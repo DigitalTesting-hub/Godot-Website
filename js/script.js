@@ -9,13 +9,6 @@ const btnText = submitBtn.querySelector('.btn-text');
 const btnLoading = submitBtn.querySelector('.btn-loading');
 
 // Toggle functions
-function toggleModule(moduleNum) {
-    const module = document.getElementById(`module${moduleNum}`);
-    module.classList.toggle('active');
-    const header = module.previousElementSibling;
-    header.querySelector('span').textContent = module.classList.contains('active') ? '−' : '+';
-}
-
 function toggleFAQ(faqNum) {
     const answer = document.getElementById(`faq${faqNum}`);
     answer.classList.toggle('active');
@@ -34,7 +27,7 @@ leadForm.addEventListener('submit', async function(e) {
         budget: document.getElementById('budget').value,
         expectations: document.getElementById('expectations').value.trim(),
         timestamp: new Date().toISOString(),
-        source: 'Godot Course Prelaunch'
+        source: 'Godot 3D MP Course Prelaunch'
     };
     
     console.log('Submitting data:', formData);
@@ -140,12 +133,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }, observerOptions);
     
     // Observe feature cards and other elements
-    document.querySelectorAll('.feature-card, .pricing-card, .testimonial-card').forEach(el => {
+    document.querySelectorAll('.feature-card, .pricing-card, .curriculum-card, .mechanic-item, .gallery-item').forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(20px)';
         el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
         observer.observe(el);
     });
     
-    console.log('Godot course form handler loaded');
+    console.log('Godot 3D MP course form handler loaded');
 });
