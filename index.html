@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Godot 4 Multiplayer Mastery - Build a Professional Battle Royale Game</title>
+    <title>Godot 4 3D Multiplayer - Build a Basic Battle Royale Game</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -11,12 +11,13 @@
     <header>
         <div class="container">
             <nav>
-                <div class="logo">GODOTMP</div>
+                <div class="logo">GODOT 3D MP</div>
                 <div class="nav-links">
                     <a href="#features">Features</a>
                     <a href="#curriculum">Curriculum</a>
+                    <a href="#mechanics">Mechanics</a>
+                    <a href="#media">Media</a>
                     <a href="#pricing">Get Notified</a>
-                    <a href="#testimonials">Testimonials</a>
                     <a href="#faq">FAQ</a>
                 </div>
                 <a href="#pricing" class="cta-button">Get Notified</a>
@@ -28,8 +29,8 @@
     <section class="hero">
         <div class="container">
             <div class="hero-badge">🚀 COMING SOON - PRELAUNCH OFFER</div>
-            <h1>Build a Professional Battle Royale Game with Godot 4</h1>
-            <p>Go from beginner to pro by creating a complete multiplayer game with advanced networking, AI enemies, vehicles, and full backend integration</p>
+            <h1>Build a Basic Battle Royale Game with Godot 4</h1>
+            <p>Master 3D multiplayer game development by creating a complete battle royale experience with networking, combat systems, and professional game mechanics</p>
             <a href="#pricing" class="cta-button">Get Early Access & Special Pricing →</a>
         </div>
     </section>
@@ -40,34 +41,155 @@
             <h2 class="section-title">What You'll Build</h2>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">🎮</div>
-                    <h3>Complete Battle Royale System</h3>
-                    <p>Shrinking safe zones, kill feed, victory conditions, and full game cycle management</p>
-                </div>
-                <div class="feature-card">
                     <div class="feature-icon">🌐</div>
-                    <h3>Advanced Multiplayer Networking</h3>
-                    <p>Client-server architecture, RPC calls, state synchronization, and lag compensation</p>
+                    <h3>Multiplayer Networking</h3>
+                    <p>Client-server architecture, RPC calls, player synchronization, and lag compensation for smooth multiplayer experience</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🤖</div>
-                    <h3>Smart AI Enemies</h3>
-                    <p>Zombie melee combat and ranged enemies with advanced targeting and group behavior</p>
+                    <div class="feature-icon">🎭</div>
+                    <h3>Character System</h3>
+                    <p>Multiple character models with animations, character selection, and customized player controllers</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🚗</div>
-                    <h3>Vehicle System</h3>
-                    <p>Physics-based cars with enter/exit mechanics, camera control, and multiplayer sync</p>
+                    <div class="feature-icon">🏟️</div>
+                    <h3>Lobby & Map System</h3>
+                    <p>Custom lobby with god mode, waiting area, and optimized battle royale map with strategic locations</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🔐</div>
-                    <h3>Backend Integration</h3>
-                    <p>Supabase authentication, user profiles, data persistence, and cloud saves</p>
+                    <div class="feature-icon">⚔️</div>
+                    <h3>Combat Mechanics</h3>
+                    <p>Gun systems with raycast damage, melee weapons with Area3D detection, and weapon switching</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Production-Ready Code</h3>
-                    <p>Optimized, documented, and scalable codebase you can use in your own projects</p>
+                    <div class="feature-icon">🗺️</div>
+                    <h3>Game Systems</h3>
+                    <p>Shrinking danger zones, minimaps, kill feeds, spectator mode, and complete game cycle management</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Production Ready</h3>
+                    <p>Optimized, documented codebase that you can extend and use as foundation for your own games</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Curriculum Section -->
+    <section class="curriculum" id="curriculum">
+        <div class="container">
+            <h2 class="section-title">Course Curriculum</h2>
+            <div class="curriculum-grid">
+                <div class="curriculum-card">
+                    <h3>1. Multiplayer Network Setup</h3>
+                    <p>Learn to set up robust multiplayer networking with Godot 4's high-level networking API, including client-server architecture and state synchronization.</p>
+                </div>
+                <div class="curriculum-card">
+                    <h3>2. Character Modeling & Animation</h3>
+                    <p>Create and implement 3D character models with proper rigging, animations for movement, combat, and character selection systems.</p>
+                </div>
+                <div class="curriculum-card">
+                    <h3>3. Character Selection System</h3>
+                    <p>Build a multiplayer-ready character selection screen where players can choose from multiple characters with visual previews.</p>
+                </div>
+                <div class="curriculum-card">
+                    <h3>4. Lobby & Map Creation</h3>
+                    <p>Design and implement the game lobby with god mode functionality and create the main battle royale map with strategic locations.</p>
+                </div>
+                <div class="curriculum-card">
+                    <h3>5. Battle Royale Mechanics</h3>
+                    <p>Implement core battle royale features including safe zones, shrinking danger areas, and victory conditions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mechanics Section -->
+    <section class="features" id="mechanics">
+        <div class="container">
+            <h2 class="section-title">Game Mechanics You'll Learn</h2>
+            <div class="mechanics-grid">
+                <div class="mechanic-item">Multiple Character System with Selection</div>
+                <div class="mechanic-item">Spawn Lobby with God Mode</div>
+                <div class="mechanic-item">Gun Systems with Raycast Damage</div>
+                <div class="mechanic-item">Melee Weapons with Area3D Detection</div>
+                <div class="mechanic-item">Basic Weapon Switching (Gun + Melee)</div>
+                <div class="mechanic-item">Safe & Shrinking Danger Zones</div>
+                <div class="mechanic-item">Minimaps & Individual Map Views</div>
+                <div class="mechanic-item">Killfeed & Player Status System</div>
+                <div class="mechanic-item">Spectator Mode & Waiting Lobby</div>
+                <div class="mechanic-item">Complete Game Cycle Management</div>
+                <div class="mechanic-item">Multiplayer Sync & Networking</div>
+                <div class="mechanic-item">Player Spawning & Respawn Systems</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Media Gallery -->
+    <section class="media" id="media">
+        <div class="container">
+            <h2 class="section-title">Game Screenshots</h2>
+            <p style="text-align: center; margin-bottom: 2rem; color: #ccc;">See the battle royale game in action</p>
+            <div class="gallery-grid">
+                <!-- 20 demo image slots -->
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 1</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 2</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 3</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 4</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 5</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 6</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 7</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 8</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 9</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 10</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 11</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 12</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 13</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 14</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 15</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 16</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 17</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 18</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 19</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">Game Screenshot 20</div>
                 </div>
             </div>
         </div>
@@ -91,11 +213,11 @@
                     <div class="form-group">
                         <select id="budget" name="budget" required>
                             <option value="">What's your budget? (INR)</option>
-                            <option value="500-1000">₹500 - ₹1,000</option>
-                            <option value="1000-2000">₹1,000 - ₹2,000</option>
-                            <option value="2000-3000">₹2,000 - ₹3,000</option>
-                            <option value="3000-5000">₹3,000 - ₹5,000</option>
-                            <option value="5000+">₹5,000+</option>
+                            <option value="100">₹100</option>
+                            <option value="200">₹200</option>
+                            <option value="300">₹300</option>
+                            <option value="400">₹400</option>
+                            <option value="500">₹500</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -112,27 +234,6 @@
                 
                 <div style="margin-top: 1rem; font-size: 0.9rem; color: #ccc;">
                     🔒 We respect your privacy. No spam, ever.
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials -->
-    <section class="testimonials" id="testimonials">
-        <div class="container">
-            <h2 class="section-title">What Students Say</h2>
-            <div class="testimonial-grid">
-                <div class="testimonial-card">
-                    <p>"This course transformed me from a beginner to being able to create professional multiplayer games. The code quality is production-ready!"</p>
-                    <div style="margin-top: 1rem; font-weight: bold;">- Alex, Indie Developer</div>
-                </div>
-                <div class="testimonial-card">
-                    <p>"The multiplayer networking section alone is worth the price. Finally understand how to properly sync game states across clients."</p>
-                    <div style="margin-top: 1rem; font-weight: bold;">- Sarah, Game Dev Student</div>
-                </div>
-                <div class="testimonial-card">
-                    <p>"I've taken many Godot courses, but this is the first one that covers backend integration and persistent data properly."</p>
-                    <div style="margin-top: 1rem; font-weight: bold;">- Mike, Professional Developer</div>
                 </div>
             </div>
         </div>
@@ -182,6 +283,16 @@
                         <p>You'll get access to our private Discord community where you can ask questions, get help from me and other students, and share your progress.</p>
                     </div>
                 </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(5)">
+                        <span>Is this course suitable for beginners?</span>
+                        <span>+</span>
+                    </div>
+                    <div class="faq-answer" id="faq5">
+                        <p>While some programming experience is helpful, we explain everything step by step. The course is designed to take you from basic concepts to advanced multiplayer implementation.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -189,10 +300,10 @@
     <!-- Footer -->
     <footer>
         <div class="container">
-            <div class="logo" style="margin-bottom: 1rem;">GODOTMP</div>
-            <p>Master Multiplayer Game Development with Godot 4</p>
+            <div class="logo" style="margin-bottom: 1rem;">GODOT 3D MP</div>
+            <p>Master 3D Multiplayer Game Development with Godot 4</p>
             <div style="margin-top: 2rem; font-size: 0.9rem; color: #ccc;">
-                © 2024 Godot Multiplayer Mastery. All rights reserved.
+                © 2024 Godot 3D Multiplayer Mastery. All rights reserved.
             </div>
         </div>
     </footer>
