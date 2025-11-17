@@ -4,313 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Godot 4 Multiplayer Mastery - Build a Professional Battle Royale Game</title>
-    <style>
-        :root {
-            --primary: #ff6b35;
-            --secondary: #2a2a2a;
-            --accent: #00d9ff;
-            --light: #f8f9fa;
-            --dark: #1a1a1a;
-            --success: #28a745;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--light);
-            background: linear-gradient(135deg, var(--dark) 0%, #2d1b69 100%);
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        /* Header */
-        header {
-            background: rgba(26, 26, 26, 0.95);
-            backdrop-filter: blur(10px);
-            position: fixed;
-            width: 100%;
-            z-index: 1000;
-            border-bottom: 2px solid var(--primary);
-        }
-        
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-        }
-        
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-        
-        .nav-links a {
-            color: var(--light);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-        
-        .cta-button {
-            background: var(--primary);
-            color: white;
-            padding: 0.8rem 2rem;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        
-        .cta-button:hover {
-            background: #e55a2b;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
-        }
-        
-        /* Hero Section */
-        .hero {
-            padding: 150px 0 100px;
-            text-align: center;
-            background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
-        }
-        
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .hero p {
-            font-size: 1.3rem;
-            margin-bottom: 2rem;
-            color: #ccc;
-        }
-        
-        .hero-badge {
-            display: inline-block;
-            background: var(--success);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            margin-bottom: 2rem;
-            font-weight: bold;
-        }
-        
-        /* Features Grid */
-        .features {
-            padding: 100px 0;
-            background: var(--secondary);
-        }
-        
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-            color: var(--primary);
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-        
-        .feature-card {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 2rem;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
-        
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: var(--accent);
-        }
-        
-        /* Curriculum */
-        .curriculum {
-            padding: 100px 0;
-        }
-        
-        .module {
-            background: rgba(255, 255, 255, 0.05);
-            margin-bottom: 1rem;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .module-header {
-            padding: 1.5rem;
-            background: rgba(255, 107, 53, 0.1);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .module-content {
-            padding: 0 1.5rem;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-        
-        .module-content.active {
-            max-height: 500px;
-            padding: 1.5rem;
-        }
-        
-        .lesson {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        /* Pricing */
-        .pricing {
-            padding: 100px 0;
-            background: var(--secondary);
-            text-align: center;
-        }
-        
-        .pricing-card {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 3rem;
-            border-radius: 15px;
-            border: 2px solid var(--primary);
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        
-        .price {
-            font-size: 3rem;
-            color: var(--primary);
-            margin: 1rem 0;
-        }
-        
-        .price-original {
-            text-decoration: line-through;
-            color: #ccc;
-            margin-right: 1rem;
-        }
-        
-        .bonus-list {
-            text-align: left;
-            margin: 2rem 0;
-        }
-        
-        .bonus-item {
-            margin: 1rem 0;
-            display: flex;
-            align-items: center;
-        }
-        
-        .bonus-item::before {
-            content: "🎁";
-            margin-right: 1rem;
-        }
-        
-        /* Testimonials */
-        .testimonials {
-            padding: 100px 0;
-        }
-        
-        .testimonial-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-        
-        .testimonial-card {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 2rem;
-            border-radius: 10px;
-            border-left: 4px solid var(--primary);
-        }
-        
-        /* FAQ */
-        .faq {
-            padding: 100px 0;
-            background: var(--secondary);
-        }
-        
-        .faq-item {
-            margin-bottom: 1rem;
-        }
-        
-        .faq-question {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 1.5rem;
-            border-radius: 10px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .faq-answer {
-            padding: 0 1.5rem;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-        
-        .faq-answer.active {
-            max-height: 500px;
-            padding: 1.5rem;
-        }
-        
-        /* Footer */
-        footer {
-            background: var(--dark);
-            padding: 3rem 0;
-            text-align: center;
-            border-top: 2px solid var(--primary);
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-            
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            
-            .hero p {
-                font-size: 1.1rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <!-- Header -->
@@ -321,11 +15,11 @@
                 <div class="nav-links">
                     <a href="#features">Features</a>
                     <a href="#curriculum">Curriculum</a>
-                    <a href="#pricing">Pricing</a>
+                    <a href="#pricing">Get Notified</a>
                     <a href="#testimonials">Testimonials</a>
                     <a href="#faq">FAQ</a>
                 </div>
-                <a href="#pricing" class="cta-button">Enroll Now</a>
+                <a href="#pricing" class="cta-button">Get Notified</a>
             </nav>
         </div>
     </header>
@@ -333,10 +27,10 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="container">
-            <div class="hero-badge">🚀 COMPLETE MULTIPLAYER MASTERCLASS</div>
+            <div class="hero-badge">🚀 COMING SOON - PRELAUNCH OFFER</div>
             <h1>Build a Professional Battle Royale Game with Godot 4</h1>
             <p>Go from beginner to pro by creating a complete multiplayer game with advanced networking, AI enemies, vehicles, and full backend integration</p>
-            <a href="#pricing" class="cta-button">Start Learning Today →</a>
+            <a href="#pricing" class="cta-button">Get Early Access & Special Pricing →</a>
         </div>
     </section>
 
@@ -379,103 +73,45 @@
         </div>
     </section>
 
-    <!-- Curriculum -->
-    <section class="curriculum" id="curriculum">
-        <div class="container">
-            <h2 class="section-title">Course Curriculum</h2>
-            <div class="modules">
-                <div class="module">
-                    <div class="module-header" onclick="toggleModule(1)">
-                        <h3>Module 1: Foundation & Setup</h3>
-                        <span>+</span>
-                    </div>
-                    <div class="module-content" id="module1">
-                        <div class="lesson">• Godot 4 Multiplayer Architecture Overview</div>
-                        <div class="lesson">• Project Structure & Scene Organization</div>
-                        <div class="lesson">• Basic Player Movement & Camera Control</div>
-                        <div class="lesson">• Input System & Key Bindings</div>
-                    </div>
-                </div>
-                
-                <div class="module">
-                    <div class="module-header" onclick="toggleModule(2)">
-                        <h3>Module 2: Advanced Player Systems</h3>
-                        <span>+</span>
-                    </div>
-                    <div class="module-content" id="module2">
-                        <div class="lesson">• Multi-stance Movement (Normal/Crouch/Prone)</div>
-                        <div class="lesson">• Dual Weapon System (Gun & Melee)</div>
-                        <div class="lesson">• Health, Damage & Combat Mechanics</div>
-                        <div class="lesson">• Animation State Management</div>
-                    </div>
-                </div>
-                
-                <div class="module">
-                    <div class="module-header" onclick="toggleModule(3)">
-                        <h3>Module 3: Multiplayer Networking</h3>
-                        <span>+</span>
-                    </div>
-                    <div class="module-content" id="module3">
-                        <div class="lesson">• Client-Server Model Implementation</div>
-                        <div class="lesson">• RPC Calls & Remote Procedure Calls</div>
-                        <div class="lesson">• State Synchronization & Prediction</div>
-                        <div class="lesson">• Chat System & Player Communication</div>
-                    </div>
-                </div>
-                
-                <div class="module">
-                    <div class="module-header" onclick="toggleModule(4)">
-                        <h3>Module 4: AI Enemy Systems</h3>
-                        <span>+</span>
-                    </div>
-                    <div class="module-content" id="module4">
-                        <div class="lesson">• Zombie Melee Combat AI</div>
-                        <div class="lesson">• Ranged Enemy Targeting System</div>
-                        <div class="lesson">• Group Detection & Priority Targeting</div>
-                        <div class="lesson">• Multiplayer AI Synchronization</div>
-                    </div>
-                </div>
-                
-                <div class="module">
-                    <div class="module-header" onclick="toggleModule(5)">
-                        <h3>Module 5: Backend & Progression</h3>
-                        <span>+</span>
-                    </div>
-                    <div class="module-content" id="module5">
-                        <div class="lesson">• Supabase Authentication Integration</div>
-                        <div class="lesson">• User Profiles & Data Persistence</div>
-                        <div class="lesson">• Character Selection & Customization</div>
-                        <div class="lesson">• Save/Load System Implementation</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing -->
+    <!-- Lead Collection Form -->
     <section class="pricing" id="pricing">
         <div class="container">
-            <h2 class="section-title">Enroll Today</h2>
+            <h2 class="section-title">Get Early Access & Special Pricing</h2>
             <div class="pricing-card">
-                <h3>Complete Multiplayer Mastery</h3>
-                <div class="price">
-                    <span class="price-original">$297</span>
-                    <span>$197</span>
-                </div>
-                <p>One-time payment, lifetime access</p>
+                <h3>🎁 Prelaunch Exclusive Offer</h3>
+                <p>Be the first to know when we launch and get special early-bird pricing</p>
                 
-                <div class="bonus-list">
-                    <div class="bonus-item">Complete Source Code ($500+ value)</div>
-                    <div class="bonus-item">6+ Hours of HD Video Content</div>
-                    <div class="bonus-item">Private Discord Community Access</div>
-                    <div class="bonus-item">1 Year of Course Updates</div>
-                    <div class="bonus-item">Certificate of Completion</div>
-                </div>
+                <form id="leadForm" class="lead-form">
+                    <div class="form-group">
+                        <input type="text" id="name" name="name" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="email" name="email" placeholder="Your Email" required>
+                    </div>
+                    <div class="form-group">
+                        <select id="budget" name="budget" required>
+                            <option value="">What's your budget? (INR)</option>
+                            <option value="500-1000">₹500 - ₹1,000</option>
+                            <option value="1000-2000">₹1,000 - ₹2,000</option>
+                            <option value="2000-3000">₹2,000 - ₹3,000</option>
+                            <option value="3000-5000">₹3,000 - ₹5,000</option>
+                            <option value="5000+">₹5,000+</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="expectations" name="expectations" placeholder="What do you expect to learn from this course?" rows="3"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="cta-button full-width" id="submitBtn">
+                        <span class="btn-text">Get Early Access & Pricing</span>
+                        <span class="btn-loading" style="display: none;">Sending...</span>
+                    </button>
+                </form>
                 
-                <a href="#" class="cta-button" style="display: block; text-align: center;">Enroll Now & Get Instant Access</a>
+                <div id="formMessage" class="form-message"></div>
                 
                 <div style="margin-top: 1rem; font-size: 0.9rem; color: #ccc;">
-                    🔒 30-Day Money-Back Guarantee
+                    🔒 We respect your privacy. No spam, ever.
                 </div>
             </div>
         </div>
@@ -519,11 +155,11 @@
                 
                 <div class="faq-item">
                     <div class="faq-question" onclick="toggleFAQ(2)">
-                        <span>How long does it take to complete?</span>
+                        <span>When will the course be available?</span>
                         <span>+</span>
                     </div>
                     <div class="faq-answer" id="faq2">
-                        <p>The core content is about 6-8 hours, but implementing everything and understanding the concepts will take 2-4 weeks depending on your pace.</p>
+                        <p>We're launching soon! Join the waitlist to get notified first and receive special early-bird pricing.</p>
                     </div>
                 </div>
                 
@@ -561,30 +197,6 @@
         </div>
     </footer>
 
-    <script>
-        function toggleModule(moduleNum) {
-            const module = document.getElementById(`module${moduleNum}`);
-            module.classList.toggle('active');
-            const header = module.previousElementSibling;
-            header.querySelector('span').textContent = module.classList.contains('active') ? '−' : '+';
-        }
-        
-        function toggleFAQ(faqNum) {
-            const answer = document.getElementById(`faq${faqNum}`);
-            answer.classList.toggle('active');
-            const question = answer.previousElementSibling;
-            question.querySelector('span:last-child').textContent = answer.classList.contains('active') ? '−' : '+';
-        }
-        
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-    </script>
+    <script src="js/script.js"></script>
 </body>
 </html>
