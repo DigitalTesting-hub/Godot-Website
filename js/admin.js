@@ -39,24 +39,24 @@ class AdminPanel {
     }
 
     async checkAdminRole(userId) {
-    try {
-        const { data, error } = await supabase
-            .from('admin_roles')
-            .select('*')
-            .eq('user_id', userId)
-            .single();
+        try {
+            const { data, error } = await supabase
+                .from('admin_roles')
+                .select('*')
+                .eq('user_id', userId)
+                .single();
 
-        if (error) {
-            console.log('Admin role check error:', error);
+            if (error) {
+                console.log('Admin role check error:', error);
+                return false;
+            }
+
+            return !!data; // Returns true if admin role exists
+        } catch (error) {
+            console.error('Error checking admin role:', error);
             return false;
         }
-
-        return !!data; // Returns true if admin role exists
-    } catch (error) {
-        console.error('Error checking admin role:', error);
-        return false;
     }
-}
 
     async loadDashboardData() {
         await this.loadCourses();
