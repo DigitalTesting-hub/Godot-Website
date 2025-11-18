@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godot 3D MP - Course LMS</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/lms.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">GODOT 3D MP</div>
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="#dashboard">Dashboard</a>
+                    <a href="#progress">My Progress</a>
+                    <div class="user-menu">
+                        <span id="userEmail" class="user-email"></span>
+                        <button id="logoutBtn" class="cta-button logout-btn">Logout</button>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Authentication Required Message -->
+    <div id="authRequired" class="auth-required-message">
+        <div class="container">
+            <div class="auth-message">
+                <h2>Authentication Required</h2>
+                <p>Please log in to access the course content.</p>
+                <a href="login.html" class="cta-button">Login / Sign Up</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- LMS Dashboard -->
+    <section id="dashboard" class="lms-dashboard" style="display: none;">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Godot 4 Battle Royale Course</h1>
+                <div class="user-progress">
+                    <div class="progress-info">
+                        <span>Course Progress: </span>
+                        <strong id="progressPercentage">0%</strong>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lms-layout">
+                <!-- Video Player Section -->
+                <div class="video-section">
+                    <div class="video-container">
+                        <div id="videoPlayer" class="video-player">
+                            <div class="video-placeholder">
+                                <div class="placeholder-content">
+                                    <div class="lock-icon">📚</div>
+                                    <h3>Select a lesson to start learning</h3>
+                                    <p>Choose from the course modules to begin your journey</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="video-controls">
+                            <button id="prevBtn" class="control-btn nav-btn">◀ Previous</button>
+                            <button id="playPause" class="control-btn play-btn" disabled>
+                                <span class="play-icon">▶ Play</span>
+                                <span class="pause-icon" style="display: none;">⏸ Pause</span>
+                            </button>
+                            <button id="nextBtn" class="control-btn nav-btn">Next ▶</button>
+                        </div>
+                    </div>
+
+                    <div class="video-info">
+                        <h2 id="videoTitle">No video selected</h2>
+                        <p id="videoDescription">Select a lesson from the course modules to view its content</p>
+                        <div class="video-meta">
+                            <span class="video-duration" id="videoDuration">Duration: --:--</span>
+                            <span class="video-status" id="videoStatus">Not started</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Modules Sidebar -->
+                <div class="modules-sidebar">
+                    <div class="modules-header">
+                        <h3>Course Modules</h3>
+                        <div class="modules-filter">
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn" data-filter="unlocked">Unlocked</button>
+                            <button class="filter-btn" data-filter="completed">Completed</button>
+                        </div>
+                    </div>
+
+                    <div class="modules-list" id="modulesList">
+                        <!-- Modules will be loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Progress Overview -->
+    <section id="progress" class="progress-overview" style="display: none;">
+        <div class="container">
+            <h2>Your Learning Progress</h2>
+            <div class="progress-grid">
+                <div class="progress-card">
+                    <h3>Course Completion</h3>
+                    <div class="progress-circle">
+                        <svg width="120" height="120" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="#333" stroke-width="8"/>
+                            <circle id="completionCircle" cx="60" cy="60" r="54" fill="none" stroke="#ff6b35" stroke-width="8" stroke-dasharray="339.292" stroke-dashoffset="339.292" transform="rotate(-90 60 60)"/>
+                        </svg>
+                        <span id="completionPercent" class="completion-percent">0%</span>
+                    </div>
+                </div>
+
+                <div class="progress-card">
+                    <h3>Time Spent</h3>
+                    <div class="time-stats">
+                        <div class="time-item">
+                            <span class="time-label">Total:</span>
+                            <span id="totalTime" class="time-value">0h 0m</span>
+                        </div>
+                        <div class="time-item">
+                            <span class="time-label">This Week:</span>
+                            <span id="weeklyTime" class="time-value">0h 0m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-card">
+                    <h3>Recent Activity</h3>
+                    <div class="activity-list" id="activityList">
+                        <!-- Recent activities will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="js/auth.js"></script>
+    <script src="js/lms.js"></script>
+</body>
+</html>
