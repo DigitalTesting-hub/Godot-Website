@@ -7,23 +7,70 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/lms.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Multiple Video Platform APIs -->
-    <script src="https://player.vimeo.com/api/player.js"></script>
-    <script src="https://fast.wistia.com/assets/external/E-v1.js" async></script>
-    <!-- YouTube IFrame API is loaded dynamically -->
 </head>
 <body>
-    <!-- Header (same as before) -->
+    <!-- Header -->
     <header>
-        <!-- Your existing header code -->
+        <div class="container">
+            <nav>
+                <div class="logo">GODOT 3D MP</div>
+                
+                <!-- Desktop Navigation -->
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="#dashboard">Dashboard</a>
+                    <a href="#progress">My Progress</a>
+                </div>
+                
+                <!-- Desktop User Menu -->
+                <div class="user-menu">
+                    <span id="userEmail" class="user-email"></span>
+                    <span id="userTier" class="user-tier"></span>
+                    <button id="logoutBtn" class="cta-button logout-btn">Logout</button>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            </nav>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">GODOT 3D MP</div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="index.html" onclick="closeMobileMenu()">Home</a>
+                <a href="#dashboard" onclick="closeMobileMenu()">Dashboard</a>
+                <a href="#progress" onclick="closeMobileMenu()">My Progress</a>
+                
+                <!-- Mobile User Info -->
+                <div class="mobile-user-menu">
+                    <div class="mobile-user-email" id="mobileUserEmail"></div>
+                    <div class="mobile-user-tier" id="mobileUserTier"></div>
+                    <button class="mobile-logout-btn" id="mobileLogoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
     </header>
 
     <!-- Authentication Required Message -->
     <div id="authRequired" class="auth-required-message">
-        <!-- Same as before -->
+        <div class="container">
+            <div class="auth-message">
+                <h2>Authentication Required</h2>
+                <p>Please log in to access the course content.</p>
+                <a href="login.html" class="cta-button">Login / Sign Up</a>
+            </div>
+        </div>
     </div>
 
-    <!-- Enhanced LMS Dashboard with Multi-Platform Player -->
+    <!-- LMS Dashboard -->
     <section id="dashboard" class="lms-dashboard" style="display: none;">
         <div class="container">
             <div class="dashboard-header">
@@ -31,81 +78,148 @@
                 <div class="user-info">
                     <p>Email: <span id="displayEmail"></span></p>
                     <p>Tier: <strong id="displayTier"></strong></p>
+                    <p>User ID: <span id="displayUserId"></span></p>
                 </div>
             </div>
 
-            <!-- Courses View (same as before) -->
+            <!-- Courses View -->
             <div id="coursesView" class="courses-view">
-                <!-- Your existing courses grid -->
+                <h2>Available Courses</h2>
+                <div class="subscription-info">
+                    <p>Current Tier: <strong id="currentTier">Free</strong></p>
+                    <p>Purchased Courses: <strong id="purchasedCount">0</strong></p>
+                </div>
+                <div id="coursesContainer" class="courses-grid">
+                    <!-- Courses will be loaded here -->
+                </div>
             </div>
 
-            <!-- Enhanced Course Player View with Multi-Platform Support -->
-            <div id="coursePlayerView" class="course-player-view" style="display: none;">
-                <div class="course-player-header">
-                    <button id="backToCourses" class="back-button" onclick="backToCourses()">← Back to Courses</button>
-                    <div class="course-title-section">
-                        <h2 id="coursePlayerTitle">Course Title</h2>
-                        <div class="course-meta">
-                            <span id="coursePlayerTier" class="tier-badge"></span>
-                            <span id="coursePlayerProgress" class="progress-badge">0% Complete</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="course-player-layout">
-                    <!-- Universal Video Player Section -->
-                    <div class="video-section">
-                        <div id="videoPlayerContainer" class="video-player-container">
-                            <!-- Premium Lock Overlay -->
-                            <div id="premiumLockOverlay" class="premium-lock-overlay" style="display: none;">
-                                <div class="lock-content">
-                                    <div class="lock-icon">🔒</div>
-                                    <h3>Premium Content Locked</h3>
-                                    <p>This video requires Premium subscription</p>
-                                    <button class="cta-button" onclick="showUpgradeModal()">Upgrade to Premium</button>
-                                </div>
-                            </div>
-                            
-                            <!-- Platform-Specific Video Players -->
-                            <div id="vimeoPlayer" class="video-platform-player" style="display: none;"></div>
-                            <div id="wistiaPlayer" class="video-platform-player" style="display: none;"></div>
-                            <div id="youtubePlayer" class="video-platform-player" style="display: none;"></div>
-                            
-                            <!-- Fallback Message -->
-                            <div id="noVideoMessage" class="no-video-message" style="display: none;">
-                                <p>Video content not available</p>
-                            </div>
-                        </div>
-                        
-                        <div class="video-controls">
-                            <h3 id="currentModuleTitle">Select a module to start learning</h3>
-                            <div class="video-platform-badge" id="videoPlatformBadge" style="display: none;">
-                                Powered by <span id="platformName">Platform</span>
-                            </div>
-                            <div class="video-actions">
-                                <button id="prevModule" class="btn-secondary" disabled>Previous</button>
-                                <button id="nextModule" class="btn-secondary" disabled>Next</button>
-                                <button id="completeModule" class="cta-button" style="display: none;">Mark Complete</button>
-                            </div>
+            <!-- Course Details View -->
+            <div id="courseDetailsView" class="course-details-view" style="display: none;">
+                <button id="backToCourses" class="back-button" onclick="backToCourses()">← Back to Courses</button>
+                <div class="course-details-container">
+                    <div class="course-header-details">
+                        <h2 id="courseDetailTitle"></h2>
+                        <p id="courseDetailDescription"></p>
+                        <div class="course-meta-details">
+                            <span class="course-tier-badge" id="courseDetailTier"></span>
+                            <span class="course-price" id="courseDetailPrice"></span>
                         </div>
                     </div>
 
-                    <!-- Modules Sidebar (same as before) -->
-                    <div class="modules-sidebar">
-                        <!-- Your existing modules list -->
+                    <div class="course-content">
+                        <!-- Modules Section -->
+                        <div class="modules-section">
+                            <h3>Course Content</h3>
+                            <div id="modulesList" class="modules-list">
+                                <!-- Modules will be loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- Downloads Section -->
+                        <div class="downloads-section">
+                            <h3>Resources & Downloads</h3>
+                            <div id="downloadsList" class="downloads-list">
+                                <!-- Downloads will be loaded here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Upgrade Modal (same as before) -->
-    <div id="upgradeModal" class="modal">
-        <!-- Your existing upgrade modal -->
+    <!-- Progress Overview -->
+    <section id="progress" class="progress-overview" style="display: none;">
+        <div class="container">
+            <h2>Your Learning Progress</h2>
+            <div class="progress-grid">
+                <div class="progress-card">
+                    <h3>Course Completion</h3>
+                    <div class="progress-circle">
+                        <svg width="120" height="120" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="#333" stroke-width="8"/>
+                            <circle id="completionCircle" cx="60" cy="60" r="54" fill="none" stroke="#ff6b35" stroke-width="8" stroke-dasharray="339.292" stroke-dashoffset="339.292" transform="rotate(-90 60 60)"/>
+                        </svg>
+                        <span id="completionPercent" class="completion-percent">0%</span>
+                    </div>
+                </div>
+
+                <div class="progress-card">
+                    <h3>Your Subscription</h3>
+                    <div class="subscription-status">
+                        <div class="tier-info">
+                            <span class="tier-label">Current Tier:</span>
+                            <span id="progressTier" class="tier-value">Free</span>
+                        </div>
+                        <div class="upgrade-options">
+                            <button class="upgrade-btn basic" onclick="upgradeToTier('basic')">Upgrade to Basic - $100</button>
+                            <button class="upgrade-btn premium" onclick="upgradeToTier('premium')">Upgrade to Premium - $200</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Purchase Modal -->
+    <div id="purchaseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Purchase Course</h3>
+                <button class="close-btn" onclick="closePurchaseModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p>You are purchasing: <strong id="purchaseCourseTitle"></strong></p>
+                <p>Price: <strong id="purchaseCoursePrice"></strong></p>
+                <p>Your tier will be upgraded to: <strong id="purchaseTierUpgrade"></strong></p>
+                
+                <div class="payment-options">
+                    <h4>Select Payment Method:</h4>
+                    <button class="payment-btn stripe" onclick="processPayment('stripe')">Pay with Stripe</button>
+                    <button class="payment-btn paypal" onclick="processPayment('paypal')">Pay with PayPal</button>
+                    <button class="payment-btn manual" onclick="processPayment('manual')">Manual Payment</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Enhanced LMS Manager with Multi-Platform Video Support
+        // Mobile Menu Functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const body = document.body;
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            body.classList.add('menu-open');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            body.classList.remove('menu-open');
+        }
+
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+        // Close menu when clicking on links
+        const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         class LMSManager {
             constructor() {
                 this.currentUser = null;
@@ -113,305 +227,310 @@
                 this.courses = [];
                 this.userCourses = [];
                 this.currentCourse = null;
-                this.currentModuleIndex = 0;
-                this.modules = [];
-                this.currentPlayer = null;
-                this.currentPlatform = null;
-                this.youtubeAPIReady = false;
                 this.init();
             }
 
             async init() {
                 await this.checkAuthState();
                 this.setupEventListeners();
-                this.loadYouTubeAPI(); // Load YouTube API dynamically
-            }
-
-            // Load YouTube IFrame API
-            loadYouTubeAPI() {
-                const tag = document.createElement('script');
-                tag.src = "https://www.youtube.com/iframe_api";
-                const firstScriptTag = document.getElementsByTagName('script')[0];
-                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-            }
-
-            // YouTube API ready callback
-            onYouTubeAPIReady() {
-                this.youtubeAPIReady = true;
-                console.log('YouTube API ready');
             }
 
             async checkAuthState() {
-                const { data: { session } } = await supabase.auth.getSession();
+                const { data: { session }, error } = await supabase.auth.getSession();
                 
+                const authRequired = document.getElementById('authRequired');
+                const dashboard = document.getElementById('dashboard');
+                const progressSection = document.getElementById('progress');
+                const userEmail = document.getElementById('userEmail');
+                const displayEmail = document.getElementById('displayEmail');
+                const displayUserId = document.getElementById('displayUserId');
+                const mobileUserEmail = document.getElementById('mobileUserEmail');
+
                 if (session && session.user) {
                     this.currentUser = session.user;
-                    document.getElementById('authRequired').style.display = 'none';
-                    document.getElementById('dashboard').style.display = 'block';
+                    authRequired.style.display = 'none';
+                    dashboard.style.display = 'block';
+                    progressSection.style.display = 'block';
                     
-                    document.getElementById('userEmail').textContent = session.user.email;
-                    document.getElementById('displayEmail').textContent = session.user.email;
+                    userEmail.textContent = session.user.email;
+                    displayEmail.textContent = session.user.email;
+                    displayUserId.textContent = session.user.id.substring(0, 8) + '...';
+                    mobileUserEmail.textContent = session.user.email;
                     
                     await this.loadUserData();
                     await this.loadCourses();
                     await this.loadUserCourses();
                     this.renderCourses();
+                    this.updateProgress();
                     
                 } else {
-                    document.getElementById('authRequired').style.display = 'block';
-                    document.getElementById('dashboard').style.display = 'none';
+                    authRequired.style.display = 'block';
+                    dashboard.style.display = 'none';
+                    progressSection.style.display = 'none';
                 }
             }
 
-            // ... (keep your existing loadUserData, loadCourses, loadUserCourses, renderCourses methods)
+            async loadUserData() {
+                if (!this.currentUser) return;
 
-            async enterCourse(courseId) {
+                try {
+                    const { data, error } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', this.currentUser.id)
+                        .single();
+
+                    if (error) throw error;
+                    this.userProfile = data;
+                    
+                    // Update UI with user tier
+                    document.getElementById('currentTier').textContent = this.userProfile.subscription_tier;
+                    document.getElementById('displayTier').textContent = this.userProfile.subscription_tier;
+                    document.getElementById('progressTier').textContent = this.userProfile.subscription_tier;
+                    document.getElementById('userTier').textContent = this.userProfile.subscription_tier;
+                    document.getElementById('mobileUserTier').textContent = this.userProfile.subscription_tier;
+                    
+                } catch (error) {
+                    console.error('Error loading user profile:', error);
+                }
+            }
+
+            async loadCourses() {
+                try {
+                    const { data, error } = await supabase
+                        .from('courses')
+                        .select('*')
+                        .eq('is_active', true)
+                        .order('created_at');
+
+                    if (error) throw error;
+                    this.courses = data || [];
+                } catch (error) {
+                    console.error('Error loading courses:', error);
+                    this.courses = [];
+                }
+            }
+
+            async loadUserCourses() {
+                if (!this.currentUser) return;
+
+                try {
+                    const { data, error } = await supabase
+                        .from('user_courses')
+                        .select('*')
+                        .eq('user_id', this.currentUser.id)
+                        .eq('payment_status', 'completed');
+
+                    if (error) throw error;
+                    this.userCourses = data || [];
+                    
+                    document.getElementById('purchasedCount').textContent = this.userCourses.length;
+                    
+                } catch (error) {
+                    console.error('Error loading user courses:', error);
+                    this.userCourses = [];
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
+                document.getElementById('mobileLogoutBtn').addEventListener('click', () => this.logout());
+            }
+
+            renderCourses() {
+                const container = document.getElementById('coursesContainer');
+                if (!container) return;
+
+                container.innerHTML = this.courses.map(course => {
+                    const hasAccess = this.hasCourseAccess(course.id);
+                    const canPurchase = this.canPurchaseCourse(course);
+                    
+                    return `
+                        <div class="course-card ${hasAccess ? 'unlocked' : 'locked'}">
+                            ${hasAccess ? '<div class="access-badge">✅ Access Granted</div>' : ''}
+                            <h3>${course.title}</h3>
+                            <p>${course.description}</p>
+                            <div class="course-meta">
+                                <span class="course-tier">${course.required_tier.toUpperCase()} TIER</span>
+                                <span class="course-price">$${course.price}</span>
+                            </div>
+                            <div class="course-actions">
+                                ${hasAccess ? 
+                                    `<button class="cta-button" onclick="lmsManager.viewCourse('${course.id}')">Access Course</button>` :
+                                    (canPurchase ?
+                                        `<button class="cta-button purchase" onclick="lmsManager.purchaseCourse('${course.id}')">Purchase - $${course.price}</button>` :
+                                        `<button class="cta-button disabled" disabled>Upgrade Tier Required</button>`
+                                    )
+                                }
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            hasCourseAccess(courseId) {
+                const course = this.courses.find(c => c.id === courseId);
+                if (!course) return false;
+
+                // Check if user has purchased the course
+                const hasPurchased = this.userCourses.some(uc => uc.course_id === courseId);
+                
+                // Check if user's tier meets course requirement
+                const tierLevel = { 'free': 0, 'basic': 1, 'premium': 2 };
+                const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 0;
+                const courseTierLevel = tierLevel[course.required_tier] || 0;
+                
+                return hasPurchased && userTierLevel >= courseTierLevel;
+            }
+
+            canPurchaseCourse(course) {
+                const tierLevel = { 'free': 0, 'basic': 1, 'premium': 2 };
+                const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 0;
+                const courseTierLevel = tierLevel[course.required_tier] || 0;
+                
+                return userTierLevel >= courseTierLevel && !this.hasCourseAccess(course.id);
+            }
+
+            async viewCourse(courseId) {
                 this.currentCourse = this.courses.find(c => c.id === courseId);
                 if (!this.currentCourse) return;
 
-                // Switch to course player view
                 document.getElementById('coursesView').style.display = 'none';
-                document.getElementById('coursePlayerView').style.display = 'block';
+                document.getElementById('courseDetailsView').style.display = 'block';
 
-                // Update course info
-                document.getElementById('coursePlayerTitle').textContent = this.currentCourse.title;
-                document.getElementById('coursePlayerTier').textContent = this.currentCourse.required_tier.toUpperCase();
-                document.getElementById('coursePlayerTier').className = `tier-badge ${this.currentCourse.required_tier}`;
+                document.getElementById('courseDetailTitle').textContent = this.currentCourse.title;
+                document.getElementById('courseDetailDescription').textContent = this.currentCourse.description;
+                document.getElementById('courseDetailTier').textContent = this.currentCourse.required_tier.toUpperCase() + ' TIER';
+                document.getElementById('courseDetailPrice').textContent = '$' + this.currentCourse.price;
 
                 await this.loadCourseModules(courseId);
                 await this.loadCourseDownloads(courseId);
-                
-                // Load first module if available
-                if (this.modules.length > 0) {
-                    this.currentModuleIndex = 0;
-                    this.loadModule(this.currentModuleIndex);
-                }
             }
 
-            async loadModule(moduleIndex) {
-                if (moduleIndex < 0 || moduleIndex >= this.modules.length) return;
+            async loadCourseModules(courseId) {
+                try {
+                    const { data, error } = await supabase
+                        .from('course_modules')
+                        .select('*')
+                        .eq('course_id', courseId)
+                        .order('module_order');
 
-                const module = this.modules[moduleIndex];
-                this.currentModuleIndex = moduleIndex;
+                    if (error) throw error;
 
-                // Update UI
-                document.querySelectorAll('.module-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                document.querySelectorAll('.module-item')[moduleIndex].classList.add('active');
-
-                document.getElementById('currentModuleTitle').textContent = module.title;
-
-                // Check if user has access
-                const hasAccess = !module.is_premium || this.userProfile?.subscription_tier === 'premium';
-
-                if (hasAccess && module.video_id) {
-                    // Hide premium lock, show video
-                    document.getElementById('premiumLockOverlay').style.display = 'none';
-                    this.loadVideo(module);
-                } else {
-                    // Show premium lock overlay
-                    document.getElementById('premiumLockOverlay').style.display = 'flex';
-                    this.destroyCurrentPlayer();
-                }
-
-                // Update navigation buttons
-                document.getElementById('prevModule').disabled = moduleIndex === 0;
-                document.getElementById('nextModule').disabled = moduleIndex === this.modules.length - 1;
-                
-                // Show complete button if user has access
-                document.getElementById('completeModule').style.display = hasAccess ? 'block' : 'none';
-
-                // Track module access
-                await this.trackModuleAccess(module.id);
-            }
-
-            loadVideo(module) {
-                // Destroy any existing player first
-                this.destroyCurrentPlayer();
-
-                // Hide all video players
-                document.querySelectorAll('.video-platform-player').forEach(player => {
-                    player.style.display = 'none';
-                });
-                document.getElementById('noVideoMessage').style.display = 'none';
-
-                const platform = module.video_platform || 'vimeo';
-                this.currentPlatform = platform;
-
-                // Show platform badge
-                const badge = document.getElementById('videoPlatformBadge');
-                const platformName = document.getElementById('platformName');
-                badge.style.display = 'block';
-                platformName.textContent = platform.charAt(0).toUpperCase() + platform.slice(1);
-
-                switch (platform) {
-                    case 'vimeo':
-                        this.loadVimeoVideo(module.video_id);
-                        break;
-                    case 'wistia':
-                        this.loadWistiaVideo(module.video_id);
-                        break;
-                    case 'youtube':
-                        this.loadYouTubeVideo(module.video_id);
-                        break;
-                    default:
-                        console.error('Unsupported video platform:', platform);
-                        document.getElementById('noVideoMessage').style.display = 'block';
-                }
-            }
-
-            loadVimeoVideo(videoId) {
-                const container = document.getElementById('vimeoPlayer');
-                container.style.display = 'block';
-                container.innerHTML = '';
-
-                this.currentPlayer = new Vimeo.Player(container, {
-                    id: parseInt(videoId),
-                    width: 800,
-                    responsive: true,
-                    controls: true,
-                    // Security settings
-                    title: false,
-                    portrait: false,
-                    byline: false,
-                    // Prevent right-click and downloads
-                    transparent: false
-                });
-
-                this.currentPlayer.on('play', () => {
-                    console.log('Vimeo video started playing');
-                });
-
-                this.currentPlayer.on('ended', () => {
-                    this.markModuleCompleted(this.modules[this.currentModuleIndex].id);
-                });
-            }
-
-            loadWistiaVideo(videoId) {
-                const container = document.getElementById('wistiaPlayer');
-                container.style.display = 'block';
-                container.innerHTML = '';
-
-                // Wistia security features
-                window._wq = window._wq || [];
-                _wq.push({
-                    id: videoId,
-                    options: {
-                        // Security settings
-                        copyLinkAndThumbnailEnabled: false,
-                        playbar: true,
-                        volumeControl: true,
-                        fullscreenButton: true,
-                        playButton: true,
-                        controlsVisibleOnLoad: false,
-                        // Prevent downloads
-                        videoFoam: true
-                    },
-                    onReady: (video) => {
-                        this.currentPlayer = video;
+                    const modulesList = document.getElementById('modulesList');
+                    modulesList.innerHTML = (data || []).map(module => {
+                        const isLocked = module.is_premium && this.userProfile?.subscription_tier !== 'premium';
                         
-                        video.bind("play", () => {
-                            console.log('Wistia video started playing');
-                        });
-
-                        video.bind("end", () => {
-                            this.markModuleCompleted(this.modules[this.currentModuleIndex].id);
-                        });
-                    }
-                });
-
-                // Create Wistia embed
-                const wistiaEmbed = document.createElement('div');
-                wistiaEmbed.className = `wistia_embed wistia_async_${videoId}`;
-                wistiaEmbed.style.width = '100%';
-                wistiaEmbed.style.height = '450px';
-                container.appendChild(wistiaEmbed);
-            }
-
-            loadYouTubeVideo(videoId) {
-                if (!this.youtubeAPIReady) {
-                    console.warn('YouTube API not ready yet, retrying...');
-                    setTimeout(() => this.loadYouTubeVideo(videoId), 1000);
-                    return;
+                        return `
+                            <div class="module-item ${isLocked ? 'locked' : ''}">
+                                <div class="module-header">
+                                    <span class="module-number">${module.module_order.toString().padStart(2, '0')}</span>
+                                    <span class="module-title">${module.title} ${isLocked ? '🔒' : ''}</span>
+                                    <span class="module-duration">${module.duration}</span>
+                                    <span class="module-status status-${isLocked ? 'locked' : 'unlocked'}">
+                                        ${isLocked ? 'PREMIUM CONTENT' : 'AVAILABLE'}
+                                    </span>
+                                </div>
+                                <div class="module-description">
+                                    <p>${module.description}</p>
+                                    ${isLocked ? 
+                                        '<div class="premium-lock-message">Upgrade to Premium to access this content</div>' : 
+                                        (module.video_url ? 
+                                            `<a href="${module.video_url}" target="_blank" class="video-link">Watch Video →</a>` : 
+                                            '<em>Content coming soon</em>'
+                                        )
+                                    }
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                } catch (error) {
+                    console.error('Error loading modules:', error);
                 }
-
-                const container = document.getElementById('youtubePlayer');
-                container.style.display = 'block';
-                container.innerHTML = '';
-
-                this.currentPlayer = new YT.Player(container, {
-                    height: '450',
-                    width: '800',
-                    videoId: videoId,
-                    playerVars: {
-                        // Security and UX settings
-                        'modestbranding': 1,
-                        'rel': 0,
-                        'showinfo': 0,
-                        'controls': 1,
-                        'disablekb': 0, // Allow keyboard controls
-                        'fs': 1, // Allow fullscreen
-                        // Try to prevent downloads (limited effectiveness)
-                        'origin': window.location.origin
-                    },
-                    events: {
-                        'onReady': (event) => {
-                            console.log('YouTube player ready');
-                        },
-                        'onStateChange': (event) => {
-                            if (event.data === YT.PlayerState.PLAYING) {
-                                console.log('YouTube video started playing');
-                            }
-                            if (event.data === YT.PlayerState.ENDED) {
-                                this.markModuleCompleted(this.modules[this.currentModuleIndex].id);
-                            }
-                        }
-                    }
-                });
             }
 
-            destroyCurrentPlayer() {
-                if (this.currentPlayer) {
-                    switch (this.currentPlatform) {
-                        case 'vimeo':
-                            this.currentPlayer.destroy().then(() => {
-                                console.log('Vimeo player destroyed');
-                            }).catch(error => {
-                                console.log('Vimeo player destruction error:', error);
-                            });
-                            break;
-                        case 'wistia':
-                            if (this.currentPlayer.remove) {
-                                this.currentPlayer.remove();
-                            }
-                            break;
-                        case 'youtube':
-                            this.currentPlayer.destroy();
-                            break;
-                    }
-                    this.currentPlayer = null;
+            async loadCourseDownloads(courseId) {
+                try {
+                    const { data, error } = await supabase
+                        .from('course_downloads')
+                        .select('*')
+                        .eq('course_id', courseId)
+                        .order('created_at');
+
+                    if (error) throw error;
+
+                    const downloadsList = document.getElementById('downloadsList');
+                    downloadsList.innerHTML = (data || []).map(download => {
+                        const isLocked = download.is_premium && this.userProfile?.subscription_tier !== 'premium';
+                        
+                        return `
+                            <div class="download-item ${isLocked ? 'locked' : ''}">
+                                <div class="download-info">
+                                    <h4>${download.title} ${isLocked ? '🔒' : ''}</h4>
+                                    <span class="file-size">${download.file_size}</span>
+                                </div>
+                                <div class="download-actions">
+                                    ${isLocked ? 
+                                        '<button class="btn-secondary" disabled>Premium Required</button>' :
+                                        `<a href="${download.file_url}" target="_blank" class="cta-button">Download</a>`
+                                    }
+                                </div>
+                                ${isLocked ? 
+                                    '<div class="premium-lock-message">Upgrade to Premium to download this resource</div>' : 
+                                    ''
+                                }
+                            </div>
+                        `;
+                    }).join('');
+                    
+                } catch (error) {
+                    console.error('Error loading downloads:', error);
                 }
-                
-                // Clear all video containers
-                document.querySelectorAll('.video-platform-player').forEach(container => {
-                    container.innerHTML = '';
-                    container.style.display = 'none';
-                });
-                document.getElementById('videoPlatformBadge').style.display = 'none';
             }
-
-            // ... (keep your existing trackModuleAccess, markModuleCompleted, 
-            // loadCourseDownloads, setupEventListeners, navigation methods)
 
             async purchaseCourse(courseId) {
-                // Your existing purchase logic
-                alert('Purchase functionality to be implemented with Stripe');
+                const course = this.courses.find(c => c.id === courseId);
+                if (!course) return;
+
+                // For demo purposes - in production, integrate with payment gateway
+                try {
+                    const { data, error } = await supabase
+                        .from('user_courses')
+                        .insert([{
+                            user_id: this.currentUser.id,
+                            course_id: courseId,
+                            payment_status: 'completed',
+                            purchased_price: course.price
+                        }]);
+
+                    if (error) throw error;
+
+                    // Update user tier if purchasing higher tier course
+                    const tierLevel = { 'free': 0, 'basic': 1, 'premium': 2 };
+                    const currentTierLevel = tierLevel[this.userProfile.subscription_tier];
+                    const courseTierLevel = tierLevel[course.required_tier];
+                    
+                    if (courseTierLevel > currentTierLevel) {
+                        await supabase
+                            .from('profiles')
+                            .update({ subscription_tier: course.required_tier })
+                            .eq('id', this.currentUser.id);
+                    }
+
+                    alert('🎉 Course purchased successfully! You now have access.');
+                    await this.loadUserData();
+                    await this.loadUserCourses();
+                    this.renderCourses();
+                    
+                } catch (error) {
+                    console.error('Error purchasing course:', error);
+                    alert('❌ Purchase failed: ' + error.message);
+                }
             }
 
             async logout() {
                 try {
-                    this.destroyCurrentPlayer();
                     const { error } = await supabase.auth.signOut();
                     if (error) throw error;
                     window.location.href = 'login.html';
@@ -420,38 +539,39 @@
                     alert('Logout failed: ' + error.message);
                 }
             }
-        }
 
-        // Global YouTube API callback
-        function onYouTubeIframeAPIReady() {
-            if (window.lmsManager) {
-                window.lmsManager.onYouTubeAPIReady();
-            } else {
-                // Fallback if LMS manager isn't ready yet
-                window.youtubeAPIReady = true;
+            updateProgress() {
+                // Update progress circle based on completed modules
+                const progress = 25; // Demo value
+                const circle = document.getElementById('completionCircle');
+                const percent = document.getElementById('completionPercent');
+                
+                const circumference = 339.292;
+                const offset = circumference - (progress / 100) * circumference;
+                
+                circle.style.strokeDashoffset = offset;
+                percent.textContent = progress + '%';
             }
         }
 
-        // Global functions (same as before)
+        // Global functions
         function backToCourses() {
             document.getElementById('coursesView').style.display = 'block';
-            document.getElementById('coursePlayerView').style.display = 'none';
-            if (window.lmsManager) {
-                window.lmsManager.destroyCurrentPlayer();
-            }
+            document.getElementById('courseDetailsView').style.display = 'none';
         }
 
-        function showUpgradeModal() {
-            document.getElementById('upgradeModal').classList.add('active');
+        function upgradeToTier(tier) {
+            alert(`In production, this would redirect to payment page for ${tier} tier upgrade.`);
+            // Integration with payment gateway would go here
         }
 
-        function closeUpgradeModal() {
-            document.getElementById('upgradeModal').classList.remove('active');
+        function closePurchaseModal() {
+            document.getElementById('purchaseModal').classList.remove('active');
         }
 
-        function upgradeToPremium() {
-            alert('Redirecting to premium upgrade payment...');
-            closeUpgradeModal();
+        function processPayment(method) {
+            alert(`In production, this would process ${method} payment.`);
+            closePurchaseModal();
         }
 
         // Initialize LMS Manager
