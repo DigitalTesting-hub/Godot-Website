@@ -1424,3 +1424,30 @@
     grid-template-columns: 1fr 2fr;
     gap: 2rem;
 }
+/* FIX FOR LOGIN PAGE HEADER - OVERRIDE ANY CONFLICTING STYLES */
+.auth-page {
+    display: block !important;
+    align-items: normal !important;
+    justify-content: normal !important;
+}
+
+.auth-page header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    z-index: 1000 !important;
+    background: rgba(26, 26, 26, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border-bottom: 2px solid var(--primary) !important;
+    transform: none !important;
+}
+
+.auth-container {
+    margin-top: 80px !important;
+    padding-top: 0 !important;
+}
+
+body.auth-page {
+    padding-top: 0 !important;
+}
