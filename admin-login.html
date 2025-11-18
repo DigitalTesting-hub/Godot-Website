@@ -26,236 +26,107 @@
             max-width: 400px;
             text-align: center;
         }
-        
-        .admin-login-card .logo {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 1rem;
-            font-weight: bold;
-        }
-        
-        .admin-login-card h1 {
-            color: var(--accent);
-            margin-bottom: 0.5rem;
-            font-size: 1.8rem;
-        }
-        
-        .admin-login-card p {
-            color: #ccc;
-            margin-bottom: 2rem;
-        }
-        
-        .admin-login-form .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-        
-        .admin-login-form label {
-            display: block;
-            color: var(--light);
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-        
-        .admin-login-form input {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--light);
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-        
-        .admin-login-form input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        .admin-login-btn {
-            width: 100%;
-            padding: 1rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 1rem;
-        }
-        
-        .admin-login-btn:hover {
-            background: #e55a2b;
-            transform: translateY(-2px);
-        }
-        
-        .admin-login-btn:disabled {
-            background: #666;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .admin-message {
-            margin-top: 1rem;
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: center;
-            display: none;
-        }
-        
-        .admin-message.success {
-            background: rgba(40, 167, 69, 0.2);
-            border: 1px solid var(--success);
-            color: var(--success);
-            display: block;
-        }
-        
-        .admin-message.error {
-            background: rgba(220, 53, 69, 0.2);
-            border: 1px solid var(--error);
-            color: var(--error);
-            display: block;
-        }
-        
-        .back-to-site {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .back-to-site a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-        
-        .back-to-site a:hover {
-            text-decoration: underline;
-        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="admin-login-container">
         <div class="admin-login-card">
-            <div class="logo">GODOT 3D MP</div>
-            <h1>Admin Portal</h1>
-            <p>Enter your credentials to access the admin panel</p>
+            <div class="logo" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem;">GODOT 3D MP</div>
+            <h1 style="color: var(--accent); margin-bottom: 0.5rem;">Admin Portal</h1>
+            <p style="color: #ccc; margin-bottom: 2rem;">Enter admin credentials</p>
             
-            <form id="adminLoginForm" class="admin-login-form">
-                <div class="form-group">
-                    <label for="adminEmail">Email Address</label>
-                    <input type="email" id="adminEmail" name="email" required placeholder="admin@yourdomain.com">
+            <form id="adminLoginForm">
+                <div style="margin-bottom: 1.5rem; text-align: left;">
+                    <label style="display: block; color: var(--light); margin-bottom: 0.5rem;">Email</label>
+                    <input type="email" id="adminEmail" required style="width: 100%; padding: 1rem; border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: white;" value="graphicyin@gmail.com">
                 </div>
                 
-                <div class="form-group">
-                    <label for="adminPassword">Password</label>
-                    <input type="password" id="adminPassword" name="password" required placeholder="Enter your password">
+                <div style="margin-bottom: 1.5rem; text-align: left;">
+                    <label style="display: block; color: var(--light); margin-bottom: 0.5rem;">Password</label>
+                    <input type="password" id="adminPassword" required style="width: 100%; padding: 1rem; border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.05); color: white;" value="Graph@123">
                 </div>
 
-                <button type="submit" class="admin-login-btn" id="adminLoginBtn">
-                    <span class="btn-text">Access Admin Panel</span>
-                    <span class="btn-loading" style="display: none;">Authenticating...</span>
+                <button type="submit" style="width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; transition: all 0.3s;">
+                    Access Admin Panel
                 </button>
             </form>
             
-            <div id="adminMessage" class="admin-message"></div>
+            <div id="message" style="margin-top: 1rem; padding: 1rem; border-radius: 8px; display: none;"></div>
             
-            <div class="back-to-site">
-                <a href="index.html">← Back to Main Site</a>
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <a href="index.html" style="color: var(--accent); text-decoration: none;">← Back to Main Site</a>
             </div>
         </div>
     </div>
 
     <script>
-        // Supabase Configuration
         const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
-        // Initialize Supabase
+
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Check if user is already logged in and is admin
-        async function checkExistingAuth() {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            
-            if (session?.user) {
-                const isAdmin = await checkAdminRole(session.user.id);
-                if (isAdmin) {
-                    window.location.href = 'admin.html';
-                }
-            }
-        }
-
-        // Check if user has admin role
+        // Fixed admin role check
         async function checkAdminRole(userId) {
             try {
+                console.log('Checking admin role for user:', userId);
+                
                 const { data, error } = await supabase
                     .from('admin_roles')
                     .select('*')
                     .eq('user_id', userId)
-                    .single();
+                    .maybeSingle();  // Use maybeSingle instead of single
 
-                if (error) {
-                    console.log('Admin role check error:', error);
-                    return false;
-                }
-
+                console.log('Admin check result:', data, error);
+                
+                // Return true if data exists, false otherwise
                 return !!data;
+                
             } catch (error) {
                 console.error('Error checking admin role:', error);
                 return false;
             }
         }
 
-        // Login form handler
         document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const submitBtn = document.getElementById('adminLoginBtn');
-            const btnText = submitBtn.querySelector('.btn-text');
-            const btnLoading = submitBtn.querySelector('.btn-loading');
-            const messageEl = document.getElementById('adminMessage');
-
-            // Show loading state
-            btnText.style.display = 'none';
-            btnLoading.style.display = 'inline';
-            submitBtn.disabled = true;
-            messageEl.style.display = 'none';
-
             const email = document.getElementById('adminEmail').value;
             const password = document.getElementById('adminPassword').value;
+            const messageEl = document.getElementById('message');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
 
-            if (!email || !password) {
-                showMessage('Please enter both email and password', 'error');
-                resetButtonState(submitBtn, btnText, btnLoading);
-                return;
-            }
+            messageEl.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Authenticating...';
 
             try {
-                // Attempt to sign in
-                const { data, error } = await supabase.auth.signInWithPassword({
+                // 1. Sign in
+                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
 
-                if (error) {
-                    throw error;
+                if (authError) {
+                    throw new Error('Login failed: ' + authError.message);
                 }
 
-                // Check if user has admin role
-                const isAdmin = await checkAdminRole(data.user.id);
+                console.log('User logged in:', authData.user);
+
+                // 2. Check admin role
+                const isAdmin = await checkAdminRole(authData.user.id);
                 
                 if (!isAdmin) {
-                    // Sign out non-admin users immediately
                     await supabase.auth.signOut();
-                    throw new Error('Access denied. Admin privileges required.');
+                    throw new Error('Admin privileges required. User is not an admin.');
                 }
 
-                showMessage('✅ Authentication successful! Redirecting to admin panel...', 'success');
-                
-                // Wait a moment then redirect
+                // 3. Success - redirect to admin panel
+                messageEl.textContent = '✅ Admin access granted! Redirecting...';
+                messageEl.style.backgroundColor = 'rgba(40, 167, 69, 0.2)';
+                messageEl.style.color = 'var(--success)';
+                messageEl.style.display = 'block';
+
                 setTimeout(() => {
                     window.location.href = 'admin.html';
                 }, 1000);
@@ -263,37 +134,22 @@
             } catch (error) {
                 console.error('Login error:', error);
                 
-                if (error.message.includes('Invalid login credentials')) {
-                    showMessage('❌ Invalid email or password', 'error');
-                } else if (error.message.includes('Email not confirmed')) {
-                    showMessage('📧 Please confirm your email before logging in', 'error');
-                } else if (error.message.includes('Access denied')) {
-                    showMessage('🔒 Access denied. Admin privileges required.', 'error');
-                } else {
-                    showMessage('❌ ' + error.message, 'error');
-                }
+                messageEl.textContent = '❌ ' + error.message;
+                messageEl.style.backgroundColor = 'rgba(220, 53, 69, 0.2)';
+                messageEl.style.color = 'var(--error)';
+                messageEl.style.display = 'block';
                 
-                resetButtonState(submitBtn, btnText, btnLoading);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Access Admin Panel';
             }
         });
 
-        function showMessage(message, type) {
-            const messageEl = document.getElementById('adminMessage');
-            messageEl.textContent = message;
-            messageEl.className = `admin-message ${type}`;
-            messageEl.style.display = 'block';
-        }
-
-        function resetButtonState(button, text, loading) {
-            text.style.display = 'inline';
-            loading.style.display = 'none';
-            button.disabled = false;
-        }
-
-        // Check existing auth on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            checkExistingAuth();
-            console.log('Admin login system initialized');
+        // Check if already logged in
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session?.user) {
+                document.getElementById('adminEmail').value = session.user.email;
+                console.log('Already signed in as:', session.user.email);
+            }
         });
     </script>
 </body>
