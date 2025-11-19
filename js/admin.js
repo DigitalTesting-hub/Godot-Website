@@ -6,6 +6,7 @@ class AdminPanel {
         this.students = [];
         this.modules = [];
         this.filteredCourses = [];
+        this.filteredStudents = [];
         this.currentFilter = 'all';
         this.currentCourseId = null;
         this.init();
@@ -144,7 +145,7 @@ class AdminPanel {
     async loadStats() {
         try {
             // Get total students
-            const { data: users, error: usersError } = await supabase.auth.admin.listUsers();
+            const { data: users, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
             if (!usersError) {
                 document.getElementById('totalStudents').textContent = users.users.length;
             }
@@ -176,32 +177,48 @@ class AdminPanel {
 
     async loadStudents() {
         try {
-            // Get all users
-            const { data: users, error } = await supabase.auth.admin.listUsers();
+            this.showLoading('students');
             
-            if (error) throw error;
+            // Use admin client to get all users
+            const { data: users, error } = await supabaseAdmin.auth.admin.listUsers();
             
-            // Get user profiles
+            if (error) {
+                console.error('Error fetching users:', error);
+                throw new Error('Unable to fetch user data. Check service role key configuration.');
+            }
+            
+            // Get user profiles from public schema
             const { data: profiles, error: profileError } = await supabase
                 .from('profiles')
                 .select('*');
 
-            if (profileError) throw profileError;
+            if (profileError) {
+                console.error('Error fetching profiles:', profileError);
+                // Continue with just user data if profiles fail
+            }
 
             // Combine user data with profiles
             this.students = users.users.map(user => {
-                const profile = profiles.find(p => p.id === user.id) || {};
+                const profile = profiles?.find(p => p.id === user.id) || {};
                 return {
-                    ...user,
-                    ...profile
+                    id: user.id,
+                    email: user.email,
+                    created_at: user.created_at,
+                    last_sign_in_at: user.last_sign_in_at,
+                    subscription_tier: profile.subscription_tier || 'basic',
+                    full_name: profile.full_name || '',
+                    avatar_url: profile.avatar_url || ''
                 };
             });
 
+            this.filteredStudents = [...this.students];
             this.renderStudents();
             
         } catch (error) {
             console.error('Error loading students:', error);
+            this.showMessage('Error loading students: ' + error.message, 'error');
             this.students = [];
+            this.filteredStudents = [];
         }
     }
 
@@ -558,24 +575,58 @@ class AdminPanel {
         const container = document.getElementById('studentsList');
         if (!container) return;
 
-        if (this.students.length === 0) {
+        if (this.filteredStudents.length === 0) {
             container.innerHTML = `
                 <div class="placeholder-message">
-                    <p>No students found. Student data will appear here once users start signing up.</p>
+                    <p>No students found matching your search.</p>
                 </div>
             `;
             return;
         }
 
-        container.innerHTML = this.students.map(student => {
+        container.innerHTML = this.filteredStudents.map(student => {
             return `
                 <div class="student-item">
                     <div class="student-info">
                         <h3>${student.email}</h3>
                         <div class="student-meta">
-                            <span>Tier: ${student.subscription_tier || 'basic'}</span>
+                            <span class="student-tier ${student.subscription_tier}">${student.subscription_tier.toUpperCase()} TIER</span>
                             <span>Joined: ${new Date(student.created_at).toLocaleDateString()}</span>
                             <span>Last Sign In: ${student.last_sign_in_at ? new Date(student.last_sign_in_at).toLocaleDateString() : 'Never'}</span>
+                            ${student.full_name ? `<span>Name: ${student.full_name}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="student-actions">
+                        <button class="btn-small" onclick="adminPanel.editStudent('${student.id}')">Edit Tier</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    renderFilteredStudents(students) {
+        const container = document.getElementById('studentsList');
+        if (!container) return;
+
+        if (students.length === 0) {
+            container.innerHTML = `
+                <div class="placeholder-message">
+                    <p>No students found matching your search.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = students.map(student => {
+            return `
+                <div class="student-item">
+                    <div class="student-info">
+                        <h3>${student.email}</h3>
+                        <div class="student-meta">
+                            <span class="student-tier ${student.subscription_tier}">${student.subscription_tier.toUpperCase()} TIER</span>
+                            <span>Joined: ${new Date(student.created_at).toLocaleDateString()}</span>
+                            <span>Last Sign In: ${student.last_sign_in_at ? new Date(student.last_sign_in_at).toLocaleDateString() : 'Never'}</span>
+                            ${student.full_name ? `<span>Name: ${student.full_name}</span>` : ''}
                         </div>
                     </div>
                     <div class="student-actions">
@@ -587,8 +638,20 @@ class AdminPanel {
     }
 
     searchStudents(query) {
-        // Implement student search functionality
-        console.log('Searching students:', query);
+        if (!query.trim()) {
+            this.filteredStudents = [...this.students];
+            this.renderStudents();
+            return;
+        }
+        
+        const searchTerm = query.toLowerCase();
+        const filteredStudents = this.students.filter(student => 
+            student.email.toLowerCase().includes(searchTerm) ||
+            (student.full_name && student.full_name.toLowerCase().includes(searchTerm)) ||
+            (student.subscription_tier && student.subscription_tier.toLowerCase().includes(searchTerm))
+        );
+        
+        this.renderFilteredStudents(filteredStudents);
     }
 
     // MODAL MANAGEMENT
@@ -713,7 +776,7 @@ class AdminPanel {
     showModulesLoading() {
         const container = document.getElementById('modulesListView');
         if (container) {
-            container.innerHTML = '<div class="loading-message">Loading modules...</div>';
+            container.innerHTML = '<div class="loading-message'>Loading modules...</div>';
         }
     }
 
@@ -743,8 +806,28 @@ class AdminPanel {
     }
 
     // Student management methods
-    editStudent(studentId) {
-        this.showMessage('Student tier editing will be implemented in next phase', 'info');
+    async editStudent(studentId) {
+        const student = this.students.find(s => s.id === studentId);
+        if (!student) return;
+
+        // Simple implementation - you can expand this with a modal
+        const newTier = student.subscription_tier === 'basic' ? 'premium' : 'basic';
+        
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ subscription_tier: newTier })
+                .eq('id', studentId);
+
+            if (error) throw error;
+
+            await this.loadStudents();
+            this.showMessage(`✅ Student tier updated to ${newTier}`, 'success');
+            
+        } catch (error) {
+            console.error('Error updating student tier:', error);
+            this.showMessage('❌ Error updating student tier: ' + error.message, 'error');
+        }
     }
 }
 
@@ -772,9 +855,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Supabase Configuration
     const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
+    
+    // NEW: Service Role Key for Admin Operations
+    const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzQ3ODYxMSwiZXhwIjoyMDc5MDU0NjExfQ.1LXf8oSw593OhihrQvegwK2EfpG8M6rMb9Ix7UnWfkY'; // Replace with your actual service role key
 
-    // Initialize Supabase
+    // Initialize Supabase clients
     window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    window.supabaseAdmin = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
     
     // Initialize Admin Panel
     window.adminPanel = new AdminPanel();
