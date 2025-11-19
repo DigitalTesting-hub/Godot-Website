@@ -332,25 +332,25 @@
 
             async loadStudents() {
                 try {
-                    console.log('👥 Loading students from profiles...');
+                    console.log('👥 Loading students from userprofile...');
                     
-                    // Get all profiles with user data
-                    const { data: profiles, error } = await supabase
-                        .from('profiles')
+                    // Get all userprofile with user data
+                    const { data: userprofile, error } = await supabase
+                        .from('userprofile')
                         .select(`
                             *,
                             auth_users:auth.users(email, created_at, last_sign_in_at)
                         `);
 
                     if (error) {
-                        console.error('Error loading profiles:', error);
+                        console.error('Error loading userprofile:', error);
                         throw error;
                     }
 
-                    console.log('📊 Profiles data:', profiles);
+                    console.log('📊 userprofile data:', userprofile);
 
                     // Transform the data to match our structure
-                    this.students = profiles.map(profile => {
+                    this.students = userprofile.map(profile => {
                         return {
                             id: profile.id,
                             email: profile.email || 'No email',
@@ -591,7 +591,7 @@
 
                 try {
                     const { error } = await supabase
-                        .from('profiles')
+                        .from('userprofile')
                         .update({ subscription_tier: tier })
                         .eq('id', studentId);
 
