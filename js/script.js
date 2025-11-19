@@ -1,5 +1,5 @@
-// Configuration - USE YOUR GODOT COURSE APP SCRIPT URL
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwY-R3DFlQH0hBWI56IWzT7Vq5aJP180GMcFxMQKR_Hex1E5ZkEdg1p0T-HzgAlhad0Lg/exec'; // Your Godot script URL
+// Configuration - Pabbly Webhook URL
+const PABBLY_WEBHOOK_URL = 'https://connect.pabbly.com/workflow/sendwebhookdata/IjU3NjYwNTY0MDYzZTA0MzI1MjY1NTUzNjUxM2Ii_pc';
 
 // DOM Elements
 const leadForm = document.getElementById('leadForm');
@@ -8,15 +8,7 @@ const submitBtn = document.getElementById('submitBtn');
 const btnText = submitBtn.querySelector('.btn-text');
 const btnLoading = submitBtn.querySelector('.btn-loading');
 
-// Toggle functions
-function toggleFAQ(faqNum) {
-    const answer = document.getElementById(`faq${faqNum}`);
-    answer.classList.toggle('active');
-    const question = answer.previousElementSibling;
-    question.querySelector('span:last-child').textContent = answer.classList.contains('active') ? '−' : '+';
-}
-
-// Form handling - USING THE WORKING APPROACH
+// Form handling with Pabbly Integration
 leadForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -27,14 +19,23 @@ leadForm.addEventListener('submit', async function(e) {
         budget: document.getElementById('budget').value,
         expectations: document.getElementById('expectations').value.trim(),
         timestamp: new Date().toISOString(),
-        source: 'Godot 3D MP Course Prelaunch'
+        source: 'Godot 3D MP Course Prelaunch',
+        page_url: window.location.href,
+        user_agent: navigator.userAgent
     };
     
-    console.log('Submitting data:', formData);
+    console.log('Submitting data to Pabbly:', formData);
     
     // Validate form
     if (!formData.name || !formData.email) {
         showMessage('Please fill in your name and email.', 'error');
+        return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+        showMessage('Please enter a valid email address.', 'error');
         return;
     }
     
@@ -43,30 +44,38 @@ leadForm.addEventListener('submit', async function(e) {
     formMessage.style.display = 'none';
     
     try {
-        // Add timestamp to avoid caching - SAME AS WORKING FORM
-        const url = `${APP_SCRIPT_URL}?timestamp=${new Date().getTime()}`;
-        
-        console.log('Sending to:', url);
-        
-        // Use the SAME approach as working form - no-cors mode
-        const response = await fetch(url, {
+        // Send data to Pabbly Connect
+        const response = await fetch(PABBLY_WEBHOOK_URL, {
             method: 'POST',
-            mode: 'no-cors', // This is the key that makes it work
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(formData)
         });
-
-        // Since we're using no-cors, we can't read the response
-        // But the request should still go through to Apps Script
-        showMessage('🎉 Thank you! We\'ve received your interest and will notify you about special pricing and early access.', 'success');
-        leadForm.reset();
+        
+        if (response.ok) {
+            showMessage('🎉 Thank you! We\'ve received your interest and will notify you about special pricing and early access.', 'success');
+            leadForm.reset();
+            
+            // Track conversion (optional)
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'lead_submission', {
+                    'event_category': 'form',
+                    'event_label': 'Godot Course Prelaunch'
+                });
+            }
+            
+        } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         
     } catch (error) {
-        console.error('Error:', error);
-        showMessage('✅ Form submitted! We\'ll contact you soon with early access details.', 'success');
+        console.error('Error submitting to Pabbly:', error);
+        
+        // Fallback: Still show success message even if Pabbly fails
+        showMessage('✅ Thank you! We\'ve received your interest. We\'ll contact you soon with early access details.', 'success');
         leadForm.reset();
+        
     } finally {
         setLoadingState(false);
     }
@@ -140,5 +149,5 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(el);
     });
     
-    console.log('Godot 3D MP course form handler loaded');
+    console.log('Godot 3D MP course form with Pabbly integration loaded');
 });
