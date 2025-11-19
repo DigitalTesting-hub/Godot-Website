@@ -4,7 +4,8 @@ class AdminPanel {
         this.currentUser = null;
         this.courses = [];
         this.students = [];
-        this.userProgress = [];
+        this.filteredCourses = [];
+        this.currentFilter = 'all';
         this.init();
     }
 
@@ -16,73 +17,152 @@ class AdminPanel {
     }
 
     async checkAdminAuth() {
+        console.log('🔐 Checking admin auth...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (session?.user) {
+            console.log('👤 User session found:', session.user.email);
             this.currentUser = session.user;
             
-            // Check if user is admin (you might want to add admin role to profiles)
             const isAdmin = await this.checkAdminRole(session.user.id);
+            console.log('🛡️ Admin check result:', isAdmin);
             
             if (!isAdmin) {
-                alert('Access denied. Admin privileges required.');
-                window.location.href = 'course.html';
+                console.log('❌ Access denied - not admin');
+                this.redirectToLogin('Access denied. Admin privileges required.');
                 return;
             }
             
+            this.currentUser = session.user;
             document.getElementById('adminEmail').textContent = session.user.email;
             document.getElementById('mobileAdminEmail').textContent = session.user.email;
+            console.log('✅ Admin access granted');
             
         } else {
-            window.location.href = 'login.html';
+            console.log('❌ No user session found');
+            this.redirectToLogin('Please login to access admin panel.');
         }
     }
 
     async checkAdminRole(userId) {
-        try {
-            const { data, error } = await supabase
-                .from('admin_roles')
-                .select('*')
-                .eq('user_id', userId)
-                .single();
-
-            if (error) {
-                console.log('Admin role check error:', error);
-                return false;
-            }
-
-            return !!data; // Returns true if admin role exists
-        } catch (error) {
-            console.error('Error checking admin role:', error);
+        // Simple email-based admin check
+        const adminEmails = ['graphicyin@gmail.com'];
+        
+        if (!this.currentUser || !this.currentUser.email) {
+            console.log('❌ No current user or email found');
             return false;
         }
+        
+        const isAdmin = adminEmails.includes(this.currentUser.email.toLowerCase());
+        console.log('🛡️ Admin check for', this.currentUser.email, ':', isAdmin);
+        return isAdmin;
+    }
+
+    redirectToLogin(message = '') {
+        console.log('🔀 Redirecting to login:', message);
+        if (message) {
+            localStorage.setItem('adminLoginMessage', message);
+        }
+        window.location.href = 'admin-login.html';
+    }
+
+    setupEventListeners() {
+        // Logout buttons
+        document.getElementById('adminLogoutBtn').addEventListener('click', () => this.logout());
+        document.getElementById('mobileAdminLogoutBtn').addEventListener('click', () => this.logout());
+
+        // Course form
+        document.getElementById('courseForm').addEventListener('submit', (e) => this.handleCourseSubmit(e));
+
+        // Mobile menu
+        this.setupMobileMenu();
+    }
+
+    setupMobileMenu() {
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => this.openMobileMenu());
+        }
+        if (mobileCloseBtn) {
+            mobileCloseBtn.addEventListener('click', () => this.closeMobileMenu());
+        }
+        if (mobileMenuOverlay) {
+            mobileMenuOverlay.addEventListener('click', () => this.closeMobileMenu());
+        }
+    }
+
+    openMobileMenu() {
+        document.getElementById('mobileMenu').classList.add('active');
+        document.getElementById('mobileMenuOverlay').classList.add('active');
+        document.body.classList.add('menu-open');
+    }
+
+    closeMobileMenu() {
+        document.getElementById('mobileMenu').classList.remove('active');
+        document.getElementById('mobileMenuOverlay').classList.remove('active');
+        document.body.classList.remove('menu-open');
     }
 
     async loadDashboardData() {
         await this.loadCourses();
+        await this.loadStats();
         await this.loadStudents();
-        await this.loadUserProgress();
-        await this.loadAnalytics();
     }
 
     async loadCourses() {
         try {
+            this.showLoading('courses');
+            
             const { data, error } = await supabase
                 .from('courses')
                 .select('*')
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
+            
             this.courses = data || [];
+            this.filteredCourses = [...this.courses];
+            this.renderCourses();
+            
         } catch (error) {
             console.error('Error loading courses:', error);
+            this.showMessage('Error loading courses: ' + error.message, 'error');
             this.courses = [];
+            this.filteredCourses = [];
+        }
+    }
+
+    async loadStats() {
+        try {
+            // Get total students
+            const { data: users, error: usersError } = await supabase.auth.admin.listUsers();
+            if (!usersError) {
+                document.getElementById('totalStudents').textContent = users.users.length;
+            }
+
+            // Get total courses and active courses
+            const { data: courses, error: coursesError } = await supabase
+                .from('courses')
+                .select('id, is_active');
+            
+            if (!coursesError) {
+                document.getElementById('totalCourses').textContent = courses.length;
+                const activeCourses = courses.filter(course => course.is_active).length;
+                document.getElementById('activeCourses').textContent = activeCourses;
+            }
+
+        } catch (error) {
+            console.error('Error loading stats:', error);
         }
     }
 
     async loadStudents() {
         try {
-            // Get all users (you might want to paginate this in production)
+            // Get all users
             const { data: users, error } = await supabase.auth.admin.listUsers();
             
             if (error) throw error;
@@ -103,238 +183,34 @@ class AdminPanel {
                 };
             });
 
+            this.renderStudents();
+            
         } catch (error) {
             console.error('Error loading students:', error);
             this.students = [];
         }
     }
 
-    async loadUserProgress() {
-        try {
-            const { data, error } = await supabase
-                .from('user_progress')
-                .select(`
-                    *,
-                    course_modules (
-                        title,
-                        course_id
-                    ),
-                    profiles (
-                        subscription_tier
-                    )
-                `);
-
-            if (error) throw error;
-            this.userProgress = data || [];
-        } catch (error) {
-            console.error('Error loading user progress:', error);
-            this.userProgress = [];
-        }
-    }
-
-    async loadAnalytics() {
-        // This would typically involve more complex queries
-        // For now, we'll calculate basic stats
-        const totalStudents = this.students.length;
-        const totalCourses = this.courses.length;
-        const activeUsers = this.students.filter(s => s.last_sign_in_at > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length;
-        
-        // Calculate revenue (simplified)
-        const userCourses = await this.getUserCourses();
-        const totalRevenue = userCourses.reduce((sum, uc) => {
-            const course = this.courses.find(c => c.id === uc.course_id);
-            return sum + (course?.price || 0);
-        }, 0);
-
-        document.getElementById('totalStudents').textContent = totalStudents;
-        document.getElementById('totalCourses').textContent = totalCourses;
-        document.getElementById('activeUsers').textContent = activeUsers;
-        document.getElementById('totalRevenue').textContent = `$${totalRevenue.toFixed(2)}`;
-    }
-
-    async getUserCourses() {
-        try {
-            const { data, error } = await supabase
-                .from('user_courses')
-                .select('*')
-                .eq('payment_status', 'completed');
-
-            if (error) throw error;
-            return data || [];
-        } catch (error) {
-            console.error('Error loading user courses:', error);
-            return [];
-        }
-    }
-
-    setupEventListeners() {
-        // Logout buttons
-        document.getElementById('adminLogoutBtn').addEventListener('click', () => this.logout());
-        document.getElementById('mobileAdminLogoutBtn').addEventListener('click', () => this.logout());
-
-        // Form submissions
-        document.getElementById('courseForm').addEventListener('submit', (e) => this.handleCourseSubmit(e));
-        document.getElementById('moduleForm').addEventListener('submit', (e) => this.handleModuleSubmit(e));
-
-        // Search functionality
-        document.getElementById('studentSearch').addEventListener('input', (e) => this.searchStudents(e.target.value));
-
-        // Modal close on overlay click
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
-        });
-    }
-
-    renderDashboard() {
-        this.renderCourses();
-        this.renderStudents();
-        this.renderRecentActivity();
-    }
-
-    renderCourses() {
-        const container = document.getElementById('adminCoursesList');
-        if (!container) return;
-
-        container.innerHTML = this.courses.map(course => {
-            const modules = this.getCourseModules(course.id);
-            
-            return `
-                <div class="course-item">
-                    <div class="course-header">
-                        <div class="course-info">
-                            <h3>${course.title}</h3>
-                            <div class="course-meta">
-                                <span class="course-tier">Tier: ${course.required_tier}</span>
-                                <span class="course-price">$${course.price}</span>
-                                <span class="course-status">${course.is_active ? 'Active' : 'Inactive'}</span>
-                            </div>
-                        </div>
-                        <div class="course-actions">
-                            <button class="btn-small" onclick="adminPanel.editCourse('${course.id}')">Edit</button>
-                            <button class="btn-small btn-secondary" onclick="adminPanel.toggleCourseStatus('${course.id}')">
-                                ${course.is_active ? 'Deactivate' : 'Activate'}
-                            </button>
-                            <button class="btn-small btn-danger" onclick="adminPanel.deleteCourse('${course.id}')">Delete</button>
-                            <button class="btn-small" onclick="adminPanel.openModuleModal('${course.id}')">+ Add Module</button>
-                        </div>
-                    </div>
-                    <div class="course-description">
-                        <p>${course.description}</p>
-                    </div>
-                    <div class="course-modules">
-                        ${modules.map(module => `
-                            <div class="module-item">
-                                <div class="module-info">
-                                    <h4>${module.title}</h4>
-                                    <div class="module-meta">
-                                        <span>Order: ${module.module_order}</span>
-                                        <span>Duration: ${module.duration}</span>
-                                        <span>Tier: ${module.required_tier}</span>
-                                    </div>
-                                </div>
-                                <div class="module-actions">
-                                    <button class="btn-small" onclick="adminPanel.editModule('${module.id}')">Edit</button>
-                                    <button class="btn-small btn-danger" onclick="adminPanel.deleteModule('${module.id}')">Delete</button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    renderStudents() {
-        const container = document.getElementById('studentsList');
-        if (!container) return;
-
-        container.innerHTML = this.students.map(student => {
-            const progress = this.getStudentProgress(student.id);
-            const enrolledCourses = this.getStudentCourses(student.id);
-            
-            return `
-                <div class="student-item">
-                    <div class="student-info">
-                        <h3>${student.email}</h3>
-                        <div class="student-meta">
-                            <span>Tier: ${student.subscription_tier || 'free'}</span>
-                            <span>Joined: ${new Date(student.created_at).toLocaleDateString()}</span>
-                            <span>Courses: ${enrolledCourses.length}</span>
-                        </div>
-                    </div>
-                    <div class="student-progress">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${progress.percentage}%"></div>
-                        </div>
-                        <span>${progress.completed} of ${progress.total} modules completed</span>
-                    </div>
-                    <div class="student-actions">
-                        <button class="btn-small" onclick="adminPanel.viewStudentDetails('${student.id}')">View Details</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    renderRecentActivity() {
-        const container = document.getElementById('recentActivityList');
-        if (!container) return;
-
-        // Get recent user progress
-        const recentProgress = this.userProgress
-            .sort((a, b) => new Date(b.last_accessed || b.created_at) - new Date(a.last_accessed || a.created_at))
-            .slice(0, 10);
-
-        container.innerHTML = recentProgress.map(progress => {
-            const student = this.students.find(s => s.id === progress.user_id);
-            const module = progress.course_modules;
-            
-            return `
-                <div class="activity-item">
-                    <div>${student?.email || 'Unknown user'} ${progress.completed ? 'completed' : 'started'} "${module?.title || 'Unknown module'}"</div>
-                    <small>${new Date(progress.last_accessed || progress.created_at).toLocaleString()}</small>
-                </div>
-            `;
-        }).join('');
-    }
-
-    getCourseModules(courseId) {
-        // This would typically come from your database
-        // For now, we'll return empty array
-        return [];
-    }
-
-    getStudentProgress(studentId) {
-        const studentProgress = this.userProgress.filter(up => up.user_id === studentId);
-        const completed = studentProgress.filter(up => up.completed).length;
-        const total = studentProgress.length;
-        
-        return {
-            completed,
-            total,
-            percentage: total > 0 ? Math.round((completed / total) * 100) : 0
-        };
-    }
-
-    getStudentCourses(studentId) {
-        // This would typically come from your user_courses table
-        return [];
-    }
-
-    // Course Management
+    // COURSES CRUD OPERATIONS
     async handleCourseSubmit(e) {
         e.preventDefault();
         
+        const submitBtn = document.getElementById('courseSubmitBtn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnLoading = submitBtn.querySelector('.btn-loading');
+        
+        // Show loading state
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'inline';
+        submitBtn.disabled = true;
+
         const courseId = document.getElementById('courseId').value;
         const courseData = {
             title: document.getElementById('courseTitle').value,
             description: document.getElementById('courseDescription').value,
             required_tier: document.getElementById('courseTier').value,
             price: parseFloat(document.getElementById('coursePrice').value),
+            status: document.getElementById('courseStatus').value,
             is_active: document.getElementById('courseActive').checked
         };
 
@@ -347,7 +223,7 @@ class AdminPanel {
                     .eq('id', courseId);
 
                 if (error) throw error;
-                this.showMessage('Course updated successfully!', 'success');
+                this.showMessage('✅ Course updated successfully!', 'success');
             } else {
                 // Create new course
                 const { error } = await supabase
@@ -355,61 +231,21 @@ class AdminPanel {
                     .insert([courseData]);
 
                 if (error) throw error;
-                this.showMessage('Course created successfully!', 'success');
+                this.showMessage('✅ Course created successfully!', 'success');
             }
 
             await this.loadCourses();
-            this.renderCourses();
+            await this.loadStats();
             this.closeCourseModal();
             
         } catch (error) {
             console.error('Error saving course:', error);
-            this.showMessage('Error saving course: ' + error.message, 'error');
-        }
-    }
-
-    async handleModuleSubmit(e) {
-        e.preventDefault();
-        
-        const moduleId = document.getElementById('moduleId').value;
-        const courseId = document.getElementById('moduleCourseId').value;
-        const moduleData = {
-            course_id: courseId,
-            title: document.getElementById('moduleTitle').value,
-            description: document.getElementById('moduleDescription').value,
-            module_order: parseInt(document.getElementById('moduleOrder').value),
-            duration: document.getElementById('moduleDuration').value,
-            video_url: document.getElementById('moduleVideoUrl').value,
-            required_tier: document.getElementById('moduleTier').value
-        };
-
-        try {
-            if (moduleId) {
-                // Update existing module
-                const { error } = await supabase
-                    .from('course_modules')
-                    .update(moduleData)
-                    .eq('id', moduleId);
-
-                if (error) throw error;
-                this.showMessage('Module updated successfully!', 'success');
-            } else {
-                // Create new module
-                const { error } = await supabase
-                    .from('course_modules')
-                    .insert([moduleData]);
-
-                if (error) throw error;
-                this.showMessage('Module created successfully!', 'success');
-            }
-
-            await this.loadCourses();
-            this.renderCourses();
-            this.closeModuleModal();
-            
-        } catch (error) {
-            console.error('Error saving module:', error);
-            this.showMessage('Error saving module: ' + error.message, 'error');
+            this.showMessage('❌ Error saving course: ' + error.message, 'error');
+        } finally {
+            // Reset button state
+            btnText.style.display = 'inline';
+            btnLoading.style.display = 'none';
+            submitBtn.disabled = false;
         }
     }
 
@@ -426,62 +262,172 @@ class AdminPanel {
             if (error) throw error;
 
             await this.loadCourses();
-            this.renderCourses();
-            this.showMessage(`Course ${!course.is_active ? 'activated' : 'deactivated'} successfully!`, 'success');
+            await this.loadStats();
+            this.showMessage(`✅ Course ${!course.is_active ? 'activated' : 'deactivated'} successfully!`, 'success');
             
         } catch (error) {
             console.error('Error toggling course status:', error);
-            this.showMessage('Error updating course: ' + error.message, 'error');
+            this.showMessage('❌ Error updating course: ' + error.message, 'error');
         }
     }
 
     async deleteCourse(courseId) {
-        if (!confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+        const course = this.courses.find(c => c.id === courseId);
+        if (!course) return;
+
+        this.showConfirmModal(
+            'Delete Course',
+            `Are you sure you want to delete "${course.title}"? This action cannot be undone.`,
+            async () => {
+                try {
+                    const { error } = await supabase
+                        .from('courses')
+                        .delete()
+                        .eq('id', courseId);
+
+                    if (error) throw error;
+
+                    await this.loadCourses();
+                    await this.loadStats();
+                    this.showMessage('✅ Course deleted successfully!', 'success');
+                    
+                } catch (error) {
+                    console.error('Error deleting course:', error);
+                    this.showMessage('❌ Error deleting course: ' + error.message, 'error');
+                }
+            }
+        );
+    }
+
+    // COURSES RENDERING AND FILTERING
+    renderCourses() {
+        const container = document.getElementById('adminCoursesList');
+        if (!container) return;
+
+        if (this.filteredCourses.length === 0) {
+            container.innerHTML = `
+                <div class="placeholder-message">
+                    <p>No courses found. Click "Add New Course" to get started.</p>
+                </div>
+            `;
             return;
         }
 
-        try {
-            const { error } = await supabase
-                .from('courses')
-                .delete()
-                .eq('id', courseId);
-
-            if (error) throw error;
-
-            await this.loadCourses();
-            this.renderCourses();
-            this.showMessage('Course deleted successfully!', 'success');
+        container.innerHTML = this.filteredCourses.map(course => {
+            const statusClass = course.is_active ? 'status-active' : 'status-inactive';
+            const statusText = course.is_active ? 'Active' : 'Inactive';
             
-        } catch (error) {
-            console.error('Error deleting course:', error);
-            this.showMessage('Error deleting course: ' + error.message, 'error');
-        }
+            return `
+                <div class="course-item ${!course.is_active ? 'inactive' : ''}">
+                    <div class="course-header">
+                        <div class="course-info">
+                            <h3>${course.title}</h3>
+                            <div class="course-meta">
+                                <span class="course-tier">${course.required_tier.toUpperCase()} TIER</span>
+                                <span class="course-price">$${course.price}</span>
+                                <span class="course-status ${statusClass}">${statusText}</span>
+                                <span class="course-status status-${course.status}">${course.status}</span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn-small" onclick="adminPanel.openCourseModal('${course.id}')">Edit</button>
+                            <button class="btn-small ${course.is_active ? 'btn-danger' : ''}" 
+                                    onclick="adminPanel.toggleCourseStatus('${course.id}')">
+                                ${course.is_active ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button class="btn-small btn-danger" onclick="adminPanel.deleteCourse('${course.id}')">Delete</button>
+                        </div>
+                    </div>
+                    <div class="course-description">
+                        <p>${course.description}</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
-    async deleteModule(moduleId) {
-        if (!confirm('Are you sure you want to delete this module?')) {
+    filterCourses(filter) {
+        this.currentFilter = filter;
+        
+        // Update filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        switch (filter) {
+            case 'active':
+                this.filteredCourses = this.courses.filter(course => course.is_active);
+                break;
+            case 'inactive':
+                this.filteredCourses = this.courses.filter(course => !course.is_active);
+                break;
+            case 'free':
+                this.filteredCourses = this.courses.filter(course => course.required_tier === 'free');
+                break;
+            case 'premium':
+                this.filteredCourses = this.courses.filter(course => course.required_tier === 'premium');
+                break;
+            default:
+                this.filteredCourses = [...this.courses];
+        }
+
+        this.renderCourses();
+    }
+
+    searchCourses(query) {
+        if (!query.trim()) {
+            this.filteredCourses = [...this.courses];
+        } else {
+            const searchTerm = query.toLowerCase();
+            this.filteredCourses = this.courses.filter(course => 
+                course.title.toLowerCase().includes(searchTerm) ||
+                course.description.toLowerCase().includes(searchTerm) ||
+                course.required_tier.toLowerCase().includes(searchTerm)
+            );
+        }
+        this.renderCourses();
+    }
+
+    // STUDENTS MANAGEMENT
+    renderStudents() {
+        const container = document.getElementById('studentsList');
+        if (!container) return;
+
+        if (this.students.length === 0) {
+            container.innerHTML = `
+                <div class="placeholder-message">
+                    <p>No students found. Student data will appear here once users start signing up.</p>
+                </div>
+            `;
             return;
         }
 
-        try {
-            const { error } = await supabase
-                .from('course_modules')
-                .delete()
-                .eq('id', moduleId);
-
-            if (error) throw error;
-
-            await this.loadCourses();
-            this.renderCourses();
-            this.showMessage('Module deleted successfully!', 'success');
-            
-        } catch (error) {
-            console.error('Error deleting module:', error);
-            this.showMessage('Error deleting module: ' + error.message, 'error');
-        }
+        container.innerHTML = this.students.map(student => {
+            return `
+                <div class="student-item">
+                    <div class="student-info">
+                        <h3>${student.email}</h3>
+                        <div class="student-meta">
+                            <span>Tier: ${student.subscription_tier || 'free'}</span>
+                            <span>Joined: ${new Date(student.created_at).toLocaleDateString()}</span>
+                            <span>Last Sign In: ${student.last_sign_in_at ? new Date(student.last_sign_in_at).toLocaleDateString() : 'Never'}</span>
+                        </div>
+                    </div>
+                    <div class="student-actions">
+                        <button class="btn-small" onclick="adminPanel.editStudent('${student.id}')">Edit Tier</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
-    // Modal Management
+    searchStudents(query) {
+        // Implement student search functionality
+        console.log('Searching students:', query);
+    }
+
+    // MODAL MANAGEMENT
     openCourseModal(courseId = null) {
         const modal = document.getElementById('courseModal');
         const title = document.getElementById('courseModalTitle');
@@ -497,6 +443,7 @@ class AdminPanel {
                 document.getElementById('courseDescription').value = course.description;
                 document.getElementById('courseTier').value = course.required_tier;
                 document.getElementById('coursePrice').value = course.price;
+                document.getElementById('courseStatus').value = course.status;
                 document.getElementById('courseActive').checked = course.is_active;
             }
         } else {
@@ -504,6 +451,8 @@ class AdminPanel {
             title.textContent = 'Add New Course';
             form.reset();
             document.getElementById('courseId').value = '';
+            document.getElementById('courseStatus').value = 'draft';
+            document.getElementById('courseActive').checked = true;
         }
         
         modal.classList.add('active');
@@ -511,125 +460,63 @@ class AdminPanel {
 
     closeCourseModal() {
         document.getElementById('courseModal').classList.remove('active');
+        document.getElementById('courseForm').reset();
     }
 
-    openModuleModal(courseId, moduleId = null) {
-        const modal = document.getElementById('moduleModal');
-        const title = document.getElementById('moduleModalTitle');
-        const form = document.getElementById('moduleForm');
+    showConfirmModal(title, message, confirmCallback) {
+        document.getElementById('confirmModalTitle').textContent = title;
+        document.getElementById('confirmModalMessage').textContent = message;
         
-        document.getElementById('moduleCourseId').value = courseId;
+        const confirmBtn = document.getElementById('confirmActionBtn');
+        confirmBtn.onclick = confirmCallback;
         
-        if (moduleId) {
-            // Edit mode - you would load module data here
-            title.textContent = 'Edit Module';
-            document.getElementById('moduleId').value = moduleId;
-        } else {
-            // Create mode
-            title.textContent = 'Add New Module';
-            form.reset();
-            document.getElementById('moduleId').value = '';
+        document.getElementById('confirmModal').classList.add('active');
+    }
+
+    closeConfirmModal() {
+        document.getElementById('confirmModal').classList.remove('active');
+    }
+
+    // UTILITY METHODS
+    showLoading(section) {
+        const container = document.getElementById(`admin${section.charAt(0).toUpperCase() + section.slice(1)}List`);
+        if (container) {
+            container.innerHTML = '<div class="loading-message">Loading...</div>';
         }
+    }
+
+    showMessage(message, type) {
+        const messageEl = document.getElementById('adminMessage');
+        messageEl.textContent = message;
+        messageEl.className = `form-message ${type}`;
+        messageEl.style.display = 'block';
         
-        modal.classList.add('active');
-    }
-
-    closeModuleModal() {
-        document.getElementById('moduleModal').classList.remove('active');
-    }
-
-    async viewStudentDetails(studentId) {
-        const student = this.students.find(s => s.id === studentId);
-        if (!student) return;
-
-        const progress = this.getStudentProgress(studentId);
-        const enrolledCourses = this.getStudentCourses(studentId);
-        
-        const details = document.getElementById('studentDetails');
-        details.innerHTML = `
-            <div class="detail-row">
-                <div class="detail-label">Email:</div>
-                <div class="detail-value">${student.email}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Subscription Tier:</div>
-                <div class="detail-value">${student.subscription_tier || 'free'}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Joined:</div>
-                <div class="detail-value">${new Date(student.created_at).toLocaleDateString()}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Last Sign In:</div>
-                <div class="detail-value">${student.last_sign_in_at ? new Date(student.last_sign_in_at).toLocaleString() : 'Never'}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Progress:</div>
-                <div class="detail-value">${progress.completed} of ${progress.total} modules completed (${progress.percentage}%)</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Enrolled Courses:</div>
-                <div class="detail-value">${enrolledCourses.length} courses</div>
-            </div>
-        `;
-
-        document.getElementById('studentModal').classList.add('active');
-    }
-
-    closeStudentModal() {
-        document.getElementById('studentModal').classList.remove('active');
-    }
-
-    searchStudents(query) {
-        const filteredStudents = this.students.filter(student => 
-            student.email.toLowerCase().includes(query.toLowerCase())
-        );
-        
-        // Re-render students list with filtered results
-        const container = document.getElementById('studentsList');
-        // ... (similar to renderStudents but with filtered data)
-    }
-
-    editCourse(courseId) {
-        this.openCourseModal(courseId);
-    }
-
-    editModule(moduleId) {
-        // You would need to load the module data first
-        // For now, we'll just open the modal
-        this.openModuleModal(null, moduleId);
+        // Auto-hide success messages
+        if (type === 'success') {
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
+        }
     }
 
     async logout() {
         try {
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
-            window.location.href = 'login.html';
+            window.location.href = 'admin-login.html';
         } catch (error) {
             console.error('Logout error:', error);
-            alert('Logout failed: ' + error.message);
+            this.showMessage('❌ Logout failed: ' + error.message, 'error');
         }
     }
 
-    showMessage(message, type) {
-        // Create a temporary message element
-        const messageEl = document.createElement('div');
-        messageEl.className = `form-message ${type}`;
-        messageEl.textContent = message;
-        messageEl.style.position = 'fixed';
-        messageEl.style.top = '100px';
-        messageEl.style.right = '20px';
-        messageEl.style.zIndex = '3000';
-        
-        document.body.appendChild(messageEl);
-        
-        setTimeout(() => {
-            messageEl.remove();
-        }, 5000);
+    // Student management methods (to be implemented)
+    editStudent(studentId) {
+        this.showMessage('Student tier editing will be implemented in Phase 2', 'info');
     }
 }
 
-// Global functions for HTML onclick handlers
+// Global functions for navigation
 function showSection(sectionId) {
     // Hide all sections
     document.querySelectorAll('.admin-section').forEach(section => {
@@ -639,54 +526,24 @@ function showSection(sectionId) {
     // Show selected section
     document.getElementById(sectionId).style.display = 'block';
     
+    // Update active state in navigation (optional)
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.classList.remove('active');
+    });
+    
     // Update URL hash
     window.location.hash = sectionId;
 }
 
-function openCourseModal(courseId = null) {
-    window.adminPanel.openCourseModal(courseId);
-}
-
-function closeCourseModal() {
-    window.adminPanel.closeCourseModal();
-}
-
-function openModuleModal(courseId, moduleId = null) {
-    window.adminPanel.openModuleModal(courseId, moduleId);
-}
-
-function closeModuleModal() {
-    window.adminPanel.closeModuleModal();
-}
-
-function closeStudentModal() {
-    window.adminPanel.closeStudentModal();
-}
-
-// Mobile Menu Functionality (similar to your existing code)
-const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-const mobileCloseBtn = document.getElementById('mobileCloseBtn');
-const mobileMenu = document.getElementById('mobileMenu');
-const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
-
-function openMobileMenu() {
-    mobileMenu.classList.add('active');
-    mobileMenuOverlay.classList.add('active');
-    document.body.classList.add('menu-open');
-}
-
-function closeMobileMenu() {
-    mobileMenu.classList.remove('active');
-    mobileMenuOverlay.classList.remove('active');
-    document.body.classList.remove('menu-open');
-}
-
-// Event Listeners for mobile menu
-mobileMenuBtn?.addEventListener('click', openMobileMenu);
-mobileCloseBtn?.addEventListener('click', closeMobileMenu);
-mobileMenuOverlay?.addEventListener('click', closeMobileMenu);
-
 // Initialize admin panel when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Supabase Configuration
+    const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
+
+    // Initialize Supabase
+    window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Initialize Admin Panel
     window.adminPanel = new AdminPanel();
 });
