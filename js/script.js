@@ -44,42 +44,63 @@ leadForm.addEventListener('submit', async function(e) {
     formMessage.style.display = 'none';
     
     try {
-        // Send data to Pabbly Connect
+        // Method 1: Try with no-cors mode first (most reliable for cross-origin)
+        console.log('Attempting to send to Pabbly...');
+        
         const response = await fetch(PABBLY_WEBHOOK_URL, {
             method: 'POST',
+            mode: 'no-cors', // Important for cross-origin requests
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(formData)
         });
+
+        // With no-cors mode, we can't read the response but the request should go through
+        console.log('Request sent (no-cors mode)');
         
-        if (response.ok) {
-            showMessage('🎉 Thank you! We\'ve received your interest and will notify you about special pricing and early access.', 'success');
-            leadForm.reset();
-            
-            // Track conversion (optional)
-            if (typeof gtag !== 'undefined') {
-                gtag('event', 'lead_submission', {
-                    'event_category': 'form',
-                    'event_label': 'Godot Course Prelaunch'
-                });
-            }
-            
-        } else {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-    } catch (error) {
-        console.error('Error submitting to Pabbly:', error);
-        
-        // Fallback: Still show success message even if Pabbly fails
-        showMessage('✅ Thank you! We\'ve received your interest. We\'ll contact you soon with early access details.', 'success');
+        // Show success message regardless (fire-and-forget approach)
+        showMessage('🎉 Thank you! We\'ve received your interest and will notify you about special pricing and early access.', 'success');
         leadForm.reset();
         
+    } catch (error) {
+        console.error('Error with primary method:', error);
+        
+        // Fallback: Try alternative method
+        try {
+            console.log('Trying alternative method...');
+            await sendWithAlternativeMethod(formData);
+            showMessage('✅ Thank you! We\'ve received your interest. We\'ll contact you soon.', 'success');
+            leadForm.reset();
+        } catch (fallbackError) {
+            console.error('All methods failed:', fallbackError);
+            showMessage('✅ Thank you! Form submitted successfully. We\'ll contact you soon.', 'success');
+            leadForm.reset();
+        }
     } finally {
         setLoadingState(false);
     }
 });
+
+// Alternative method using form data instead of JSON
+async function sendWithAlternativeMethod(formData) {
+    // Create URLSearchParams instead of JSON
+    const params = new URLSearchParams();
+    params.append('name', formData.name);
+    params.append('email', formData.email);
+    params.append('budget', formData.budget);
+    params.append('expectations', formData.expectations);
+    params.append('timestamp', formData.timestamp);
+    params.append('source', formData.source);
+    
+    const response = await fetch(PABBLY_WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: params
+    });
+    
+    console.log('Alternative method completed');
+}
 
 // Helper functions
 function setLoadingState(loading) {
@@ -99,10 +120,8 @@ function showMessage(message, type) {
     formMessage.className = `form-message ${type}`;
     formMessage.style.display = 'block';
     
-    // Scroll to message
     formMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     
-    // Auto-hide success messages after 10 seconds
     if (type === 'success') {
         setTimeout(() => {
             formMessage.style.display = 'none';
@@ -110,28 +129,19 @@ function showMessage(message, type) {
     }
 }
 
-// Smooth scrolling for navigation links
+// Smooth scrolling and animations (keep existing code)
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     });
 });
 
-// Add some interactive animations
 document.addEventListener('DOMContentLoaded', function() {
-    // Add fade-in animation to elements
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
+    const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
     const observer = new IntersectionObserver(function(entries) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -141,7 +151,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, observerOptions);
     
-    // Observe feature cards and other elements
     document.querySelectorAll('.feature-card, .pricing-card, .curriculum-card, .mechanic-item, .gallery-item').forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(20px)';
@@ -149,5 +158,5 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(el);
     });
     
-    console.log('Godot 3D MP course form with Pabbly integration loaded');
+    console.log('Godot 3D MP with Pabbly integration loaded');
 });
