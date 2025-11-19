@@ -80,8 +80,8 @@
                     <span id="activeCourses" class="stat-number">0</span>
                 </div>
                 <div class="stat-card">
-                    <h3>Admin Status</h3>
-                    <span class="stat-number">✅ Active</span>
+                    <h3>Total Modules</h3>
+                    <span id="totalModules" class="stat-number">0</span>
                 </div>
             </div>
 
@@ -229,6 +229,100 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Module Modal -->
+    <div id="moduleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="moduleModalTitle">Add New Module</h3>
+                <button class="close-btn" onclick="adminPanel.closeModuleModal()">✕</button>
+            </div>
+            <form id="moduleForm" class="modal-form">
+                <input type="hidden" id="moduleId" value="">
+                <input type="hidden" id="moduleCourseId" value="">
+                
+                <div class="form-group">
+                    <label for="moduleTitle">Module Title *</label>
+                    <input type="text" id="moduleTitle" required placeholder="Enter module title">
+                </div>
+                
+                <div class="form-group">
+                    <label for="moduleDescription">Description *</label>
+                    <textarea id="moduleDescription" rows="3" required placeholder="Enter module description"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="moduleOrder">Order *</label>
+                        <input type="number" id="moduleOrder" min="1" required placeholder="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="moduleDuration">Duration</label>
+                        <input type="text" id="moduleDuration" placeholder="e.g., 15 min">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="moduleVideoUrl">Video URL (Mux)</label>
+                        <input type="url" id="moduleVideoUrl" placeholder="https://mux.com/...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="moduleTier">Required Tier</label>
+                        <select id="moduleTier">
+                            <option value="free">Free</option>
+                            <option value="basic">Basic</option>
+                            <option value="premium">Premium</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="moduleIsPremium">
+                        <span class="checkmark"></span>
+                        Premium Content (Requires premium tier)
+                    </label>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="adminPanel.closeModuleModal()">Cancel</button>
+                    <button type="submit" class="cta-button" id="moduleSubmitBtn">
+                        <span class="btn-text">Save Module</span>
+                        <span class="btn-loading" style="display: none;">Saving...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Course Modules View -->
+    <div id="modulesView" class="modal large-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modulesViewTitle">Course Modules</h3>
+                <button class="close-btn" onclick="adminPanel.closeModulesView()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="modules-view-header">
+                    <div class="course-info">
+                        <h4 id="modulesCourseTitle"></h4>
+                        <p id="modulesCourseDescription"></p>
+                    </div>
+                    <button class="cta-button" onclick="adminPanel.openModuleModal(adminPanel.currentCourseId)">
+                        <span class="action-icon">➕</span>
+                        Add Module
+                    </button>
+                </div>
+                
+                <div class="modules-list" id="modulesListView">
+                    <div class="loading-message">Loading modules...</div>
+                </div>
+            </div>
         </div>
     </div>
 
