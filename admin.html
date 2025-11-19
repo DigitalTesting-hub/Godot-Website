@@ -132,7 +132,7 @@
                 </div>
             </div>
 
-            <!-- Courses Filter -->
+            <!-- Courses Filter - UPDATED: Free changed to Basic -->
             <div class="courses-filter">
                 <button class="filter-btn active" onclick="adminPanel.filterCourses('all')">All</button>
                 <button class="filter-btn" onclick="adminPanel.filterCourses('active')">Active</button>
@@ -189,8 +189,8 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="courseTier">Required Tier *</label>
+                        <!-- UPDATED: Free removed, Basic is now the entry level -->
                         <select id="courseTier" required>
-                            <option value="free">Free</option>
                             <option value="basic">Basic</option>
                             <option value="premium">Premium</option>
                         </select>
@@ -273,8 +273,8 @@
                     
                     <div class="form-group">
                         <label for="moduleTier">Required Tier</label>
+                        <!-- UPDATED: Free removed, Basic is now the entry level -->
                         <select id="moduleTier">
-                            <option value="free">Free</option>
                             <option value="basic">Basic</option>
                             <option value="premium">Premium</option>
                         </select>
