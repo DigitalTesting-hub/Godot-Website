@@ -159,6 +159,69 @@
         </div>
     </div>
 
+    <!-- Chapter Management Modal -->
+    <div id="chapterModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 id="chapterModalTitle">Manage Chapters for: <span id="currentCourseTitle"></span></h3>
+                <button class="close-btn" onclick="closeChapterModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="chapters-list" id="chaptersList">
+                    <div class="placeholder-message">
+                        <p>Loading chapters...</p>
+                    </div>
+                </div>
+                
+                <div class="add-chapter-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <h4>Add New Chapter</h4>
+                    <form id="chapterForm" class="modal-form">
+                        <input type="hidden" id="chapterId">
+                        <input type="hidden" id="chapterCourseId">
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="chapterTitle">Chapter Title *</label>
+                                <input type="text" id="chapterTitle" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="chapterOrder">Chapter Order *</label>
+                                <input type="number" id="chapterOrder" min="1" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="chapterDescription">Description</label>
+                            <textarea id="chapterDescription" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="chapterVideoUrl">Video URL (Mux/YouTube)</label>
+                                <input type="text" id="chapterVideoUrl" placeholder="mux.com/... or youtube.com/...">
+                            </div>
+                            <div class="form-group">
+                                <label for="chapterDuration">Duration</label>
+                                <input type="text" id="chapterDuration" placeholder="e.g., 15:30">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="chapterIsPremium"> Premium Content (Basic users cannot access)
+                            </label>
+                        </div>
+                        
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="resetChapterForm()">Clear</button>
+                            <button type="submit" class="cta-button">Save Chapter</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Student Details Modal -->
     <div id="studentModal" class="modal">
         <div class="modal-content">
@@ -174,496 +237,6 @@
 
     <div id="adminMessage" class="form-message" style="display: none;"></div>
 
-    <script>
-        // Supabase Configuration
-        const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        class AdminPanel {
-            constructor() {
-                this.currentUser = null;
-                this.courses = [];
-                this.students = [];
-                this.init();
-            }
-
-            async init() {
-                await this.checkAdminAuth();
-                this.setupEventListeners();
-                await this.loadDashboardData();
-            }
-
-            async checkAdminAuth() {
-                const { data: { session }, error } = await supabase.auth.getSession();
-                
-                if (session?.user) {
-                    this.currentUser = session.user;
-                    
-                    // Simple admin check - only specific emails
-                    const adminEmails = ['graphicyin@gmail.com'];
-                    if (!adminEmails.includes(this.currentUser.email.toLowerCase())) {
-                        this.redirectToLogin('Admin access required');
-                        return;
-                    }
-                    
-                    document.getElementById('adminEmail').textContent = this.currentUser.email;
-                    
-                } else {
-                    this.redirectToLogin('Please login to access admin panel');
-                }
-            }
-
-            redirectToLogin(message = '') {
-                if (message) {
-                    localStorage.setItem('adminLoginMessage', message);
-                }
-                window.location.href = 'admin-login.html';
-            }
-
-            setupEventListeners() {
-                document.getElementById('adminLogoutBtn').addEventListener('click', () => this.logout());
-                document.getElementById('courseForm').addEventListener('submit', (e) => this.handleCourseSubmit(e));
-            }
-
-            async loadDashboardData() {
-                await this.loadCourses();
-                await this.loadStudents();
-                this.updateStats();
-            }
-
-            async loadCourses() {
-                try {
-                    const { data, error } = await supabase
-                        .from('courses')
-                        .select('*')
-                        .order('created_at', { ascending: false });
-
-                    if (error) throw error;
-                    this.courses = data || [];
-                    this.renderCourses();
-                    
-                } catch (error) {
-                    console.error('Error loading courses:', error);
-                    this.showMessage('Error loading courses: ' + error.message, 'error');
-                }
-            }
-
-            async loadStudents() {
-                try {
-                    // Get all users from auth
-                    const { data: { users }, error } = await supabase.auth.admin.listUsers();
-                    if (error) throw error;
-
-                    // Get user profiles
-                    const { data: profiles, error: profileError } = await supabase
-                        .from('profiles')
-                        .select('*');
-
-                    if (profileError) throw profileError;
-
-                    // Combine data
-                    this.students = users.map(user => {
-                        const profile = profiles.find(p => p.id === user.id) || {};
-                        return {
-                            id: user.id,
-                            email: user.email,
-                            created_at: user.created_at,
-                            last_sign_in_at: user.last_sign_in_at,
-                            subscription_tier: profile.subscription_tier || 'free',
-                            profile_updated: profile.updated_at
-                        };
-                    });
-
-                    this.renderStudents();
-                    
-                } catch (error) {
-                    console.error('Error loading students:', error);
-                    this.showMessage('Error loading students: ' + error.message, 'error');
-                }
-            }
-
-            updateStats() {
-                document.getElementById('totalStudents').textContent = this.students.length;
-                document.getElementById('totalCourses').textContent = this.courses.length;
-                document.getElementById('activeCourses').textContent = this.courses.filter(c => c.is_active).length;
-            }
-
-            renderCourses() {
-                const container = document.getElementById('adminCoursesList');
-                if (!container) return;
-
-                if (this.courses.length === 0) {
-                    container.innerHTML = `
-                        <div class="placeholder-message">
-                            <p>No courses found. Click "Add New Course" to get started.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                container.innerHTML = this.courses.map(course => `
-                    <div class="course-item">
-                        <div class="course-header">
-                            <div class="course-info">
-                                <h3>${course.title}</h3>
-                                <div class="course-meta">
-                                    <span class="course-tier ${course.required_tier}">${course.required_tier.toUpperCase()}</span>
-                                    <span class="course-price">₹${course.price}</span>
-                                    <span class="course-status ${course.is_active ? 'active' : 'inactive'}">
-                                        ${course.is_active ? 'Active' : 'Inactive'}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="course-actions">
-                                <button class="btn-small" onclick="adminPanel.editCourse('${course.id}')">Edit</button>
-                                <button class="btn-small btn-secondary" onclick="adminPanel.toggleCourseStatus('${course.id}')">
-                                    ${course.is_active ? 'Deactivate' : 'Activate'}
-                                </button>
-                                <button class="btn-small btn-danger" onclick="adminPanel.deleteCourse('${course.id}')">Delete</button>
-                                <button class="btn-small" onclick="adminPanel.manageChapters('${course.id}')">Chapters</button>
-                            </div>
-                        </div>
-                        <div class="course-description">
-                            <p>${course.description}</p>
-                        </div>
-                        <div class="course-dates">
-                            <small>Created: ${new Date(course.created_at).toLocaleDateString()} | Updated: ${new Date(course.updated_at).toLocaleDateString()}</small>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            renderStudents() {
-                const container = document.getElementById('studentsList');
-                if (!container) return;
-
-                if (this.students.length === 0) {
-                    container.innerHTML = `
-                        <div class="placeholder-message">
-                            <p>No students found.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                container.innerHTML = this.students.map(student => {
-                    const signInDate = student.last_sign_in_at ? new Date(student.last_sign_in_at).toLocaleDateString() : 'Never';
-                    
-                    return `
-                        <div class="student-item">
-                            <div class="student-info">
-                                <h3>${student.email}</h3>
-                                <div class="student-meta">
-                                    <span class="tier-badge ${student.subscription_tier}">${student.subscription_tier.toUpperCase()}</span>
-                                    <span>Joined: ${new Date(student.created_at).toLocaleDateString()}</span>
-                                    <span>Last Login: ${signInDate}</span>
-                                </div>
-                            </div>
-                            <div class="student-actions">
-                                <select onchange="adminPanel.changeStudentTier('${student.id}', this.value)" class="tier-select">
-                                    <option value="free" ${student.subscription_tier === 'free' ? 'selected' : ''}>Free</option>
-                                    <option value="basic" ${student.subscription_tier === 'basic' ? 'selected' : ''}>Basic</option>
-                                    <option value="premium" ${student.subscription_tier === 'premium' ? 'selected' : ''}>Premium</option>
-                                </select>
-                                <button class="btn-small" onclick="adminPanel.viewStudentDetails('${student.id}')">Details</button>
-                                <button class="btn-small btn-danger" onclick="adminPanel.deleteStudent('${student.id}')">Delete</button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            async handleCourseSubmit(e) {
-                e.preventDefault();
-                
-                const courseId = document.getElementById('courseId').value;
-                const courseData = {
-                    title: document.getElementById('courseTitle').value,
-                    description: document.getElementById('courseDescription').value,
-                    required_tier: document.getElementById('courseTier').value,
-                    price: parseInt(document.getElementById('coursePrice').value),
-                    is_active: document.getElementById('courseActive').checked,
-                    updated_at: new Date().toISOString()
-                };
-
-                try {
-                    if (courseId) {
-                        // Update existing course
-                        const { error } = await supabase
-                            .from('courses')
-                            .update(courseData)
-                            .eq('id', courseId);
-
-                        if (error) throw error;
-                        this.showMessage('Course updated successfully!', 'success');
-                    } else {
-                        // Create new course
-                        const { error } = await supabase
-                            .from('courses')
-                            .insert([courseData]);
-
-                        if (error) throw error;
-                        this.showMessage('Course created successfully!', 'success');
-                    }
-
-                    await this.loadCourses();
-                    this.updateStats();
-                    closeCourseModal();
-                    
-                } catch (error) {
-                    console.error('Error saving course:', error);
-                    this.showMessage('Error saving course: ' + error.message, 'error');
-                }
-            }
-
-            editCourse(courseId) {
-                const course = this.courses.find(c => c.id === courseId);
-                if (!course) return;
-
-                document.getElementById('courseModalTitle').textContent = 'Edit Course';
-                document.getElementById('courseId').value = course.id;
-                document.getElementById('courseTitle').value = course.title;
-                document.getElementById('courseDescription').value = course.description;
-                document.getElementById('courseTier').value = course.required_tier;
-                document.getElementById('coursePrice').value = course.price;
-                document.getElementById('courseActive').checked = course.is_active;
-
-                openCourseModal();
-            }
-
-            async toggleCourseStatus(courseId) {
-                const course = this.courses.find(c => c.id === courseId);
-                if (!course) return;
-
-                try {
-                    const { error } = await supabase
-                        .from('courses')
-                        .update({ 
-                            is_active: !course.is_active,
-                            updated_at: new Date().toISOString()
-                        })
-                        .eq('id', courseId);
-
-                    if (error) throw error;
-
-                    await this.loadCourses();
-                    this.updateStats();
-                    this.showMessage(`Course ${!course.is_active ? 'activated' : 'deactivated'} successfully!`, 'success');
-                    
-                } catch (error) {
-                    console.error('Error toggling course status:', error);
-                    this.showMessage('Error updating course: ' + error.message, 'error');
-                }
-            }
-
-            async deleteCourse(courseId) {
-                if (!confirm('Are you sure you want to delete this course? This will also delete all chapters and downloads.')) {
-                    return;
-                }
-
-                try {
-                    const { error } = await supabase
-                        .from('courses')
-                        .delete()
-                        .eq('id', courseId);
-
-                    if (error) throw error;
-
-                    await this.loadCourses();
-                    this.updateStats();
-                    this.showMessage('Course deleted successfully!', 'success');
-                    
-                } catch (error) {
-                    console.error('Error deleting course:', error);
-                    this.showMessage('Error deleting course: ' + error.message, 'error');
-                }
-            }
-
-            async changeStudentTier(studentId, newTier) {
-                try {
-                    const { error } = await supabase
-                        .from('profiles')
-                        .update({ 
-                            subscription_tier: newTier,
-                            updated_at: new Date().toISOString()
-                        })
-                        .eq('id', studentId);
-
-                    if (error) throw error;
-
-                    // Reload students to reflect changes
-                    await this.loadStudents();
-                    this.showMessage(`Student tier updated to ${newTier}`, 'success');
-                    
-                } catch (error) {
-                    console.error('Error updating student tier:', error);
-                    this.showMessage('Error updating student tier: ' + error.message, 'error');
-                }
-            }
-
-            async deleteStudent(studentId) {
-                if (!confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
-                    return;
-                }
-
-                try {
-                    const { error } = await supabase.auth.admin.deleteUser(studentId);
-                    if (error) throw error;
-
-                    await this.loadStudents();
-                    this.updateStats();
-                    this.showMessage('Student deleted successfully!', 'success');
-                    
-                } catch (error) {
-                    console.error('Error deleting student:', error);
-                    this.showMessage('Error deleting student: ' + error.message, 'error');
-                }
-            }
-
-            viewStudentDetails(studentId) {
-                const student = this.students.find(s => s.id === studentId);
-                if (!student) return;
-
-                const details = document.getElementById('studentDetails');
-                details.innerHTML = `
-                    <div class="detail-row">
-                        <div class="detail-label">Email:</div>
-                        <div class="detail-value">${student.email}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">User ID:</div>
-                        <div class="detail-value">${student.id}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Subscription Tier:</div>
-                        <div class="detail-value">
-                            <span class="tier-badge ${student.subscription_tier}">${student.subscription_tier.toUpperCase()}</span>
-                        </div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Account Created:</div>
-                        <div class="detail-value">${new Date(student.created_at).toLocaleString()}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Last Sign In:</div>
-                        <div class="detail-value">${student.last_sign_in_at ? new Date(student.last_sign_in_at).toLocaleString() : 'Never'}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Profile Updated:</div>
-                        <div class="detail-value">${student.profile_updated ? new Date(student.profile_updated).toLocaleString() : 'Never'}</div>
-                    </div>
-                `;
-
-                document.getElementById('studentModal').classList.add('active');
-            }
-
-            searchStudents(query) {
-                const filteredStudents = this.students.filter(student => 
-                    student.email.toLowerCase().includes(query.toLowerCase())
-                );
-                
-                this.renderFilteredStudents(filteredStudents);
-            }
-
-            renderFilteredStudents(students) {
-                const container = document.getElementById('studentsList');
-                if (!container) return;
-
-                if (students.length === 0) {
-                    container.innerHTML = `
-                        <div class="placeholder-message">
-                            <p>No students found matching your search.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // Use same render logic as renderStudents but with filtered data
-                container.innerHTML = students.map(student => {
-                    const signInDate = student.last_sign_in_at ? new Date(student.last_sign_in_at).toLocaleDateString() : 'Never';
-                    
-                    return `
-                        <div class="student-item">
-                            <div class="student-info">
-                                <h3>${student.email}</h3>
-                                <div class="student-meta">
-                                    <span class="tier-badge ${student.subscription_tier}">${student.subscription_tier.toUpperCase()}</span>
-                                    <span>Joined: ${new Date(student.created_at).toLocaleDateString()}</span>
-                                    <span>Last Login: ${signInDate}</span>
-                                </div>
-                            </div>
-                            <div class="student-actions">
-                                <select onchange="adminPanel.changeStudentTier('${student.id}', this.value)" class="tier-select">
-                                    <option value="free" ${student.subscription_tier === 'free' ? 'selected' : ''}>Free</option>
-                                    <option value="basic" ${student.subscription_tier === 'basic' ? 'selected' : ''}>Basic</option>
-                                    <option value="premium" ${student.subscription_tier === 'premium' ? 'selected' : ''}>Premium</option>
-                                </select>
-                                <button class="btn-small" onclick="adminPanel.viewStudentDetails('${student.id}')">Details</button>
-                                <button class="btn-small btn-danger" onclick="adminPanel.deleteStudent('${student.id}')">Delete</button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            manageChapters(courseId) {
-                // Will implement chapter management next
-                alert('Chapter management will be implemented in the next phase!');
-                // window.location.href = `admin-chapters.html?course_id=${courseId}`;
-            }
-
-            async logout() {
-                try {
-                    const { error } = await supabase.auth.signOut();
-                    if (error) throw error;
-                    window.location.href = 'admin-login.html';
-                } catch (error) {
-                    console.error('Logout error:', error);
-                    this.showMessage('Logout failed: ' + error.message, 'error');
-                }
-            }
-
-            showMessage(message, type) {
-                const messageEl = document.getElementById('adminMessage');
-                messageEl.textContent = message;
-                messageEl.className = `form-message ${type}`;
-                messageEl.style.display = 'block';
-                
-                setTimeout(() => {
-                    messageEl.style.display = 'none';
-                }, 5000);
-            }
-        }
-
-        // Global functions
-        function showSection(sectionId) {
-            document.querySelectorAll('.admin-section').forEach(section => {
-                section.style.display = 'none';
-            });
-            document.getElementById(sectionId).style.display = 'block';
-        }
-
-        function openCourseModal() {
-            document.getElementById('courseModalTitle').textContent = 'Add New Course';
-            document.getElementById('courseForm').reset();
-            document.getElementById('courseId').value = '';
-            document.getElementById('courseModal').classList.add('active');
-        }
-
-        function closeCourseModal() {
-            document.getElementById('courseModal').classList.remove('active');
-        }
-
-        function closeStudentModal() {
-            document.getElementById('studentModal').classList.remove('active');
-        }
-
-        // Initialize admin panel
-        document.addEventListener('DOMContentLoaded', function() {
-            window.adminPanel = new AdminPanel();
-        });
-    </script>
+    <script src="js/admin.js"></script>
 </body>
 </html>
