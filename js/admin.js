@@ -4,8 +4,10 @@ class AdminPanel {
         this.currentUser = null;
         this.courses = [];
         this.students = [];
+        this.modules = [];
         this.filteredCourses = [];
         this.currentFilter = 'all';
+        this.currentCourseId = null;
         this.init();
     }
 
@@ -73,6 +75,9 @@ class AdminPanel {
 
         // Course form
         document.getElementById('courseForm').addEventListener('submit', (e) => this.handleCourseSubmit(e));
+
+        // Module form
+        document.getElementById('moduleForm').addEventListener('submit', (e) => this.handleModuleSubmit(e));
 
         // Mobile menu
         this.setupMobileMenu();
@@ -155,6 +160,15 @@ class AdminPanel {
                 document.getElementById('activeCourses').textContent = activeCourses;
             }
 
+            // Get total modules
+            const { data: modules, error: modulesError } = await supabase
+                .from('course_modules')
+                .select('id');
+            
+            if (!modulesError) {
+                document.getElementById('totalModules').textContent = modules.length;
+            }
+
         } catch (error) {
             console.error('Error loading stats:', error);
         }
@@ -188,6 +202,28 @@ class AdminPanel {
         } catch (error) {
             console.error('Error loading students:', error);
             this.students = [];
+        }
+    }
+
+    async loadModules(courseId) {
+        try {
+            this.showModulesLoading();
+            
+            const { data, error } = await supabase
+                .from('course_modules')
+                .select('*')
+                .eq('course_id', courseId)
+                .order('module_order', { ascending: true });
+
+            if (error) throw error;
+            
+            this.modules = data || [];
+            this.renderModules();
+            
+        } catch (error) {
+            console.error('Error loading modules:', error);
+            this.showMessage('Error loading modules: ' + error.message, 'error');
+            this.modules = [];
         }
     }
 
@@ -299,6 +335,95 @@ class AdminPanel {
         );
     }
 
+    // MODULES CRUD OPERATIONS
+    async handleModuleSubmit(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('moduleSubmitBtn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnLoading = submitBtn.querySelector('.btn-loading');
+        
+        // Show loading state
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'inline';
+        submitBtn.disabled = true;
+
+        const moduleId = document.getElementById('moduleId').value;
+        const courseId = document.getElementById('moduleCourseId').value;
+        const moduleData = {
+            course_id: courseId,
+            title: document.getElementById('moduleTitle').value,
+            description: document.getElementById('moduleDescription').value,
+            module_order: parseInt(document.getElementById('moduleOrder').value),
+            duration: document.getElementById('moduleDuration').value,
+            video_url: document.getElementById('moduleVideoUrl').value,
+            required_tier: document.getElementById('moduleTier').value,
+            is_premium: document.getElementById('moduleIsPremium').checked
+        };
+
+        try {
+            if (moduleId) {
+                // Update existing module
+                const { error } = await supabase
+                    .from('course_modules')
+                    .update(moduleData)
+                    .eq('id', moduleId);
+
+                if (error) throw error;
+                this.showMessage('✅ Module updated successfully!', 'success');
+            } else {
+                // Create new module
+                const { error } = await supabase
+                    .from('course_modules')
+                    .insert([moduleData]);
+
+                if (error) throw error;
+                this.showMessage('✅ Module created successfully!', 'success');
+            }
+
+            await this.loadModules(courseId);
+            await this.loadStats();
+            this.closeModuleModal();
+            
+        } catch (error) {
+            console.error('Error saving module:', error);
+            this.showMessage('❌ Error saving module: ' + error.message, 'error');
+        } finally {
+            // Reset button state
+            btnText.style.display = 'inline';
+            btnLoading.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    }
+
+    async deleteModule(moduleId) {
+        const module = this.modules.find(m => m.id === moduleId);
+        if (!module) return;
+
+        this.showConfirmModal(
+            'Delete Module',
+            `Are you sure you want to delete "${module.title}"? This action cannot be undone.`,
+            async () => {
+                try {
+                    const { error } = await supabase
+                        .from('course_modules')
+                        .delete()
+                        .eq('id', moduleId);
+
+                    if (error) throw error;
+
+                    await this.loadModules(this.currentCourseId);
+                    await this.loadStats();
+                    this.showMessage('✅ Module deleted successfully!', 'success');
+                    
+                } catch (error) {
+                    console.error('Error deleting module:', error);
+                    this.showMessage('❌ Error deleting module: ' + error.message, 'error');
+                }
+            }
+        );
+    }
+
     // COURSES RENDERING AND FILTERING
     renderCourses() {
         const container = document.getElementById('adminCoursesList');
@@ -314,8 +439,9 @@ class AdminPanel {
         }
 
         container.innerHTML = this.filteredCourses.map(course => {
-            const statusClass = course.is_active ? 'status-active' : 'status-inactive';
-            const statusText = course.is_active ? 'Active' : 'Inactive';
+            // FIXED: Only show status badge, not active/inactive
+            const statusClass = `status-${course.status}`;
+            const statusText = course.status.charAt(0).toUpperCase() + course.status.slice(1);
             
             return `
                 <div class="course-item ${!course.is_active ? 'inactive' : ''}">
@@ -326,20 +452,57 @@ class AdminPanel {
                                 <span class="course-tier">${course.required_tier.toUpperCase()} TIER</span>
                                 <span class="course-price">$${course.price}</span>
                                 <span class="course-status ${statusClass}">${statusText}</span>
-                                <span class="course-status status-${course.status}">${course.status}</span>
+                                ${!course.is_active ? '<span class="course-status status-inactive">INACTIVE</span>' : ''}
                             </div>
                         </div>
                         <div class="course-actions">
                             <button class="btn-small" onclick="adminPanel.openCourseModal('${course.id}')">Edit</button>
-                            <button class="btn-small ${course.is_active ? 'btn-danger' : ''}" 
+                            <button class="btn-small ${course.is_active ? 'btn-danger' : 'btn-success'}" 
                                     onclick="adminPanel.toggleCourseStatus('${course.id}')">
                                 ${course.is_active ? 'Deactivate' : 'Activate'}
                             </button>
+                            <button class="btn-small" onclick="adminPanel.viewModules('${course.id}')">Modules</button>
                             <button class="btn-small btn-danger" onclick="adminPanel.deleteCourse('${course.id}')">Delete</button>
                         </div>
                     </div>
                     <div class="course-description">
                         <p>${course.description}</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // MODULES RENDERING
+    renderModules() {
+        const container = document.getElementById('modulesListView');
+        if (!container) return;
+
+        if (this.modules.length === 0) {
+            container.innerHTML = `
+                <div class="placeholder-message">
+                    <p>No modules found. Click "Add Module" to get started.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = this.modules.map(module => {
+            return `
+                <div class="module-item">
+                    <div class="module-info">
+                        <h5>${module.title}</h5>
+                        <div class="module-meta">
+                            <span>Order: ${module.module_order}</span>
+                            <span>Duration: ${module.duration || 'N/A'}</span>
+                            <span>Tier: ${module.required_tier}</span>
+                            ${module.is_premium ? '<span class="course-tier">PREMIUM</span>' : ''}
+                        </div>
+                        <p style="color: #ccc; margin-top: 0.5rem; font-size: 0.9rem;">${module.description}</p>
+                    </div>
+                    <div class="module-actions">
+                        <button class="btn-small" onclick="adminPanel.openModuleModal('${this.currentCourseId}', '${module.id}')">Edit</button>
+                        <button class="btn-small btn-danger" onclick="adminPanel.deleteModule('${module.id}')">Delete</button>
                     </div>
                 </div>
             `;
@@ -463,6 +626,66 @@ class AdminPanel {
         document.getElementById('courseForm').reset();
     }
 
+    openModuleModal(courseId, moduleId = null) {
+        this.currentCourseId = courseId;
+        const modal = document.getElementById('moduleModal');
+        const title = document.getElementById('moduleModalTitle');
+        const form = document.getElementById('moduleForm');
+        
+        document.getElementById('moduleCourseId').value = courseId;
+        
+        if (moduleId) {
+            // Edit mode
+            const module = this.modules.find(m => m.id === moduleId);
+            if (module) {
+                title.textContent = 'Edit Module';
+                document.getElementById('moduleId').value = module.id;
+                document.getElementById('moduleTitle').value = module.title;
+                document.getElementById('moduleDescription').value = module.description;
+                document.getElementById('moduleOrder').value = module.module_order;
+                document.getElementById('moduleDuration').value = module.duration || '';
+                document.getElementById('moduleVideoUrl').value = module.video_url || '';
+                document.getElementById('moduleTier').value = module.required_tier;
+                document.getElementById('moduleIsPremium').checked = module.is_premium;
+            }
+        } else {
+            // Create mode
+            title.textContent = 'Add New Module';
+            form.reset();
+            document.getElementById('moduleId').value = '';
+            document.getElementById('moduleOrder').value = this.modules.length + 1;
+            document.getElementById('moduleTier').value = 'free';
+            document.getElementById('moduleIsPremium').checked = false;
+        }
+        
+        modal.classList.add('active');
+    }
+
+    closeModuleModal() {
+        document.getElementById('moduleModal').classList.remove('active');
+        document.getElementById('moduleForm').reset();
+    }
+
+    async viewModules(courseId) {
+        this.currentCourseId = courseId;
+        const course = this.courses.find(c => c.id === courseId);
+        
+        if (course) {
+            document.getElementById('modulesViewTitle').textContent = `Modules - ${course.title}`;
+            document.getElementById('modulesCourseTitle').textContent = course.title;
+            document.getElementById('modulesCourseDescription').textContent = course.description;
+            
+            await this.loadModules(courseId);
+            document.getElementById('modulesView').classList.add('active');
+        }
+    }
+
+    closeModulesView() {
+        document.getElementById('modulesView').classList.remove('active');
+        this.currentCourseId = null;
+        this.modules = [];
+    }
+
     showConfirmModal(title, message, confirmCallback) {
         document.getElementById('confirmModalTitle').textContent = title;
         document.getElementById('confirmModalMessage').textContent = message;
@@ -482,6 +705,13 @@ class AdminPanel {
         const container = document.getElementById(`admin${section.charAt(0).toUpperCase() + section.slice(1)}List`);
         if (container) {
             container.innerHTML = '<div class="loading-message">Loading...</div>';
+        }
+    }
+
+    showModulesLoading() {
+        const container = document.getElementById('modulesListView');
+        if (container) {
+            container.innerHTML = '<div class="loading-message">Loading modules...</div>';
         }
     }
 
@@ -512,7 +742,7 @@ class AdminPanel {
 
     // Student management methods (to be implemented)
     editStudent(studentId) {
-        this.showMessage('Student tier editing will be implemented in Phase 2', 'info');
+        this.showMessage('Student tier editing will be implemented in Phase 3', 'info');
     }
 }
 
