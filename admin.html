@@ -3,155 +3,329 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
+    <title>Admin Panel - Godot 3D MP LMS</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/lms.css">
+    <link rel="stylesheet" href="css/admin.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <nav class="bg-white shadow-lg">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-gray-800">Admin Panel</h1>
-                <div class="flex space-x-2" id="nav-tabs">
-                    <button class="nav-tab active" data-tab="profiles">Profiles</button>
-                    <button class="nav-tab" data-tab="courses">Courses</button>
-                    <button class="nav-tab" data-tab="chapters">Chapters</button>
-                    <button class="nav-tab" data-tab="content">Content</button>
+<body class="admin-page">
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">GODOT 3D MP - ADMIN</div>
+                
+                <!-- Desktop Navigation -->
+                <div class="nav-links">
+                    <a href="#dashboard">Dashboard</a>
+                    <a href="#courses">Courses</a>
+                    <a href="#students">Students</a>
+                </div>
+                
+                <!-- Admin User Menu -->
+                <div class="user-menu">
+                    <span id="adminEmail" class="user-email"></span>
+                    <button id="adminLogoutBtn" class="cta-button logout-btn">Logout</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Admin Dashboard -->
+    <section id="dashboard" class="admin-dashboard">
+        <div class="container">
+            <div class="admin-header">
+                <h1>Admin Dashboard</h1>
+                <p>Welcome to the Godot 3D MP LMS Admin Panel</p>
+            </div>
+
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <h3>Total Students</h3>
+                    <span id="totalStudents" class="stat-number">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Courses</h3>
+                    <span id="totalCourses" class="stat-number">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Admin Status</h3>
+                    <span class="stat-number">✅ Active</span>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="action-grid">
+                    <button class="action-btn" onclick="showSection('courses')">
+                        <span class="action-icon">📚</span>
+                        <span>Manage Courses</span>
+                    </button>
+                    <button class="action-btn" onclick="showSection('students')">
+                        <span class="action-icon">👥</span>
+                        <span>View Students</span>
+                    </button>
+                    <button class="action-btn" onclick="openCourseModal()">
+                        <span class="action-icon">➕</span>
+                        <span>Add New Course</span>
+                    </button>
                 </div>
             </div>
         </div>
-    </nav>
+    </section>
 
-    <div class="container mx-auto px-6 py-8">
-        <!-- Profiles Tab -->
-        <div id="profiles-tab" class="tab-content">
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="p-6 border-b">
-                    <h2 class="text-2xl font-bold">User Profiles</h2>
-                    <p class="text-gray-600">Manage user profiles</p>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subscription</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Updated</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="profiles-table-body">
-                            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Loading...</td></tr>
-                        </tbody>
-                    </table>
+    <!-- Courses Management -->
+    <section id="courses" class="admin-section" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <h2>Course Management</h2>
+                <button class="cta-button" onclick="openCourseModal()">+ Add New Course</button>
+            </div>
+
+            <div class="courses-list" id="adminCoursesList">
+                <div class="placeholder-message">
+                    <p>No courses yet. Click "Add New Course" to get started.</p>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Courses Tab -->
-        <div id="courses-tab" class="tab-content hidden">
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="p-6 border-b flex justify-between items-center">
-                    <div>
-                        <h2 class="text-2xl font-bold">Courses</h2>
-                        <p class="text-gray-600">Manage courses</p>
+    <!-- Students Management -->
+    <section id="students" class="admin-section" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <h2>Student Management</h2>
+            </div>
+
+            <div class="students-list" id="studentsList">
+                <div class="placeholder-message">
+                    <p>Student data will appear here once users start signing up.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Simple Course Modal -->
+    <div id="courseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Course</h3>
+                <button class="close-btn" onclick="closeCourseModal()">✕</button>
+            </div>
+            <form id="courseForm" class="modal-form">
+                <div class="form-group">
+                    <label for="courseTitle">Course Title</label>
+                    <input type="text" id="courseTitle" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="courseDescription">Description</label>
+                    <textarea id="courseDescription" rows="4" required></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="courseTier">Required Tier</label>
+                        <select id="courseTier" required>
+                            <option value="free">Free</option>
+                            <option value="basic">Basic</option>
+                            <option value="pro">Pro</option>
+                        </select>
                     </div>
-                    <button onclick="adminPanel.showCourseModal()" class="bg-blue-500 text-white px-4 py-2 rounded">Add Course</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="courses-table-body">
-                            <tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">No courses</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chapters Tab -->
-        <div id="chapters-tab" class="tab-content hidden">
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="p-6 border-b flex justify-between items-center">
-                    <div>
-                        <h2 class="text-2xl font-bold">Chapters</h2>
-                        <p class="text-gray-600">Manage chapters</p>
+                    
+                    <div class="form-group">
+                        <label for="coursePrice">Price ($)</label>
+                        <input type="number" id="coursePrice" step="0.01" min="0" required>
                     </div>
-                    <button onclick="adminPanel.showChapterModal()" class="bg-blue-500 text-white px-4 py-2 rounded">Add Chapter</button>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Course</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="chapters-table-body">
-                            <tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">No chapters</td></tr>
-                        </tbody>
-                    </table>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeCourseModal()">Cancel</button>
+                    <button type="submit" class="cta-button">Create Course</button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Content Tab -->
-        <div id="content-tab" class="tab-content hidden">
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="p-6 border-b flex justify-between items-center">
-                    <div>
-                        <h2 class="text-2xl font-bold">Content</h2>
-                        <p class="text-gray-600">Manage content</p>
-                    </div>
-                    <button onclick="adminPanel.showContentModal()" class="bg-blue-500 text-white px-4 py-2 rounded">Add Content</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Chapter</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="content-table-body">
-                            <tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">No content</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
-    <!-- Modals -->
-    <div id="course-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg w-96">
-            <h3 class="text-lg font-bold mb-4" id="course-modal-title">Add Course</h3>
-            <input type="text" id="course-title" placeholder="Course Title" class="w-full p-2 border rounded mb-2">
-            <textarea id="course-desc" placeholder="Description" class="w-full p-2 border rounded mb-2"></textarea>
-            <select id="course-status" class="w-full p-2 border rounded mb-4">
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-            </select>
-            <div class="flex justify-end space-x-2">
-                <button onclick="adminPanel.hideCourseModal()" class="px-4 py-2 bg-gray-500 text-white rounded">Cancel</button>
-                <button onclick="adminPanel.saveCourse()" class="px-4 py-2 bg-blue-500 text-white rounded">Save</button>
-            </div>
-        </div>
-    </div>
+    <div id="adminMessage" class="form-message" style="display: none;"></div>
 
-    <script src="admin.js"></script>
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
+        // Initialize Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        class AdminPanel {
+            constructor() {
+                this.currentUser = null;
+                this.init();
+            }
+
+            async init() {
+                await this.checkAdminAuth();
+                this.setupEventListeners();
+                this.loadDashboardData();
+            }
+
+            async checkAdminAuth() {
+                console.log('🔐 Checking admin auth...');
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (session?.user) {
+                    console.log('👤 User session found:', session.user.email);
+                    this.currentUser = session.user;
+                    
+                    const isAdmin = await this.checkAdminRole(session.user.id);
+                    console.log('🛡️ Admin check result:', isAdmin);
+                    
+                    if (!isAdmin) {
+                        console.log('❌ Access denied - not admin');
+                        this.redirectToLogin('Access denied. Admin privileges required.');
+                        return;
+                    }
+                    
+                    this.currentUser = session.user;
+                    document.getElementById('adminEmail').textContent = session.user.email;
+                    console.log('✅ Admin access granted');
+                    
+                } else {
+                    console.log('❌ No user session found');
+                    this.redirectToLogin('Please login to access admin panel.');
+                }
+            }
+
+            async checkAdminRole(userId) {
+                // Simple email-based admin check (same as login page)
+                const adminEmails = ['graphicyin@gmail.com'];
+                
+                if (!this.currentUser || !this.currentUser.email) {
+                    console.log('❌ No current user or email found');
+                    return false;
+                }
+                
+                const isAdmin = adminEmails.includes(this.currentUser.email.toLowerCase());
+                console.log('🛡️ Admin check for', this.currentUser.email, ':', isAdmin);
+                return isAdmin;
+            }
+
+            redirectToLogin(message = '') {
+                console.log('🔀 Redirecting to login:', message);
+                if (message) {
+                    localStorage.setItem('adminLoginMessage', message);
+                }
+                window.location.href = 'admin-login.html';
+            }
+
+            setupEventListeners() {
+                // Logout button
+                document.getElementById('adminLogoutBtn').addEventListener('click', () => this.logout());
+
+                // Course form
+                document.getElementById('courseForm').addEventListener('submit', (e) => this.handleCourseSubmit(e));
+            }
+
+            async loadDashboardData() {
+                await this.loadStats();
+            }
+
+            async loadStats() {
+                try {
+                    // Get total students
+                    const { data: users, error: usersError } = await supabase.auth.admin.listUsers();
+                    if (!usersError) {
+                        document.getElementById('totalStudents').textContent = users.users.length;
+                    }
+
+                    // Get total courses
+                    const { data: courses, error: coursesError } = await supabase
+                        .from('courses')
+                        .select('id');
+                    
+                    if (!coursesError) {
+                        document.getElementById('totalCourses').textContent = courses.length;
+                    }
+
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                }
+            }
+
+            async handleCourseSubmit(e) {
+                e.preventDefault();
+                
+                const courseData = {
+                    title: document.getElementById('courseTitle').value,
+                    description: document.getElementById('courseDescription').value,
+                    required_tier: document.getElementById('courseTier').value,
+                    price: parseFloat(document.getElementById('coursePrice').value),
+                    is_active: true
+                };
+
+                try {
+                    const { error } = await supabase
+                        .from('courses')
+                        .insert([courseData]);
+
+                    if (error) throw error;
+
+                    this.showMessage('Course created successfully!', 'success');
+                    this.closeCourseModal();
+                    this.loadDashboardData();
+                    
+                } catch (error) {
+                    console.error('Error creating course:', error);
+                    this.showMessage('Error creating course: ' + error.message, 'error');
+                }
+            }
+
+            async logout() {
+                try {
+                    const { error } = await supabase.auth.signOut();
+                    if (error) throw error;
+                    window.location.href = 'admin-login.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    this.showMessage('Logout failed: ' + error.message, 'error');
+                }
+            }
+
+            showMessage(message, type) {
+                const messageEl = document.getElementById('adminMessage');
+                messageEl.textContent = message;
+                messageEl.className = `form-message ${type}`;
+                messageEl.style.display = 'block';
+                
+                setTimeout(() => {
+                    messageEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Global functions for modals and navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.admin-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+        }
+
+        function openCourseModal() {
+            document.getElementById('courseModal').classList.add('active');
+        }
+
+        function closeCourseModal() {
+            document.getElementById('courseModal').classList.remove('active');
+            document.getElementById('courseForm').reset();
+        }
+
+        // Initialize admin panel
+        document.addEventListener('DOMContentLoaded', function() {
+            window.adminPanel = new AdminPanel();
+        });
+    </script>
 </body>
 </html>
+
