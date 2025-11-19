@@ -551,12 +551,13 @@
     color: #ccc;
 }
 
-/* Checkbox Styling */
+/* Checkbox Styling - FIXED */
 .checkbox-label {
     display: flex;
     align-items: center;
     cursor: pointer;
     gap: 0.5rem;
+    padding: 0.5rem 0;
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -564,14 +565,19 @@
 }
 
 .checkmark {
-    width: 40px;
+    width: 20px;
     height: 20px;
+    min-width: 20px;
+    min-height: 20px;
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 4px;
+    position: relative;
+    transition: all 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s;
+    flex-shrink: 0;
+    box-sizing: border-box;
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark {
@@ -582,8 +588,10 @@
 .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
     content: '✓';
     color: white;
-    font-size: 12px;
     font-weight: bold;
+    font-size: 14px;
+    line-height: 1;
+    display: block;
 }
 
 .modal-actions {
