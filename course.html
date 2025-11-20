@@ -183,409 +183,452 @@
         </div>
     </div>
 
-    <script>
-        // Mobile Menu Functionality
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
-        const body = document.body;
+  <script src="js/auth.js"></script>
+<script>
+    // Mobile Menu Functionality
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+    const body = document.body;
 
-        function openMobileMenu() {
-            mobileMenu.classList.add('active');
-            mobileMenuOverlay.classList.add('active');
-            body.classList.add('menu-open');
+    function openMobileMenu() {
+        mobileMenu.classList.add('active');
+        mobileMenuOverlay.classList.add('active');
+        body.classList.add('menu-open');
+    }
+
+    function closeMobileMenu() {
+        mobileMenu.classList.remove('active');
+        mobileMenuOverlay.classList.remove('active');
+        body.classList.remove('menu-open');
+    }
+
+    mobileMenuBtn.addEventListener('click', openMobileMenu);
+    mobileCloseBtn.addEventListener('click', closeMobileMenu);
+    mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+    // Close menu when clicking on links
+    const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
+    mobileLinks.forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+    });
+
+    class LMSManager {
+        constructor() {
+            this.currentUser = null;
+            this.userProfile = null;
+            this.courses = [];
+            this.userCourses = [];
+            this.currentCourse = null;
+            this.init();
         }
 
-        function closeMobileMenu() {
-            mobileMenu.classList.remove('active');
-            mobileMenuOverlay.classList.remove('active');
-            body.classList.remove('menu-open');
+        async init() {
+            await this.checkAuthState();
+            this.setupEventListeners();
         }
 
-        mobileMenuBtn.addEventListener('click', openMobileMenu);
-        mobileCloseBtn.addEventListener('click', closeMobileMenu);
-        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
-
-        // Close menu when clicking on links
-        const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', closeMobileMenu);
-        });
-
-        // Supabase Configuration
-        const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
-
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        class LMSManager {
-            constructor() {
-                this.currentUser = null;
-                this.userProfile = null;
-                this.courses = [];
-                this.userCourses = [];
-                this.currentCourse = null;
-                this.init();
+        async checkAuthState() {
+            // Use the authManager from auth.js
+            if (window.authManager && window.authManager.currentUser) {
+                this.currentUser = window.authManager.currentUser;
+                await this.handleAuthenticatedUser();
+            } else {
+                // Wait a bit for authManager to initialize
+                setTimeout(async () => {
+                    if (window.authManager && window.authManager.currentUser) {
+                        this.currentUser = window.authManager.currentUser;
+                        await this.handleAuthenticatedUser();
+                    } else {
+                        this.handleUnauthenticatedUser();
+                    }
+                }, 1000);
             }
+        }
 
-            async init() {
-                await this.checkAuthState();
-                this.setupEventListeners();
-            }
+        async handleAuthenticatedUser() {
+            const authRequired = document.getElementById('authRequired');
+            const dashboard = document.getElementById('dashboard');
+            const progressSection = document.getElementById('progress');
+            const userEmail = document.getElementById('userEmail');
+            const displayEmail = document.getElementById('displayEmail');
+            const displayUserId = document.getElementById('displayUserId');
+            const mobileUserEmail = document.getElementById('mobileUserEmail');
 
-            async checkAuthState() {
-                const { data: { session }, error } = await supabase.auth.getSession();
+            authRequired.style.display = 'none';
+            dashboard.style.display = 'block';
+            progressSection.style.display = 'block';
+            
+            userEmail.textContent = this.currentUser.email;
+            displayEmail.textContent = this.currentUser.email;
+            displayUserId.textContent = this.currentUser.id.substring(0, 8) + '...';
+            mobileUserEmail.textContent = this.currentUser.email;
+            
+            await this.loadUserData();
+            await this.loadCourses();
+            await this.loadUserCourses();
+            this.renderCourses();
+            this.updateProgress();
+        }
+
+        handleUnauthenticatedUser() {
+            const authRequired = document.getElementById('authRequired');
+            const dashboard = document.getElementById('dashboard');
+            const progressSection = document.getElementById('progress');
+
+            authRequired.style.display = 'block';
+            dashboard.style.display = 'none';
+            progressSection.style.display = 'none';
+        }
+
+        async loadUserData() {
+            if (!this.currentUser) return;
+
+            try {
+                // Use authManager's method to get user profile
+                const result = await authManager.getUserProfile(this.currentUser.id);
                 
-                const authRequired = document.getElementById('authRequired');
-                const dashboard = document.getElementById('dashboard');
-                const progressSection = document.getElementById('progress');
-                const userEmail = document.getElementById('userEmail');
-                const displayEmail = document.getElementById('displayEmail');
-                const displayUserId = document.getElementById('displayUserId');
-                const mobileUserEmail = document.getElementById('mobileUserEmail');
-
-                if (session && session.user) {
-                    this.currentUser = session.user;
-                    authRequired.style.display = 'none';
-                    dashboard.style.display = 'block';
-                    progressSection.style.display = 'block';
-                    
-                    userEmail.textContent = session.user.email;
-                    displayEmail.textContent = session.user.email;
-                    displayUserId.textContent = session.user.id.substring(0, 8) + '...';
-                    mobileUserEmail.textContent = session.user.email;
-                    
-                    await this.loadUserData();
-                    await this.loadCourses();
-                    await this.loadUserCourses();
-                    this.renderCourses();
-                    this.updateProgress();
-                    
+                if (result.success) {
+                    this.userProfile = result.data;
+                    this.updateTierUI();
                 } else {
-                    authRequired.style.display = 'block';
-                    dashboard.style.display = 'none';
-                    progressSection.style.display = 'none';
+                    console.error('Error loading user profile:', result.error);
+                    // Create profile if it doesn't exist
+                    await this.createUserProfile();
                 }
+                
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                // Create profile if it doesn't exist
+                await this.createUserProfile();
             }
+        }
 
-            async loadUserData() {
-                if (!this.currentUser) return;
-
-                try {
-                    const { data, error } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', this.currentUser.id)
-                        .single();
-
-                    if (error) throw error;
-                    this.userProfile = data;
-                    
-                    // Update UI with user tier - UPDATED: Default to 'basic' not 'free'
-                    document.getElementById('currentTier').textContent = this.userProfile.subscription_tier || 'basic';
-                    document.getElementById('displayTier').textContent = this.userProfile.subscription_tier || 'basic';
-                    document.getElementById('progressTier').textContent = this.userProfile.subscription_tier || 'basic';
-                    document.getElementById('userTier').textContent = this.userProfile.subscription_tier || 'basic';
-                    document.getElementById('mobileUserTier').textContent = this.userProfile.subscription_tier || 'basic';
-                    
-                } catch (error) {
-                    console.error('Error loading user profile:', error);
+        async createUserProfile() {
+            try {
+                const result = await authManager.createUserProfile(this.currentUser.id, this.currentUser.email);
+                if (result.success) {
+                    this.userProfile = result.data[0];
+                    this.updateTierUI();
                 }
+            } catch (error) {
+                console.error('Error creating user profile:', error);
+                // Set default tier even if profile creation fails
+                this.userProfile = { subscription_tier: 'basic' };
+                this.updateTierUI();
             }
+        }
 
-            async loadCourses() {
-                try {
-                    const { data, error } = await supabase
-                        .from('courses')
-                        .select('*')
-                        .eq('is_active', true)
-                        .order('created_at');
+        updateTierUI() {
+            const tier = this.userProfile?.subscription_tier || 'basic';
+            
+            // Update all tier displays
+            document.getElementById('currentTier').textContent = tier;
+            document.getElementById('displayTier').textContent = tier;
+            document.getElementById('progressTier').textContent = tier;
+            document.getElementById('userTier').textContent = tier;
+            document.getElementById('mobileUserTier').textContent = tier;
+        }
 
-                    if (error) throw error;
-                    this.courses = data || [];
-                } catch (error) {
-                    console.error('Error loading courses:', error);
-                    this.courses = [];
-                }
+        async loadCourses() {
+            try {
+                const { data, error } = await supabase
+                    .from('courses')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('created_at');
+
+                if (error) throw error;
+                this.courses = data || [];
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                this.courses = [];
             }
+        }
 
-            async loadUserCourses() {
-                if (!this.currentUser) return;
+        async loadUserCourses() {
+            if (!this.currentUser) return;
 
-                try {
-                    const { data, error } = await supabase
-                        .from('user_courses')
-                        .select('*')
-                        .eq('user_id', this.currentUser.id)
-                        .eq('payment_status', 'completed');
+            try {
+                const { data, error } = await supabase
+                    .from('user_courses')
+                    .select('*')
+                    .eq('user_id', this.currentUser.id)
+                    .eq('payment_status', 'completed');
 
-                    if (error) throw error;
-                    this.userCourses = data || [];
-                    
-                    document.getElementById('purchasedCount').textContent = this.userCourses.length;
-                    
-                } catch (error) {
-                    console.error('Error loading user courses:', error);
-                    this.userCourses = [];
-                }
+                if (error) throw error;
+                this.userCourses = data || [];
+                
+                document.getElementById('purchasedCount').textContent = this.userCourses.length;
+                
+            } catch (error) {
+                console.error('Error loading user courses:', error);
+                this.userCourses = [];
             }
+        }
 
-            setupEventListeners() {
-                document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
-                document.getElementById('mobileLogoutBtn').addEventListener('click', () => this.logout());
-            }
+        setupEventListeners() {
+            document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
+            document.getElementById('mobileLogoutBtn').addEventListener('click', () => this.logout());
+        }
 
-            renderCourses() {
-                const container = document.getElementById('coursesContainer');
-                if (!container) return;
+        renderCourses() {
+            const container = document.getElementById('coursesContainer');
+            if (!container) return;
 
-                container.innerHTML = this.courses.map(course => {
-                    const hasAccess = this.hasCourseAccess(course.id);
-                    const canPurchase = this.canPurchaseCourse(course);
+            container.innerHTML = this.courses.map(course => {
+                const hasAccess = this.hasCourseAccess(course.id);
+                const canPurchase = this.canPurchaseCourse(course);
+                
+                return `
+                    <div class="course-card ${hasAccess ? 'unlocked' : 'locked'}">
+                        ${hasAccess ? '<div class="access-badge">✅ Access Granted</div>' : ''}
+                        <h3>${course.title}</h3>
+                        <p>${course.description}</p>
+                        <div class="course-meta">
+                            <span class="course-tier">${course.required_tier.toUpperCase()} TIER</span>
+                            <span class="course-price">$${course.price}</span>
+                        </div>
+                        <div class="course-actions">
+                            ${hasAccess ? 
+                                `<button class="cta-button" onclick="lmsManager.viewCourse('${course.id}')">Access Course</button>` :
+                                (canPurchase ?
+                                    `<button class="cta-button purchase" onclick="lmsManager.purchaseCourse('${course.id}')">Purchase - $${course.price}</button>` :
+                                    `<button class="cta-button disabled" disabled>Upgrade Tier Required</button>`
+                                )
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        hasCourseAccess(courseId) {
+            const course = this.courses.find(c => c.id === courseId);
+            if (!course) return false;
+
+            // Check if user has purchased the course
+            const hasPurchased = this.userCourses.some(uc => uc.course_id === courseId);
+            
+            // Check if user's tier meets course requirement
+            const tierLevel = { 'basic': 1, 'premium': 2 };
+            const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 1;
+            const courseTierLevel = tierLevel[course.required_tier] || 1;
+            
+            return hasPurchased && userTierLevel >= courseTierLevel;
+        }
+
+        canPurchaseCourse(course) {
+            const tierLevel = { 'basic': 1, 'premium': 2 };
+            const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 1;
+            const courseTierLevel = tierLevel[course.required_tier] || 1;
+            
+            return userTierLevel >= courseTierLevel && !this.hasCourseAccess(course.id);
+        }
+
+        async viewCourse(courseId) {
+            this.currentCourse = this.courses.find(c => c.id === courseId);
+            if (!this.currentCourse) return;
+
+            document.getElementById('coursesView').style.display = 'none';
+            document.getElementById('courseDetailsView').style.display = 'block';
+
+            document.getElementById('courseDetailTitle').textContent = this.currentCourse.title;
+            document.getElementById('courseDetailDescription').textContent = this.currentCourse.description;
+            document.getElementById('courseDetailTier').textContent = this.currentCourse.required_tier.toUpperCase() + ' TIER';
+            document.getElementById('courseDetailPrice').textContent = '$' + this.currentCourse.price;
+
+            await this.loadCourseModules(courseId);
+            await this.loadCourseDownloads(courseId);
+        }
+
+        async loadCourseModules(courseId) {
+            try {
+                const { data, error } = await supabase
+                    .from('course_modules')
+                    .select('*')
+                    .eq('course_id', courseId)
+                    .order('module_order');
+
+                if (error) throw error;
+
+                const modulesList = document.getElementById('modulesList');
+                modulesList.innerHTML = (data || []).map(module => {
+                    const isLocked = module.is_premium && this.userProfile?.subscription_tier !== 'premium';
                     
                     return `
-                        <div class="course-card ${hasAccess ? 'unlocked' : 'locked'}">
-                            ${hasAccess ? '<div class="access-badge">✅ Access Granted</div>' : ''}
-                            <h3>${course.title}</h3>
-                            <p>${course.description}</p>
-                            <div class="course-meta">
-                                <span class="course-tier">${course.required_tier.toUpperCase()} TIER</span>
-                                <span class="course-price">$${course.price}</span>
+                        <div class="module-item ${isLocked ? 'locked' : ''}">
+                            <div class="module-header">
+                                <span class="module-number">${module.module_order.toString().padStart(2, '0')}</span>
+                                <span class="module-title">${module.title} ${isLocked ? '🔒' : ''}</span>
+                                <span class="module-duration">${module.duration}</span>
+                                <span class="module-status status-${isLocked ? 'locked' : 'unlocked'}">
+                                    ${isLocked ? 'PREMIUM CONTENT' : 'AVAILABLE'}
+                                </span>
                             </div>
-                            <div class="course-actions">
-                                ${hasAccess ? 
-                                    `<button class="cta-button" onclick="lmsManager.viewCourse('${course.id}')">Access Course</button>` :
-                                    (canPurchase ?
-                                        `<button class="cta-button purchase" onclick="lmsManager.purchaseCourse('${course.id}')">Purchase - $${course.price}</button>` :
-                                        `<button class="cta-button disabled" disabled>Upgrade Tier Required</button>`
+                            <div class="module-description">
+                                <p>${module.description}</p>
+                                ${isLocked ? 
+                                    '<div class="premium-lock-message">Upgrade to Premium to access this content</div>' : 
+                                    (module.video_url ? 
+                                        `<a href="${module.video_url}" target="_blank" class="video-link">Watch Video →</a>` : 
+                                        '<em>Content coming soon</em>'
                                     )
                                 }
                             </div>
                         </div>
                     `;
                 }).join('');
-            }
-
-            hasCourseAccess(courseId) {
-                const course = this.courses.find(c => c.id === courseId);
-                if (!course) return false;
-
-                // Check if user has purchased the course
-                const hasPurchased = this.userCourses.some(uc => uc.course_id === courseId);
                 
-                // Check if user's tier meets course requirement - UPDATED: 'free' to 'basic'
-                const tierLevel = { 'basic': 1, 'premium': 2 };
-                const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 1;
-                const courseTierLevel = tierLevel[course.required_tier] || 1;
-                
-                return hasPurchased && userTierLevel >= courseTierLevel;
+            } catch (error) {
+                console.error('Error loading modules:', error);
             }
+        }
 
-            canPurchaseCourse(course) {
-                // UPDATED: 'free' to 'basic'
-                const tierLevel = { 'basic': 1, 'premium': 2 };
-                const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 1;
-                const courseTierLevel = tierLevel[course.required_tier] || 1;
-                
-                return userTierLevel >= courseTierLevel && !this.hasCourseAccess(course.id);
-            }
+        async loadCourseDownloads(courseId) {
+            try {
+                const { data, error } = await supabase
+                    .from('course_downloads')
+                    .select('*')
+                    .eq('course_id', courseId)
+                    .order('created_at');
 
-            async viewCourse(courseId) {
-                this.currentCourse = this.courses.find(c => c.id === courseId);
-                if (!this.currentCourse) return;
+                if (error) throw error;
 
-                document.getElementById('coursesView').style.display = 'none';
-                document.getElementById('courseDetailsView').style.display = 'block';
-
-                document.getElementById('courseDetailTitle').textContent = this.currentCourse.title;
-                document.getElementById('courseDetailDescription').textContent = this.currentCourse.description;
-                document.getElementById('courseDetailTier').textContent = this.currentCourse.required_tier.toUpperCase() + ' TIER';
-                document.getElementById('courseDetailPrice').textContent = '$' + this.currentCourse.price;
-
-                await this.loadCourseModules(courseId);
-                await this.loadCourseDownloads(courseId);
-            }
-
-            async loadCourseModules(courseId) {
-                try {
-                    const { data, error } = await supabase
-                        .from('course_modules')
-                        .select('*')
-                        .eq('course_id', courseId)
-                        .order('module_order');
-
-                    if (error) throw error;
-
-                    const modulesList = document.getElementById('modulesList');
-                    modulesList.innerHTML = (data || []).map(module => {
-                        // UPDATED: 'free' to 'basic'
-                        const isLocked = module.is_premium && this.userProfile?.subscription_tier !== 'premium';
-                        
-                        return `
-                            <div class="module-item ${isLocked ? 'locked' : ''}">
-                                <div class="module-header">
-                                    <span class="module-number">${module.module_order.toString().padStart(2, '0')}</span>
-                                    <span class="module-title">${module.title} ${isLocked ? '🔒' : ''}</span>
-                                    <span class="module-duration">${module.duration}</span>
-                                    <span class="module-status status-${isLocked ? 'locked' : 'unlocked'}">
-                                        ${isLocked ? 'PREMIUM CONTENT' : 'AVAILABLE'}
-                                    </span>
-                                </div>
-                                <div class="module-description">
-                                    <p>${module.description}</p>
-                                    ${isLocked ? 
-                                        '<div class="premium-lock-message">Upgrade to Premium to access this content</div>' : 
-                                        (module.video_url ? 
-                                            `<a href="${module.video_url}" target="_blank" class="video-link">Watch Video →</a>` : 
-                                            '<em>Content coming soon</em>'
-                                        )
-                                    }
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
+                const downloadsList = document.getElementById('downloadsList');
+                downloadsList.innerHTML = (data || []).map(download => {
+                    const isLocked = download.is_premium && this.userProfile?.subscription_tier !== 'premium';
                     
-                } catch (error) {
-                    console.error('Error loading modules:', error);
-                }
-            }
-
-            async loadCourseDownloads(courseId) {
-                try {
-                    const { data, error } = await supabase
-                        .from('course_downloads')
-                        .select('*')
-                        .eq('course_id', courseId)
-                        .order('created_at');
-
-                    if (error) throw error;
-
-                    const downloadsList = document.getElementById('downloadsList');
-                    downloadsList.innerHTML = (data || []).map(download => {
-                        const isLocked = download.is_premium && this.userProfile?.subscription_tier !== 'premium';
-                        
-                        return `
-                            <div class="download-item ${isLocked ? 'locked' : ''}">
-                                <div class="download-info">
-                                    <h4>${download.title} ${isLocked ? '🔒' : ''}</h4>
-                                    <span class="file-size">${download.file_size}</span>
-                                </div>
+                    return `
+                        <div class="download-item ${isLocked ? 'locked' : ''}">
+                            <div class="download-info">
+                                <h4>${download.title} ${isLocked ? '🔒' : ''}</h4>
+                                <span class="file-size">${download.file_size}</span>
+                            </div>
                                 <div class="download-actions">
-                                    ${isLocked ? 
-                                        '<button class="btn-secondary" disabled>Premium Required</button>' :
-                                        `<a href="${download.file_url}" target="_blank" class="cta-button">Download</a>`
-                                    }
-                                </div>
                                 ${isLocked ? 
-                                    '<div class="premium-lock-message">Upgrade to Premium to download this resource</div>' : 
-                                    ''
+                                    '<button class="btn-secondary" disabled>Premium Required</button>' :
+                                    `<a href="${download.file_url}" target="_blank" class="cta-button">Download</a>`
                                 }
                             </div>
-                        `;
-                    }).join('');
-                    
-                } catch (error) {
-                    console.error('Error loading downloads:', error);
-                }
+                            ${isLocked ? 
+                                '<div class="premium-lock-message">Upgrade to Premium to download this resource</div>' : 
+                                ''
+                            }
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error loading downloads:', error);
             }
+        }
 
-            async purchaseCourse(courseId) {
-                const course = this.courses.find(c => c.id === courseId);
-                if (!course) return;
+        async purchaseCourse(courseId) {
+            const course = this.courses.find(c => c.id === courseId);
+            if (!course) return;
 
-                // For demo purposes - in production, integrate with payment gateway
-                try {
-                    const { data, error } = await supabase
-                        .from('user_courses')
-                        .insert([{
-                            user_id: this.currentUser.id,
-                            course_id: courseId,
-                            payment_status: 'completed',
-                            purchased_price: course.price
-                        }]);
+            // For demo purposes - in production, integrate with payment gateway
+            try {
+                const { data, error } = await supabase
+                    .from('user_courses')
+                    .insert([{
+                        user_id: this.currentUser.id,
+                        course_id: courseId,
+                        payment_status: 'completed',
+                        purchased_price: course.price
+                    }]);
 
-                    if (error) throw error;
+                if (error) throw error;
 
-                    // Update user tier if purchasing higher tier course - UPDATED: 'free' to 'basic'
-                    const tierLevel = { 'basic': 1, 'premium': 2 };
-                    const currentTierLevel = tierLevel[this.userProfile.subscription_tier] || 1;
-                    const courseTierLevel = tierLevel[course.required_tier] || 1;
+                // Update user tier if purchasing higher tier course
+                const tierLevel = { 'basic': 1, 'premium': 2 };
+                const currentTierLevel = tierLevel[this.userProfile.subscription_tier] || 1;
+                const courseTierLevel = tierLevel[course.required_tier] || 1;
+                
+                if (courseTierLevel > currentTierLevel) {
+                    await supabase
+                        .from('profiles')
+                        .update({ subscription_tier: course.required_tier })
+                        .eq('id', this.currentUser.id);
                     
-                    if (courseTierLevel > currentTierLevel) {
-                        await supabase
-                            .from('profiles')
-                            .update({ subscription_tier: course.required_tier })
-                            .eq('id', this.currentUser.id);
-                    }
-
-                    alert('🎉 Course purchased successfully! You now have access.');
+                    // Reload user data to get updated tier
                     await this.loadUserData();
-                    await this.loadUserCourses();
-                    this.renderCourses();
-                    
-                } catch (error) {
-                    console.error('Error purchasing course:', error);
-                    alert('❌ Purchase failed: ' + error.message);
                 }
-            }
 
-            async logout() {
-                try {
-                    const { error } = await supabase.auth.signOut();
-                    if (error) throw error;
+                alert('🎉 Course purchased successfully! You now have access.');
+                await this.loadUserCourses();
+                this.renderCourses();
+                
+            } catch (error) {
+                console.error('Error purchasing course:', error);
+                alert('❌ Purchase failed: ' + error.message);
+            }
+        }
+
+        async logout() {
+            try {
+                const result = await authManager.signOut();
+                if (result.success) {
                     window.location.href = 'login.html';
-                } catch (error) {
-                    console.error('Logout error:', error);
-                    alert('Logout failed: ' + error.message);
+                } else {
+                    alert('Logout failed: ' + result.error);
                 }
-            }
-
-            updateProgress() {
-                // Update progress circle based on completed modules
-                const progress = 25; // Demo value
-                const circle = document.getElementById('completionCircle');
-                const percent = document.getElementById('completionPercent');
-                
-                const circumference = 339.292;
-                const offset = circumference - (progress / 100) * circumference;
-                
-                circle.style.strokeDashoffset = offset;
-                percent.textContent = progress + '%';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Logout failed: ' + error.message);
             }
         }
 
-        // Global functions
-        function backToCourses() {
-            document.getElementById('coursesView').style.display = 'block';
-            document.getElementById('courseDetailsView').style.display = 'none';
+        updateProgress() {
+            // Update progress circle based on completed modules
+            const progress = 25; // Demo value
+            const circle = document.getElementById('completionCircle');
+            const percent = document.getElementById('completionPercent');
+            
+            const circumference = 339.292;
+            const offset = circumference - (progress / 100) * circumference;
+            
+            circle.style.strokeDashoffset = offset;
+            percent.textContent = progress + '%';
         }
+    }
 
-        function upgradeToTier(tier) {
-            alert(`In production, this would redirect to payment page for ${tier} tier upgrade.`);
-            // Integration with payment gateway would go here
-        }
+    // Global functions
+    function backToCourses() {
+        document.getElementById('coursesView').style.display = 'block';
+        document.getElementById('courseDetailsView').style.display = 'none';
+    }
 
-        function closePurchaseModal() {
-            document.getElementById('purchaseModal').classList.remove('active');
-        }
+    function upgradeToTier(tier) {
+        alert(`In production, this would redirect to payment page for ${tier} tier upgrade.`);
+        // Integration with payment gateway would go here
+    }
 
-        function processPayment(method) {
-            alert(`In production, this would process ${method} payment.`);
-            closePurchaseModal();
-        }
+    function closePurchaseModal() {
+        document.getElementById('purchaseModal').classList.remove('active');
+    }
 
-        // Initialize LMS Manager
-        document.addEventListener('DOMContentLoaded', function() {
-            window.lmsManager = new LMSManager();
-        });
+    function processPayment(method) {
+        alert(`In production, this would process ${method} payment.`);
+        closePurchaseModal();
+    }
 
-        // Auth state listener
+    // Initialize LMS Manager
+    document.addEventListener('DOMContentLoaded', function() {
+        window.lmsManager = new LMSManager();
+    });
+
+    // Auth state listener - use the existing authManager from auth.js
+    if (window.authManager) {
+        // Listen for auth state changes from the auth manager
         supabase.auth.onAuthStateChange((event, session) => {
             if (window.lmsManager) {
                 window.lmsManager.checkAuthState();
             }
         });
-    </script>
+    }
+</script>
 </body>
 </html>
