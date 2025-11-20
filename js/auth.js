@@ -114,14 +114,30 @@ class AuthManager {
                     {
                         id: userId,
                         email: email,
-                        subscription_tier: 'basic', // Changed from 'free' to 'basic'
+                        subscription_tier: 'basic',
                         created_at: new Date().toISOString(),
                         updated_at: new Date().toISOString()
                     }
-                ]);
+                ])
+                .select(); // Add .select() to return the created data
 
-            if (error) throw error;
-            return { success: true, data };
+            if (error) {
+                // If profile already exists, try to fetch it instead
+                if (error.code === '23505') { // Unique violation
+                    console.log('Profile already exists, fetching existing profile...');
+                    const { data: existingData, error: fetchError } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', userId)
+                        .single();
+                
+                    if (fetchError) throw fetchError;
+                    return { success: true, data: existingData };
+                }
+                throw error;
+            }
+        
+            return { success: true, data: data[0] };
         } catch (error) {
             console.error('Error creating user profile:', error);
             return { success: false, error: error.message };
