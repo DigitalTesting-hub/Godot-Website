@@ -94,52 +94,8 @@ class AuthManager {
             });
 
             if (error) throw error;
-
-            // Create user profile with basic tier (changed from 'free' to 'basic')
-            if (data.user) {
-                await this.createUserProfile(data.user.id, email);
-            }
-
             return { success: true, data };
         } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
-    async createUserProfile(userId, email) {
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .insert([
-                    {
-                        id: userId,
-                        email: email,
-                        subscription_tier: 'basic',
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    }
-                ])
-                .select(); // Add .select() to return the created data
-
-            if (error) {
-                // If profile already exists, try to fetch it instead
-                if (error.code === '23505') { // Unique violation
-                    console.log('Profile already exists, fetching existing profile...');
-                    const { data: existingData, error: fetchError } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', userId)
-                        .single();
-                
-                    if (fetchError) throw fetchError;
-                    return { success: true, data: existingData };
-                }
-                throw error;
-            }
-        
-            return { success: true, data: data[0] };
-        } catch (error) {
-            console.error('Error creating user profile:', error);
             return { success: false, error: error.message };
         }
     }
@@ -216,57 +172,6 @@ class AuthManager {
         
         console.log("No access token found in URL");
         return "";
-    }
-
-    // Add these methods to AuthManager class
-    async getUserProfile(userId) {
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', userId)
-                .single();
-
-            if (error) throw error;
-            return { success: true, data };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
-    async getUserCourses(userId) {
-        try {
-            const { data, error } = await supabase
-                .from('user_courses')
-                .select(`
-                    *,
-                    courses (*)
-                `)
-                .eq('user_id', userId)
-                .eq('payment_status', 'completed');
-
-            if (error) throw error;
-            return { success: true, data };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
-    async getUserProgress(userId) {
-        try {
-            const { data, error } = await supabase
-                .from('user_progress')
-                .select(`
-                    *,
-                    course_modules (*)
-                `)
-                .eq('user_id', userId);
-
-            if (error) throw error;
-            return { success: true, data };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
     }
 }
 
@@ -620,4 +525,54 @@ if (window.location.pathname.includes('course.html')) {
             }
         });
     });
+}
+// Add these methods to AuthManager class
+async getUserProfile(userId) {
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async getUserCourses(userId) {
+    try {
+        const { data, error } = await supabase
+            .from('user_courses')
+            .select(`
+                *,
+                courses (*)
+            `)
+            .eq('user_id', userId)
+            .eq('payment_status', 'completed');
+
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async getUserProgress(userId) {
+    try {
+        const { data, error } = await supabase
+            .from('user_progress')
+            .select(`
+                *,
+                course_modules (*)
+            `)
+            .eq('user_id', userId);
+
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
 }
