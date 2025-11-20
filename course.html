@@ -153,35 +153,13 @@
                             <span id="progressTier" class="tier-value">Basic</span>
                         </div>
                         <div class="upgrade-options">
-                            <button class="upgrade-btn premium" onclick="upgradeToTier('premium')">Upgrade to Premium - $100</button>
+                            <!-- Upgrade options will be dynamically loaded -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-
-    <!-- Purchase Modal -->
-    <div id="purchaseModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Purchase Course</h3>
-                <button class="close-btn" onclick="closePurchaseModal()">✕</button>
-            </div>
-            <div class="modal-body">
-                <p>You are purchasing: <strong id="purchaseCourseTitle"></strong></p>
-                <p>Price: <strong id="purchaseCoursePrice"></strong></p>
-                <p>Your tier will be upgraded to: <strong id="purchaseTierUpgrade"></strong></p>
-                
-                <div class="payment-options">
-                    <h4>Select Payment Method:</h4>
-                    <button class="payment-btn stripe" onclick="processPayment('stripe')">Pay with Stripe</button>
-                    <button class="payment-btn paypal" onclick="processPayment('paypal')">Pay with PayPal</button>
-                    <button class="payment-btn manual" onclick="processPayment('manual')">Manual Payment</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script>
         // Mobile Menu Functionality
@@ -261,6 +239,7 @@
                     await this.loadUserCourses();
                     this.renderCourses();
                     this.updateProgress();
+                    this.renderUpgradeOptions();
                     
                 } else {
                     authRequired.style.display = 'block';
@@ -273,25 +252,86 @@
                 if (!this.currentUser) return;
 
                 try {
-                    const { data, error } = await supabase
+                    // First try to get profile by user ID
+                    let { data, error } = await supabase
                         .from('profiles')
                         .select('*')
                         .eq('id', this.currentUser.id)
                         .single();
 
-                    if (error) throw error;
+                    // If no profile found by ID, try by email
+                    if (error || !data) {
+                        console.log('No profile found by ID, trying by email...');
+                        ({ data, error } = await supabase
+                            .from('profiles')
+                            .select('*')
+                            .eq('email', this.currentUser.email)
+                            .single());
+                    }
+
+                    // If still no profile found, create one
+                    if (error || !data) {
+                        console.log('No profile found, creating new profile...');
+                        await this.createUserProfile();
+                        return;
+                    }
+
                     this.userProfile = data;
                     
-                    // Update UI with user tier - UPDATED: Default to 'basic' not 'free'
-                    document.getElementById('currentTier').textContent = this.userProfile.subscription_tier || 'basic';
-                    document.getElementById('displayTier').textContent = this.userProfile.subscription_tier || 'basic';
-                    document.getElementById('progressTier').textContent = this.userProfile.subscription_tier || 'basic';
-                    document.getElementById('userTier').textContent = this.userProfile.subscription_tier || 'basic';
-                    document.getElementById('mobileUserTier').textContent = this.userProfile.subscription_tier || 'basic';
+                    // Update UI with user tier
+                    const userTier = this.userProfile.subscription_tier?.trim();
+                    const displayTier = userTier && userTier !== '' ? userTier : 'basic';
+                    
+                    document.getElementById('currentTier').textContent = displayTier;
+                    document.getElementById('displayTier').textContent = displayTier;
+                    document.getElementById('progressTier').textContent = displayTier;
+                    document.getElementById('userTier').textContent = displayTier;
+                    document.getElementById('mobileUserTier').textContent = displayTier;
                     
                 } catch (error) {
                     console.error('Error loading user profile:', error);
+                    // Create profile if there's an error
+                    await this.createUserProfile();
                 }
+            }
+
+            async createUserProfile() {
+                try {
+                    const { data, error } = await supabase
+                        .from('profiles')
+                        .insert([{
+                            id: this.currentUser.id,
+                            email: this.currentUser.email,
+                            subscription_tier: 'basic',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        }])
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    
+                    this.userProfile = data;
+                    this.setDefaultTier();
+                    console.log('New profile created with basic tier');
+                    
+                } catch (error) {
+                    console.error('Error creating user profile:', error);
+                    this.setDefaultTier();
+                }
+            }
+
+            setDefaultTier() {
+                const defaultTier = 'basic';
+                document.getElementById('currentTier').textContent = defaultTier;
+                document.getElementById('displayTier').textContent = defaultTier;
+                document.getElementById('progressTier').textContent = defaultTier;
+                document.getElementById('userTier').textContent = defaultTier;
+                document.getElementById('mobileUserTier').textContent = defaultTier;
+                
+                // Also set it in the userProfile object
+                this.userProfile = this.userProfile || {};
+                this.userProfile.subscription_tier = defaultTier;
             }
 
             async loadCourses() {
@@ -342,7 +382,7 @@
 
                 container.innerHTML = this.courses.map(course => {
                     const hasAccess = this.hasCourseAccess(course.id);
-                    const canPurchase = this.canPurchaseCourse(course);
+                    const canUpgrade = this.canUpgradeToCourse(course);
                     
                     return `
                         <div class="course-card ${hasAccess ? 'unlocked' : 'locked'}">
@@ -351,14 +391,14 @@
                             <p>${course.description}</p>
                             <div class="course-meta">
                                 <span class="course-tier">${course.required_tier.toUpperCase()} TIER</span>
-                                <span class="course-price">$${course.price}</span>
+                                <span class="course-price">${course.required_tier === 'basic' ? 'FREE' : 'PREMIUM'}</span>
                             </div>
                             <div class="course-actions">
                                 ${hasAccess ? 
                                     `<button class="cta-button" onclick="lmsManager.viewCourse('${course.id}')">Access Course</button>` :
-                                    (canPurchase ?
-                                        `<button class="cta-button purchase" onclick="lmsManager.purchaseCourse('${course.id}')">Purchase - $${course.price}</button>` :
-                                        `<button class="cta-button disabled" disabled>Upgrade Tier Required</button>`
+                                    (canUpgrade ?
+                                        `<button class="cta-button upgrade" onclick="lmsManager.upgradeToCourse('${course.id}')">Upgrade to ${course.required_tier.toUpperCase()}</button>` :
+                                        `<button class="cta-button disabled" disabled>Already at Highest Tier</button>`
                                     )
                                 }
                             </div>
@@ -371,24 +411,21 @@
                 const course = this.courses.find(c => c.id === courseId);
                 if (!course) return false;
 
-                // Check if user has purchased the course
-                const hasPurchased = this.userCourses.some(uc => uc.course_id === courseId);
-                
-                // Check if user's tier meets course requirement - UPDATED: 'free' to 'basic'
+                // Check if user's tier meets course requirement
                 const tierLevel = { 'basic': 1, 'premium': 2 };
                 const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 1;
                 const courseTierLevel = tierLevel[course.required_tier] || 1;
                 
-                return hasPurchased && userTierLevel >= courseTierLevel;
+                return userTierLevel >= courseTierLevel;
             }
 
-            canPurchaseCourse(course) {
-                // UPDATED: 'free' to 'basic'
+            canUpgradeToCourse(course) {
                 const tierLevel = { 'basic': 1, 'premium': 2 };
                 const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 1;
                 const courseTierLevel = tierLevel[course.required_tier] || 1;
                 
-                return userTierLevel >= courseTierLevel && !this.hasCourseAccess(course.id);
+                // User can upgrade if course requires higher tier than current
+                return courseTierLevel > userTierLevel;
             }
 
             async viewCourse(courseId) {
@@ -401,7 +438,7 @@
                 document.getElementById('courseDetailTitle').textContent = this.currentCourse.title;
                 document.getElementById('courseDetailDescription').textContent = this.currentCourse.description;
                 document.getElementById('courseDetailTier').textContent = this.currentCourse.required_tier.toUpperCase() + ' TIER';
-                document.getElementById('courseDetailPrice').textContent = '$' + this.currentCourse.price;
+                document.getElementById('courseDetailPrice').textContent = this.currentCourse.required_tier === 'basic' ? 'FREE' : 'PREMIUM';
 
                 await this.loadCourseModules(courseId);
                 await this.loadCourseDownloads(courseId);
@@ -419,7 +456,6 @@
 
                     const modulesList = document.getElementById('modulesList');
                     modulesList.innerHTML = (data || []).map(module => {
-                        // UPDATED: 'free' to 'basic'
                         const isLocked = module.is_premium && this.userProfile?.subscription_tier !== 'premium';
                         
                         return `
@@ -490,44 +526,49 @@
                 }
             }
 
-            async purchaseCourse(courseId) {
+            upgradeToCourse(courseId) {
                 const course = this.courses.find(c => c.id === courseId);
                 if (!course) return;
 
-                // For demo purposes - in production, integrate with payment gateway
-                try {
-                    const { data, error } = await supabase
-                        .from('user_courses')
-                        .insert([{
-                            user_id: this.currentUser.id,
-                            course_id: courseId,
-                            payment_status: 'completed',
-                            purchased_price: course.price
-                        }]);
+                // Send WhatsApp message for upgrade
+                const phoneNumber = '7504704502';
+                const message = `Hello! I'm interested in upgrading to the ${course.required_tier.toUpperCase()} tier for the course: "${course.title}". My email: ${this.currentUser.email}`;
+                
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+                
+                alert(`📱 Opening WhatsApp to request ${course.required_tier.toUpperCase()} tier upgrade for "${course.title}"`);
+            }
 
-                    if (error) throw error;
+            renderUpgradeOptions() {
+                const upgradeContainer = document.querySelector('.upgrade-options');
+                if (!upgradeContainer) return;
 
-                    // Update user tier if purchasing higher tier course - UPDATED: 'free' to 'basic'
-                    const tierLevel = { 'basic': 1, 'premium': 2 };
-                    const currentTierLevel = tierLevel[this.userProfile.subscription_tier] || 1;
-                    const courseTierLevel = tierLevel[course.required_tier] || 1;
-                    
-                    if (courseTierLevel > currentTierLevel) {
-                        await supabase
-                            .from('profiles')
-                            .update({ subscription_tier: course.required_tier })
-                            .eq('id', this.currentUser.id);
-                    }
-
-                    alert('🎉 Course purchased successfully! You now have access.');
-                    await this.loadUserData();
-                    await this.loadUserCourses();
-                    this.renderCourses();
-                    
-                } catch (error) {
-                    console.error('Error purchasing course:', error);
-                    alert('❌ Purchase failed: ' + error.message);
+                const userTier = this.userProfile?.subscription_tier || 'basic';
+                
+                if (userTier === 'basic') {
+                    upgradeContainer.innerHTML = `
+                        <button class="upgrade-btn premium" onclick="lmsManager.requestUpgrade('premium')">
+                            Upgrade to Premium - Contact via WhatsApp
+                        </button>
+                    `;
+                } else if (userTier === 'premium') {
+                    upgradeContainer.innerHTML = `
+                        <div class="max-tier-message">
+                            ✅ You are already at the highest tier (Premium)
+                        </div>
+                    `;
                 }
+            }
+
+            requestUpgrade(tier) {
+                const phoneNumber = '7504704502';
+                const message = `Hello! I'd like to upgrade to ${tier.toUpperCase()} tier. My email: ${this.currentUser.email}`;
+                
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+                
+                alert(`📱 Opening WhatsApp to request ${tier.toUpperCase()} tier upgrade`);
             }
 
             async logout() {
@@ -559,20 +600,6 @@
         function backToCourses() {
             document.getElementById('coursesView').style.display = 'block';
             document.getElementById('courseDetailsView').style.display = 'none';
-        }
-
-        function upgradeToTier(tier) {
-            alert(`In production, this would redirect to payment page for ${tier} tier upgrade.`);
-            // Integration with payment gateway would go here
-        }
-
-        function closePurchaseModal() {
-            document.getElementById('purchaseModal').classList.remove('active');
-        }
-
-        function processPayment(method) {
-            alert(`In production, this would process ${method} payment.`);
-            closePurchaseModal();
         }
 
         // Initialize LMS Manager
