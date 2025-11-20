@@ -196,7 +196,22 @@
     margin-bottom: 1.5rem;
     gap: 1rem;
 }
+.tier-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
 
+.tier-badge.basic {
+    background: var(--primary);
+    color: white;
+}
+
+.tier-badge.premium {
+    background: var(--accent);
+    color: var(--dark);
+}
 .course-info h3 {
     color: var(--accent);
     margin-bottom: 0.5rem;
