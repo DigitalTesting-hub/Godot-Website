@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/lms.css">
     <style>
-        /* Additional styles for the free course page */
         .free-course-page {
             padding: 120px 0 50px;
             background: var(--dark);
@@ -21,37 +20,18 @@
             text-align: center;
             margin-bottom: 3rem;
             border: 2px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .youtube-banner::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" opacity="0.1"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>');
-            background-size: 100px;
-            background-repeat: no-repeat;
-            background-position: right 20px center;
         }
         
         .youtube-banner h1 {
             color: white;
             font-size: 2.5rem;
             margin-bottom: 1rem;
-            position: relative;
-            z-index: 1;
         }
         
         .youtube-banner p {
             color: rgba(255, 255, 255, 0.9);
             font-size: 1.2rem;
             margin-bottom: 2rem;
-            position: relative;
-            z-index: 1;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
@@ -68,8 +48,6 @@
             align-items: center;
             gap: 0.5rem;
             transition: all 0.3s;
-            position: relative;
-            z-index: 1;
         }
         
         .youtube-subscribe-btn:hover {
@@ -81,84 +59,57 @@
             margin-top: 3rem;
         }
         
-        .videos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
+        .simple-links-container {
+            max-width: 800px;
+            margin: 0 auto;
         }
         
-        .video-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        
-        .video-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-        }
-        
-        .video-thumbnail {
-            position: relative;
-            width: 100%;
-            height: 180px;
-            overflow: hidden;
-        }
-        
-        .video-thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-        
-        .video-card:hover .video-thumbnail img {
-            transform: scale(1.05);
-        }
-        
-        .play-icon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 0, 0, 0.8);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+        .simple-video-link {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: white;
-            opacity: 0;
-            transition: opacity 0.3s;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--light);
+            transition: all 0.3s;
+            margin-bottom: 1rem;
         }
         
-        .video-card:hover .play-icon {
-            opacity: 1;
+        .simple-video-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            transform: translateX(10px);
         }
         
-        .video-info {
-            padding: 1rem;
+        .link-icon {
+            font-size: 1.5rem;
+            width: 50px;
             text-align: center;
         }
         
-        .video-info h3 {
-            color: var(--accent);
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-            line-height: 1.3;
+        .link-text {
+            flex: 1;
         }
         
-        .video-info p {
+        .link-text strong {
+            display: block;
+            color: var(--accent);
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .link-text small {
             color: #ccc;
-            font-size: 0.85rem;
-            line-height: 1.4;
+            font-size: 0.9rem;
+        }
+        
+        .link-arrow {
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: bold;
         }
         
         .back-to-courses {
@@ -175,15 +126,13 @@
                 font-size: 1rem;
             }
             
-            .videos-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                gap: 1.5rem;
+            .simple-video-link {
+                padding: 1rem;
             }
-        }
-
-        @media (max-width: 480px) {
-            .videos-grid {
-                grid-template-columns: 1fr;
+            
+            .link-icon {
+                font-size: 1.2rem;
+                width: 40px;
             }
         }
     </style>
@@ -248,87 +197,75 @@
             <div class="youtube-banner">
                 <h1>Free Godot Tutorials</h1>
                 <p>Learn Godot 4 and 3D multiplayer development with our free YouTube tutorials. New content added regularly!</p>
-                <a href="https://yt.openinapp.co/i5co2" target="_blank" class="youtube-subscribe-btn">
+                <a href="https://www.youtube.com/@graphicyin" target="_blank" class="youtube-subscribe-btn">
                     <span>📺</span> Subscribe to Our Channel
                 </a>
             </div>
             
-            <!-- Videos Section -->
+            <!-- Simple Links Section -->
             <div class="videos-section">
                 <h2 class="section-title">Latest Tutorials</h2>
                 
-                <div class="videos-grid" id="videosContainer">
-                    <!-- Video 1 -->
-                    <div class="video-card" onclick="openYouTubeVideo('dQw4w9WgXcQ')">
-                        <div class="video-thumbnail">
-                            <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Godot 4 3D Multiplayer Setup">
-                            <div class="play-icon">▶</div>
-                        </div>
-                        <div class="video-info">
-                            <h3>Godot 4 3D Multiplayer Setup</h3>
-                            <p>Complete guide to multiplayer setup</p>
-                        </div>
-                    </div>
+                <div class="simple-links-container">
+                    <!-- Video Link 1 -->
+                    <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID_1" target="_blank" class="simple-video-link">
+                        <span class="link-icon">🎬</span>
+                        <span class="link-text">
+                            <strong>Godot 4 3D Multiplayer Setup</strong>
+                            <small>Complete guide to multiplayer setup</small>
+                        </span>
+                        <span class="link-arrow">→</span>
+                    </a>
                     
-                    <!-- Video 2 -->
-                    <div class="video-card" onclick="openYouTubeVideo('dQw4w9WgXcQ')">
-                        <div class="video-thumbnail">
-                            <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Character Controller in Godot 4">
-                            <div class="play-icon">▶</div>
-                        </div>
-                        <div class="video-info">
-                            <h3>Character Controller</h3>
-                            <p>Advanced 3D character movement</p>
-                        </div>
-                    </div>
+                    <!-- Video Link 2 -->
+                    <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID_2" target="_blank" class="simple-video-link">
+                        <span class="link-icon">🎮</span>
+                        <span class="link-text">
+                            <strong>Character Controller</strong>
+                            <small>Advanced 3D character movement</small>
+                        </span>
+                        <span class="link-arrow">→</span>
+                    </a>
                     
-                    <!-- Video 3 -->
-                    <div class="video-card" onclick="openYouTubeVideo('dQw4w9WgXcQ')">
-                        <div class="video-thumbnail">
-                            <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Battle Royale Game Mechanics">
-                            <div class="play-icon">▶</div>
-                        </div>
-                        <div class="video-info">
-                            <h3>Battle Royale Mechanics</h3>
-                            <p>Shrinking zones and minimaps</p>
-                        </div>
-                    </div>
+                    <!-- Video Link 3 -->
+                    <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID_3" target="_blank" class="simple-video-link">
+                        <span class="link-icon">⚔️</span>
+                        <span class="link-text">
+                            <strong>Battle Royale Mechanics</strong>
+                            <small>Shrinking zones and minimaps</small>
+                        </span>
+                        <span class="link-arrow">→</span>
+                    </a>
                     
-                    <!-- Video 4 -->
-                    <div class="video-card" onclick="openYouTubeVideo('dQw4w9WgXcQ')">
-                        <div class="video-thumbnail">
-                            <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Networking Optimization">
-                            <div class="play-icon">▶</div>
-                        </div>
-                        <div class="video-info">
-                            <h3>Networking Optimization</h3>
-                            <p>Better performance and latency</p>
-                        </div>
-                    </div>
+                    <!-- Video Link 4 -->
+                    <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID_4" target="_blank" class="simple-video-link">
+                        <span class="link-icon">🌐</span>
+                        <span class="link-text">
+                            <strong>Networking Optimization</strong>
+                            <small>Better performance and latency</small>
+                        </span>
+                        <span class="link-arrow">→</span>
+                    </a>
                     
-                    <!-- Video 5 -->
-                    <div class="video-card" onclick="openYouTubeVideo('dQw4w9WgXcQ')">
-                        <div class="video-thumbnail">
-                            <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Weapon Systems">
-                            <div class="play-icon">▶</div>
-                        </div>
-                        <div class="video-info">
-                            <h3>Weapon Systems</h3>
-                            <p>Gun and melee combat</p>
-                        </div>
-                    </div>
+                    <!-- Video Link 5 -->
+                    <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID_5" target="_blank" class="simple-video-link">
+                        <span class="link-icon">🔫</span>
+                        <span class="link-text">
+                            <strong>Weapon Systems</strong>
+                            <small>Gun and melee combat</small>
+                        </span>
+                        <span class="link-arrow">→</span>
+                    </a>
                     
-                    <!-- Video 6 -->
-                    <div class="video-card" onclick="openYouTubeVideo('dQw4w9WgXcQ')">
-                        <div class="video-thumbnail">
-                            <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="UI and HUD Design">
-                            <div class="play-icon">▶</div>
-                        </div>
-                        <div class="video-info">
-                            <h3>UI and HUD Design</h3>
-                            <p>Professional game interfaces</p>
-                        </div>
-                    </div>
+                    <!-- Video Link 6 -->
+                    <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID_6" target="_blank" class="simple-video-link">
+                        <span class="link-icon">📱</span>
+                        <span class="link-text">
+                            <strong>UI and HUD Design</strong>
+                            <small>Professional game interfaces</small>
+                        </span>
+                        <span class="link-arrow">→</span>
+                    </a>
                 </div>
             </div>
             
@@ -381,11 +318,6 @@
             }
         });
 
-        // Open YouTube video in new tab
-        function openYouTubeVideo(videoId) {
-            window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
-        }
-
         // Check authentication state
         const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
@@ -427,28 +359,6 @@
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             checkAuthState();
-            
-            // Add animation to video cards
-            const observerOptions = { 
-                threshold: 0.1, 
-                rootMargin: '0px 0px -50px 0px' 
-            };
-            
-            const observer = new IntersectionObserver(function(entries) {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, observerOptions);
-            
-            document.querySelectorAll('.video-card').forEach(card => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                observer.observe(card);
-            });
         });
     </script>
 </body>
