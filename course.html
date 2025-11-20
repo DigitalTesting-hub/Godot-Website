@@ -391,14 +391,14 @@
                             <p>${course.description}</p>
                             <div class="course-meta">
                                 <span class="course-tier">${course.required_tier.toUpperCase()} TIER</span>
-                                <span class="course-price">${course.required_tier === 'free' ? 'FREE' : 'PREMIUM'}</span>
+                                <span class="course-price">${this.getCoursePriceDisplay(course.required_tier)}</span>
                             </div>
                             <div class="course-actions">
                                 ${hasAccess ? 
                                     `<button class="cta-button" onclick="lmsManager.viewCourse('${course.id}')">Access Course</button>` :
                                     (canUpgrade ?
                                         `<button class="cta-button upgrade" onclick="lmsManager.upgradeToCourse('${course.id}')">Upgrade to ${course.required_tier.toUpperCase()}</button>` :
-                                        `<button class="cta-button disabled" disabled>Already at Highest Tier</button>`
+                                        `<button class="cta-button disabled" disabled>Upgrade Required</button>`
                                     )
                                 }
                             </div>
@@ -407,22 +407,33 @@
                 }).join('');
             }
 
+            getCoursePriceDisplay(tier) {
+                const priceMap = {
+                    'free': 'FREE',
+                    'basic': 'BASIC',
+                    'premium': 'PREMIUM'
+                };
+                return priceMap[tier] || 'PREMIUM';
+            }
+
             hasCourseAccess(courseId) {
                 const course = this.courses.find(c => c.id === courseId);
                 if (!course) return false;
 
-                // Check if user's tier meets course requirement
-                const tierLevel = { 'free': 1, 'premium': 2 };
-                const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 1;
-                const courseTierLevel = tierLevel[course.required_tier] || 1;
+                // CORRECTED TIER LOGIC:
+                // Free(0) < Basic(1) < Premium(2)
+                const tierLevel = { 'free': 0, 'basic': 1, 'premium': 2 };
+                const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 0; // Default to free
+                const courseTierLevel = tierLevel[course.required_tier] || 2; // Default to premium
                 
                 return userTierLevel >= courseTierLevel;
             }
 
             canUpgradeToCourse(course) {
-                const tierLevel = { 'free': 1, 'premium': 2 };
-                const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 1;
-                const courseTierLevel = tierLevel[course.required_tier] || 1;
+                // CORRECTED TIER LOGIC:
+                const tierLevel = { 'free': 0, 'basic': 1, 'premium': 2 };
+                const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 0;
+                const courseTierLevel = tierLevel[course.required_tier] || 2;
                 
                 // User can upgrade if course requires higher tier than current
                 return courseTierLevel > userTierLevel;
@@ -432,13 +443,19 @@
                 this.currentCourse = this.courses.find(c => c.id === courseId);
                 if (!this.currentCourse) return;
 
+                // Check access before showing course
+                if (!this.hasCourseAccess(courseId)) {
+                    alert('❌ You need to upgrade your tier to access this course');
+                    return;
+                }
+
                 document.getElementById('coursesView').style.display = 'none';
                 document.getElementById('courseDetailsView').style.display = 'block';
 
                 document.getElementById('courseDetailTitle').textContent = this.currentCourse.title;
                 document.getElementById('courseDetailDescription').textContent = this.currentCourse.description;
                 document.getElementById('courseDetailTier').textContent = this.currentCourse.required_tier.toUpperCase() + ' TIER';
-                document.getElementById('courseDetailPrice').textContent = this.currentCourse.required_tier === 'free' ? 'FREE' : 'PREMIUM';
+                document.getElementById('courseDetailPrice').textContent = this.getCoursePriceDisplay(this.currentCourse.required_tier);
 
                 await this.loadCourseModules(courseId);
                 await this.loadCourseDownloads(courseId);
@@ -547,6 +564,15 @@
                 const userTier = this.userProfile?.subscription_tier || 'free';
                 
                 if (userTier === 'free') {
+                    upgradeContainer.innerHTML = `
+                        <button class="upgrade-btn basic" onclick="lmsManager.requestUpgrade('basic')">
+                            Upgrade to Basic - Contact via WhatsApp
+                        </button>
+                        <button class="upgrade-btn premium" onclick="lmsManager.requestUpgrade('premium')">
+                            Upgrade to Premium - Contact via WhatsApp
+                        </button>
+                    `;
+                } else if (userTier === 'basic') {
                     upgradeContainer.innerHTML = `
                         <button class="upgrade-btn premium" onclick="lmsManager.requestUpgrade('premium')">
                             Upgrade to Premium - Contact via WhatsApp
