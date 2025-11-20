@@ -113,134 +113,6 @@ class AuthManager {
         }
     }
 
-    // NEW APPROACH: Use the recovery token instead of access token
-    async updatePasswordWithRecovery(recoveryToken, newPassword) {
-        try {
-            console.log("Using recovery token approach");
-            
-            // First, exchange the recovery token for a session
-            const { data: sessionData, error: sessionError } = await supabase.auth.verifyOtp({
-                token: recoveryToken,
-                type: 'recovery'
-            });
-
-            if (sessionError) {
-                console.error("Recovery token verification failed:", sessionError);
-                throw sessionError;
-            }
-
-            console.log("Recovery token verified successfully");
-
-            // Now update the password using the new session
-            const { data: updateData, error: updateError } = await supabase.auth.updateUser({
-                password: newPassword
-            });
-
-            if (updateError) {
-                console.error("Password update failed:", updateError);
-                throw updateError;
-            }
-
-            console.log("Password updated successfully");
-            return { success: true, data: updateData };
-        } catch (error) {
-            console.error("Password reset error:", error);
-            return { success: false, error: error.message };
-        }
-    }
-
-    // ALTERNATIVE APPROACH: Direct API call with recovery token
-    async updatePasswordDirect(recoveryToken, newPassword) {
-        try {
-            console.log("Using direct recovery approach with token:", recoveryToken.substring(0, 20) + "...");
-            
-            // Exchange recovery token for a session
-            const response = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY
-                },
-                body: JSON.stringify({
-                    token: recoveryToken,
-                    type: 'recovery'
-                })
-            });
-
-            const verifyData = await response.json();
-            console.log("Token verification response:", verifyData);
-
-            if (!response.ok) {
-                throw new Error(verifyData.error_description || verifyData.msg || 'Token verification failed');
-            }
-
-            // Now update password using the access token from verification
-            const accessToken = verifyData.access_token;
-            const updateResponse = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${accessToken}`
-                },
-                body: JSON.stringify({
-                    password: newPassword
-                })
-            });
-
-            const updateData = await updateResponse.json();
-            console.log("Password update response:", updateData);
-
-            if (!updateResponse.ok) {
-                throw new Error(updateData.error_description || updateData.msg || 'Password update failed');
-            }
-
-            return { success: true, data: updateData };
-        } catch (error) {
-            console.error("Direct password reset error:", error);
-            return { success: false, error: error.message };
-        }
-    }
-
-    // Extract token from URL - UPDATED for recovery tokens
-    extractTokenFromUrl(url) {
-        console.log("Extracting token from URL:", url);
-        
-        // Method 1: Extract token from query parameters
-        const urlObj = new URL(url);
-        const token = urlObj.searchParams.get('token');
-        
-        if (token) {
-            console.log("Extracted token from query params:", token.substring(0, 20) + "...");
-            return token;
-        }
-
-        // Method 2: Extract from hash fragment
-        const hash = url.split('#')[1];
-        if (hash) {
-            const hashParams = new URLSearchParams(hash);
-            const hashToken = hashParams.get('token') || hashParams.get('access_token');
-            if (hashToken) {
-                console.log("Extracted token from hash:", hashToken.substring(0, 20) + "...");
-                return hashToken;
-            }
-        }
-
-        // Method 3: Manual extraction as fallback
-        let tokenStart = url.indexOf('token=');
-        if (tokenStart !== -1) {
-            tokenStart += 6;
-            let tokenEnd = url.indexOf('&', tokenStart);
-            if (tokenEnd === -1) tokenEnd = url.length;
-            const extractedToken = url.substring(tokenStart, tokenEnd);
-            console.log("Manually extracted token:", extractedToken.substring(0, 20) + "...");
-            return extractedToken;
-        }
-
-        console.log("No token found in URL");
-        return "";
-    }
-
     // Profile management methods
     async getUserProfile(userId) {
         try {
@@ -340,50 +212,20 @@ if (window.location.pathname.includes('login.html')) {
             clearMessage();
         });
 
-        forgotPassword?.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('signupForm').style.display = 'none';
-            document.getElementById('resetForm').style.display = 'block';
-            document.getElementById('resetTokenForm').style.display = 'none';
-            clearMessage();
-        });
-
-        showLoginFromReset?.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('signupForm').style.display = 'none';
-            document.getElementById('resetForm').style.display = 'none';
-            document.getElementById('resetTokenForm').style.display = 'none';
-            clearMessage();
-        });
-
-        showResetFromToken?.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('signupForm').style.display = 'none';
-            document.getElementById('resetForm').style.display = 'block';
-            document.getElementById('resetTokenForm').style.display = 'none';
-            clearMessage();
-        });
-
-        // Auto-detect URL paste and extract token
-        resetUrlInput?.addEventListener('input', function(e) {
-            const url = e.target.value;
-            if (url.includes('http')) {
-                const token = authManager.extractTokenFromUrl(url);
-                if (token) {
-                    authManager.extractedAccessToken = token;
-                    showMessage('✅ Token extracted from URL! Ready for password reset.', 'success');
-                    e.target.value = "✅ Token detected - Ready for password reset!";
-                    
-                    setTimeout(() => {
-                        e.target.value = "Token ready (extracted from URL)";
-                    }, 2000);
-                }
-            }
-        });
-
+        // Replace the forgotPassword event handler
+forgotPassword?.addEventListener('click', (e) => {
+    e.preventDefault();
+    
+    // Get the email from login form if available
+    const email = document.getElementById('email')?.value || '';
+    
+    // Create WhatsApp message with prefilled email
+    const message = `Hi, I need help recovering my password. My email is: ${email || 'not provided'}`;
+    const whatsappUrl = `https://wa.me/917504704502?text=${encodeURIComponent(message)}`;
+    
+    // Open WhatsApp
+    window.open(whatsappUrl, '_blank');
+});
         // Login Form
         loginForm?.addEventListener('submit', async (e) => {
             e.preventDefault();
