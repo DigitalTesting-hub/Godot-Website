@@ -330,71 +330,7 @@
         const mobileMenu = document.getElementById('mobileMenu');
         const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
         const body = document.body;
-        // Fullscreen Image Modal Functionality
-const imageModal = document.getElementById('imageModal');
-const modalImage = document.getElementById('modalImage');
-const modalCaption = document.getElementById('modalCaption');
-const modalClose = document.getElementById('modalClose');
-
-// Function to open image in fullscreen
-function openImageModal(imageSrc, imageAlt) {
-    modalImage.src = imageSrc;
-    modalCaption.textContent = imageAlt;
-    imageModal.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
-}
-
-// Function to close modal
-function closeImageModal() {
-    imageModal.classList.remove('active');
-    document.body.style.overflow = ''; // Restore scrolling
-    // Reset image after transition
-    setTimeout(() => {
-        modalImage.src = '';
-        modalCaption.textContent = '';
-    }, 300);
-}
-
-// Add click event to gallery images
-document.addEventListener('DOMContentLoaded', function() {
-    const galleryItems = document.querySelectorAll('.gallery-item');
-    
-    galleryItems.forEach(item => {
-        const img = item.querySelector('img');
-        if (img) {
-            // Only add click event for desktop (hover will trigger on desktop)
-            if (window.innerWidth > 768) {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    openImageModal(img.src, img.alt);
-                });
-                
-                // Optional: Add keyboard navigation
-                item.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        openImageModal(img.src, img.alt);
-                    }
-                });
-            }
-        }
-    });
-    
-    // Close modal events
-    modalClose.addEventListener('click', closeImageModal);
-    imageModal.addEventListener('click', function(e) {
-        if (e.target === imageModal) {
-            closeImageModal();
-        }
-    });
-    
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && imageModal.classList.contains('active')) {
-            closeImageModal();
-        }
-    });
-
+        
         function openMobileMenu() {
             mobileMenu.classList.add('active');
             mobileMenuOverlay.classList.add('active');
@@ -463,6 +399,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </script>
 </body>
 </html>
+
 
 
 
