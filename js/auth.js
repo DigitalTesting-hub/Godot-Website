@@ -1,4 +1,4 @@
-// Supabase Configuration - USING YOUR CREDENTIALS
+// Supabase Configuration
 const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
 
@@ -54,7 +54,6 @@ class AuthManager {
             dashboard.style.display = 'block';
             userEmail.textContent = this.currentUser.email;
             
-            // Initialize LMS if it exists
             if (window.lmsManager) {
                 window.lmsManager.loadUserData();
             }
@@ -114,12 +113,70 @@ class AuthManager {
         }
     }
 
-    // COMPLETELY FIXED: Use direct REST API call without auth session
-    async updatePasswordWithToken(accessToken, newPassword) {
+    // NEW APPROACH: Use the recovery token instead of access token
+    async updatePasswordWithRecovery(recoveryToken, newPassword) {
         try {
-            console.log("Updating password with access token:", accessToken.substring(0, 20) + "...");
+            console.log("Using recovery token approach");
             
-            const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+            // First, exchange the recovery token for a session
+            const { data: sessionData, error: sessionError } = await supabase.auth.verifyOtp({
+                token: recoveryToken,
+                type: 'recovery'
+            });
+
+            if (sessionError) {
+                console.error("Recovery token verification failed:", sessionError);
+                throw sessionError;
+            }
+
+            console.log("Recovery token verified successfully");
+
+            // Now update the password using the new session
+            const { data: updateData, error: updateError } = await supabase.auth.updateUser({
+                password: newPassword
+            });
+
+            if (updateError) {
+                console.error("Password update failed:", updateError);
+                throw updateError;
+            }
+
+            console.log("Password updated successfully");
+            return { success: true, data: updateData };
+        } catch (error) {
+            console.error("Password reset error:", error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // ALTERNATIVE APPROACH: Direct API call with recovery token
+    async updatePasswordDirect(recoveryToken, newPassword) {
+        try {
+            console.log("Using direct recovery approach with token:", recoveryToken.substring(0, 20) + "...");
+            
+            // Exchange recovery token for a session
+            const response = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({
+                    token: recoveryToken,
+                    type: 'recovery'
+                })
+            });
+
+            const verifyData = await response.json();
+            console.log("Token verification response:", verifyData);
+
+            if (!response.ok) {
+                throw new Error(verifyData.error_description || verifyData.msg || 'Token verification failed');
+            }
+
+            // Now update password using the access token from verification
+            const accessToken = verifyData.access_token;
+            const updateResponse = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -131,114 +188,56 @@ class AuthManager {
                 })
             });
 
-            const data = await response.json();
-            console.log("Password update response:", { status: response.status, data });
-            
-            if (!response.ok) {
-                const errorMsg = data.error_description || data.msg || data.error || 'Password update failed';
-                throw new Error(errorMsg);
+            const updateData = await updateResponse.json();
+            console.log("Password update response:", updateData);
+
+            if (!updateResponse.ok) {
+                throw new Error(updateData.error_description || updateData.msg || 'Password update failed');
             }
 
-            return { success: true, data };
+            return { success: true, data: updateData };
         } catch (error) {
-            console.error("Password update error:", error);
+            console.error("Direct password reset error:", error);
             return { success: false, error: error.message };
         }
     }
 
-    // Validate the access token before using it
-    async validateAccessToken(accessToken) {
-        try {
-            console.log("Validating access token:", accessToken.substring(0, 20) + "...");
-            
-            const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-                method: 'GET',
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${accessToken}`
-                }
-            });
-
-            const data = await response.json();
-            console.log("Token validation response:", { status: response.status, data });
-            
-            if (response.ok) {
-                return { 
-                    valid: true, 
-                    user: data,
-                    message: 'Token is valid'
-                };
-            } else {
-                return { 
-                    valid: false, 
-                    error: data.error_description || data.msg || 'Invalid token',
-                    status: response.status
-                };
-            }
-        } catch (error) {
-            console.error("Token validation error:", error);
-            return { 
-                valid: false, 
-                error: error.message 
-            };
-        }
-    }
-
-    async signOut() {
-        try {
-            const { error } = await supabase.auth.signOut();
-            if (error) throw error;
-            return { success: true };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
-    // Extract access token from URL (same as your Godot method)
-    extractAccessTokenFromUrl(url) {
-        console.log("Attempting to extract access token from URL: ", url);
+    // Extract token from URL - UPDATED for recovery tokens
+    extractTokenFromUrl(url) {
+        console.log("Extracting token from URL:", url);
         
-        // Method 1: Try to extract access_token parameter (most common)
-        var access_token_start = url.indexOf("access_token=");
-        if (access_token_start !== -1) {
-            access_token_start += 13;  // Length of "access_token="
-            var access_token_end = url.indexOf("&", access_token_start);
-            if (access_token_end === -1) {
-                access_token_end = url.length;
-            }
-            
-            var token = url.substring(access_token_start, access_token_end);
-            console.log("Extracted access_token: ", token);
-            return token;
-        }
+        // Method 1: Extract token from query parameters
+        const urlObj = new URL(url);
+        const token = urlObj.searchParams.get('token');
         
-        // Method 2: Try to extract token parameter
-        var token_start = url.indexOf("token=");
-        if (token_start !== -1) {
-            token_start += 6;  // Length of "token="
-            var token_end = url.indexOf("&", token_start);
-            if (token_end === -1) {
-                token_end = url.length;
-            }
-            
-            var token = url.substring(token_start, token_end);
-            console.log("Extracted token: ", token);
+        if (token) {
+            console.log("Extracted token from query params:", token.substring(0, 20) + "...");
             return token;
         }
 
-        // Method 3: Try to extract from hash fragment (common in OAuth)
-        var hash_start = url.indexOf("#");
-        if (hash_start !== -1) {
-            var hash_params = url.substring(hash_start + 1);
-            var params = new URLSearchParams(hash_params);
-            if (params.has('access_token')) {
-                var token = params.get('access_token');
-                console.log("Extracted access_token from hash: ", token);
-                return token;
+        // Method 2: Extract from hash fragment
+        const hash = url.split('#')[1];
+        if (hash) {
+            const hashParams = new URLSearchParams(hash);
+            const hashToken = hashParams.get('token') || hashParams.get('access_token');
+            if (hashToken) {
+                console.log("Extracted token from hash:", hashToken.substring(0, 20) + "...");
+                return hashToken;
             }
         }
-        
-        console.log("No access token found in URL");
+
+        // Method 3: Manual extraction as fallback
+        let tokenStart = url.indexOf('token=');
+        if (tokenStart !== -1) {
+            tokenStart += 6;
+            let tokenEnd = url.indexOf('&', tokenStart);
+            if (tokenEnd === -1) tokenEnd = url.length;
+            const extractedToken = url.substring(tokenStart, tokenEnd);
+            console.log("Manually extracted token:", extractedToken.substring(0, 20) + "...");
+            return extractedToken;
+        }
+
+        console.log("No token found in URL");
         return "";
     }
 
@@ -288,6 +287,16 @@ class AuthManager {
 
             if (error) throw error;
             return { success: true, data };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    async signOut() {
+        try {
+            const { error } = await supabase.auth.signOut();
+            if (error) throw error;
+            return { success: true };
         } catch (error) {
             return { success: false, error: error.message };
         }
@@ -358,32 +367,19 @@ if (window.location.pathname.includes('login.html')) {
             clearMessage();
         });
 
-        // Auto-detect URL paste and extract access token
+        // Auto-detect URL paste and extract token
         resetUrlInput?.addEventListener('input', function(e) {
             const url = e.target.value;
-            if (url.includes('http') && (url.includes('access_token=') || url.includes('token=') || url.includes('#'))) {
-                const token = authManager.extractAccessTokenFromUrl(url);
+            if (url.includes('http')) {
+                const token = authManager.extractTokenFromUrl(url);
                 if (token) {
                     authManager.extractedAccessToken = token;
-                    showMessage('✅ Access token automatically extracted from URL! Validating token...', 'success');
+                    showMessage('✅ Token extracted from URL! Ready for password reset.', 'success');
+                    e.target.value = "✅ Token detected - Ready for password reset!";
                     
-                    // Validate the token immediately
-                    authManager.validateAccessToken(token).then(validation => {
-                        if (validation.valid) {
-                            showMessage('✅ Token is valid! You can now set your new password.', 'success');
-                            e.target.value = "✅ Valid token detected - Ready for password reset!";
-                        } else {
-                            showMessage('❌ Invalid or expired token: ' + validation.error, 'error');
-                            e.target.value = "❌ Invalid token - Please request a new reset link";
-                        }
-                    });
-                    
-                    // Keep the visual feedback
                     setTimeout(() => {
-                        if (e.target.value.includes("✅")) {
-                            e.target.value = "Access token ready (validated)";
-                        }
-                    }, 3000);
+                        e.target.value = "Token ready (extracted from URL)";
+                    }, 2000);
                 }
             }
         });
@@ -439,7 +435,6 @@ if (window.location.pathname.includes('login.html')) {
             const password = document.getElementById('signupPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
 
-            // Validation
             if (!email || !password || !confirmPassword) {
                 showMessage('Please fill in all fields', 'error');
                 resetButtonState(submitBtn, btnText, btnLoading);
@@ -473,10 +468,7 @@ if (window.location.pathname.includes('login.html')) {
             if (result.success) {
                 showMessage('🎉 Account created! Please check your email to confirm your account.', 'success');
                 
-                // Clear form
                 registerForm.reset();
-                
-                // Switch back to login after delay
                 setTimeout(() => {
                     document.getElementById('loginForm').style.display = 'block';
                     document.getElementById('signupForm').style.display = 'none';
@@ -519,13 +511,9 @@ if (window.location.pathname.includes('login.html')) {
             if (result.success) {
                 showMessage('📧 Password reset link sent! Check your email and paste the URL below.', 'success');
                 
-                // Clear form and switch to token entry form
                 resetForm.reset();
                 document.getElementById('resetForm').style.display = 'none';
                 document.getElementById('resetTokenForm').style.display = 'block';
-                
-                // Show detailed instructions
-                showMessage('📧 Check your email for the reset link. Paste the entire URL in the field below - we will automatically extract the access token.', 'success');
             } else {
                 handleAuthError(result.error);
             }
@@ -533,7 +521,7 @@ if (window.location.pathname.includes('login.html')) {
             resetButtonState(submitBtn, btnText, btnLoading);
         });
 
-        // Password Reset Token Form - COMPLETELY FIXED
+        // Password Reset Token Form - UPDATED APPROACH
         resetTokenForm?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('resetTokenBtn');
@@ -544,7 +532,6 @@ if (window.location.pathname.includes('login.html')) {
             const newPassword = document.getElementById('newPassword').value;
             const confirmNewPassword = document.getElementById('confirmNewPassword').value;
 
-            // Validation
             if (!resetUrl || !newPassword || !confirmNewPassword) {
                 showMessage('Please fill in all fields', 'error');
                 resetButtonState(submitBtn, btnText, btnLoading);
@@ -563,14 +550,13 @@ if (window.location.pathname.includes('login.html')) {
                 return;
             }
 
-            // Use extracted token or try to extract from URL
-            let accessToken = authManager.extractedAccessToken;
-            if (!accessToken) {
-                accessToken = authManager.extractAccessTokenFromUrl(resetUrl);
+            let recoveryToken = authManager.extractedAccessToken;
+            if (!recoveryToken) {
+                recoveryToken = authManager.extractTokenFromUrl(resetUrl);
             }
 
-            if (!accessToken) {
-                showMessage('❌ Please paste a valid reset URL containing an access token', 'error');
+            if (!recoveryToken) {
+                showMessage('❌ Please paste a valid reset URL containing a token', 'error');
                 resetButtonState(submitBtn, btnText, btnLoading);
                 return;
             }
@@ -579,25 +565,20 @@ if (window.location.pathname.includes('login.html')) {
             btnLoading.style.display = 'inline';
             submitBtn.disabled = true;
 
-            showMessage('🔄 Validating token and updating password...', 'info');
+            showMessage('🔄 Processing password reset...', 'info');
 
-            // Validate token first
-            const validation = await authManager.validateAccessToken(accessToken);
-            if (!validation.valid) {
-                showMessage('❌ Invalid or expired reset token: ' + validation.error, 'error');
-                resetButtonState(submitBtn, btnText, btnLoading);
-                return;
+            // Try the recovery token approach first
+            let result = await authManager.updatePasswordWithRecovery(recoveryToken, newPassword);
+            
+            // If that fails, try the direct approach
+            if (!result.success) {
+                showMessage('🔄 Trying alternative method...', 'info');
+                result = await authManager.updatePasswordDirect(recoveryToken, newPassword);
             }
-
-            showMessage('✅ Token valid! Updating password...', 'success');
-
-            // Use the fixed update method
-            const result = await authManager.updatePasswordWithToken(accessToken, newPassword);
 
             if (result.success) {
                 showMessage('✅ Password reset successfully! You can now login with your new password.', 'success');
                 
-                // Clear everything and redirect to login
                 setTimeout(() => {
                     document.getElementById('resetTokenForm').style.display = 'none';
                     document.getElementById('loginForm').style.display = 'block';
@@ -625,7 +606,7 @@ if (window.location.pathname.includes('login.html')) {
             } else if (error.includes('Password should be at least 6 characters')) {
                 showMessage('❌ Password must be at least 6 characters', 'error');
             } else if (error.includes('Auth session missing')) {
-                showMessage('❌ Session expired. Please use the password reset link from your email.', 'error');
+                showMessage('❌ Please use the recovery token from your email, not an access token.', 'error');
             } else {
                 showMessage('❌ ' + error, 'error');
             }
@@ -641,7 +622,6 @@ if (window.location.pathname.includes('login.html')) {
             authMessage.className = `form-message ${type}`;
             authMessage.style.display = 'block';
             
-            // Only auto-hide success messages after longer delay
             if (type === 'success') {
                 setTimeout(() => {
                     authMessage.style.display = 'none';
@@ -666,7 +646,6 @@ if (window.location.pathname.includes('login.html')) {
 // Course Page Event Handlers
 if (window.location.pathname.includes('course.html')) {
     document.addEventListener('DOMContentLoaded', function() {
-        // Logout button
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             const result = await authManager.signOut();
             if (result.success) {
