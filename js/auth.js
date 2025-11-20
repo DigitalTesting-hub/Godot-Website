@@ -1,6 +1,7 @@
 // Supabase Configuration - USING YOUR CREDENTIALS
 const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
+
 // Initialize Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -113,9 +114,11 @@ class AuthManager {
         }
     }
 
+    // COMPLETELY FIXED: Use direct REST API call without auth session
     async updatePasswordWithToken(accessToken, newPassword) {
         try {
-            // Use direct REST API call like Godot implementation
+            console.log("Updating password with access token:", accessToken.substring(0, 20) + "...");
+            
             const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
                 method: 'PUT',
                 headers: {
@@ -129,20 +132,25 @@ class AuthManager {
             });
 
             const data = await response.json();
+            console.log("Password update response:", { status: response.status, data });
             
             if (!response.ok) {
-                throw new Error(data.error_description || data.msg || 'Password update failed');
+                const errorMsg = data.error_description || data.msg || data.error || 'Password update failed';
+                throw new Error(errorMsg);
             }
 
             return { success: true, data };
         } catch (error) {
+            console.error("Password update error:", error);
             return { success: false, error: error.message };
         }
     }
 
-    async debugTokenValidation(accessToken) {
+    // Validate the access token before using it
+    async validateAccessToken(accessToken) {
         try {
-            // Test if the token is valid by making a simple user info request
+            console.log("Validating access token:", accessToken.substring(0, 20) + "...");
+            
             const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
                 method: 'GET',
                 headers: {
@@ -152,19 +160,27 @@ class AuthManager {
             });
 
             const data = await response.json();
-            console.log('Token validation response:', {
-                status: response.status,
-                data: data
-            });
-
-            return { 
-                valid: response.ok, 
-                status: response.status,
-                data: data 
-            };
+            console.log("Token validation response:", { status: response.status, data });
+            
+            if (response.ok) {
+                return { 
+                    valid: true, 
+                    user: data,
+                    message: 'Token is valid'
+                };
+            } else {
+                return { 
+                    valid: false, 
+                    error: data.error_description || data.msg || 'Invalid token',
+                    status: response.status
+                };
+            }
         } catch (error) {
-            console.error('Token validation error:', error);
-            return { valid: false, error: error.message };
+            console.error("Token validation error:", error);
+            return { 
+                valid: false, 
+                error: error.message 
+            };
         }
     }
 
@@ -208,6 +224,18 @@ class AuthManager {
             var token = url.substring(token_start, token_end);
             console.log("Extracted token: ", token);
             return token;
+        }
+
+        // Method 3: Try to extract from hash fragment (common in OAuth)
+        var hash_start = url.indexOf("#");
+        if (hash_start !== -1) {
+            var hash_params = url.substring(hash_start + 1);
+            var params = new URLSearchParams(hash_params);
+            if (params.has('access_token')) {
+                var token = params.get('access_token');
+                console.log("Extracted access_token from hash: ", token);
+                return token;
+            }
         }
         
         console.log("No access token found in URL");
@@ -333,18 +361,29 @@ if (window.location.pathname.includes('login.html')) {
         // Auto-detect URL paste and extract access token
         resetUrlInput?.addEventListener('input', function(e) {
             const url = e.target.value;
-            if (url.includes('http') && (url.includes('access_token=') || url.includes('token='))) {
+            if (url.includes('http') && (url.includes('access_token=') || url.includes('token=') || url.includes('#'))) {
                 const token = authManager.extractAccessTokenFromUrl(url);
                 if (token) {
                     authManager.extractedAccessToken = token;
-                    showMessage('✅ Access token automatically extracted from URL!', 'success');
-                    // Update the input field to show success
-                    e.target.value = "✅ URL detected - Token extracted automatically!";
+                    showMessage('✅ Access token automatically extracted from URL! Validating token...', 'success');
                     
-                    // Optional: Clear the field but keep the visual feedback
+                    // Validate the token immediately
+                    authManager.validateAccessToken(token).then(validation => {
+                        if (validation.valid) {
+                            showMessage('✅ Token is valid! You can now set your new password.', 'success');
+                            e.target.value = "✅ Valid token detected - Ready for password reset!";
+                        } else {
+                            showMessage('❌ Invalid or expired token: ' + validation.error, 'error');
+                            e.target.value = "❌ Invalid token - Please request a new reset link";
+                        }
+                    });
+                    
+                    // Keep the visual feedback
                     setTimeout(() => {
-                        e.target.value = "Access token ready (extracted from URL)";
-                    }, 2000);
+                        if (e.target.value.includes("✅")) {
+                            e.target.value = "Access token ready (validated)";
+                        }
+                    }, 3000);
                 }
             }
         });
@@ -484,6 +523,9 @@ if (window.location.pathname.includes('login.html')) {
                 resetForm.reset();
                 document.getElementById('resetForm').style.display = 'none';
                 document.getElementById('resetTokenForm').style.display = 'block';
+                
+                // Show detailed instructions
+                showMessage('📧 Check your email for the reset link. Paste the entire URL in the field below - we will automatically extract the access token.', 'success');
             } else {
                 handleAuthError(result.error);
             }
@@ -491,7 +533,7 @@ if (window.location.pathname.includes('login.html')) {
             resetButtonState(submitBtn, btnText, btnLoading);
         });
 
-        // Password Reset Token Form
+        // Password Reset Token Form - COMPLETELY FIXED
         resetTokenForm?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('resetTokenBtn');
@@ -537,21 +579,25 @@ if (window.location.pathname.includes('login.html')) {
             btnLoading.style.display = 'inline';
             submitBtn.disabled = true;
 
-            // Validate token first (optional but helpful for debugging)
-            const tokenValidation = await authManager.debugTokenValidation(accessToken);
-            if (!tokenValidation.valid) {
-                showMessage('❌ Invalid or expired reset token. Please request a new reset link.', 'error');
+            showMessage('🔄 Validating token and updating password...', 'info');
+
+            // Validate token first
+            const validation = await authManager.validateAccessToken(accessToken);
+            if (!validation.valid) {
+                showMessage('❌ Invalid or expired reset token: ' + validation.error, 'error');
                 resetButtonState(submitBtn, btnText, btnLoading);
                 return;
             }
 
-            // Use the direct REST API method (like Godot)
+            showMessage('✅ Token valid! Updating password...', 'success');
+
+            // Use the fixed update method
             const result = await authManager.updatePasswordWithToken(accessToken, newPassword);
 
             if (result.success) {
                 showMessage('✅ Password reset successfully! You can now login with your new password.', 'success');
                 
-                // Clear forms and redirect to login
+                // Clear everything and redirect to login
                 setTimeout(() => {
                     document.getElementById('resetTokenForm').style.display = 'none';
                     document.getElementById('loginForm').style.display = 'block';
@@ -578,6 +624,8 @@ if (window.location.pathname.includes('login.html')) {
                 showMessage('❌ Invalid or expired reset token. Please request a new reset link.', 'error');
             } else if (error.includes('Password should be at least 6 characters')) {
                 showMessage('❌ Password must be at least 6 characters', 'error');
+            } else if (error.includes('Auth session missing')) {
+                showMessage('❌ Session expired. Please use the password reset link from your email.', 'error');
             } else {
                 showMessage('❌ ' + error, 'error');
             }
@@ -593,11 +641,12 @@ if (window.location.pathname.includes('login.html')) {
             authMessage.className = `form-message ${type}`;
             authMessage.style.display = 'block';
             
-            setTimeout(() => {
-                if (type === 'success') {
+            // Only auto-hide success messages after longer delay
+            if (type === 'success') {
+                setTimeout(() => {
                     authMessage.style.display = 'none';
-                }
-            }, 5000);
+                }, 8000);
+            }
         }
 
         function clearMessage() {
