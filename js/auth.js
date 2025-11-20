@@ -211,21 +211,6 @@ if (window.location.pathname.includes('login.html')) {
             document.getElementById('resetTokenForm').style.display = 'none';
             clearMessage();
         });
-
-        // Replace the forgotPassword event handler
-forgotPassword?.addEventListener('click', (e) => {
-    e.preventDefault();
-    
-    // Get the email from login form if available
-    const email = document.getElementById('email')?.value || '';
-    
-    // Create WhatsApp message with prefilled email
-    const message = `Hi, I need help recovering my password. My email is: ${email || 'not provided'}`;
-    const whatsappUrl = `https://wa.me/917504704502?text=${encodeURIComponent(message)}`;
-    
-    // Open WhatsApp
-    window.open(whatsappUrl, '_blank');
-});
         // Login Form
         loginForm?.addEventListener('submit', async (e) => {
             e.preventDefault();
