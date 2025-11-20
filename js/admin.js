@@ -114,6 +114,7 @@ class AdminPanel {
 
     async loadDashboardData() {
         await this.loadCourses();
+        await this.loadStudents();
         await this.loadStats();
     }
 
@@ -139,7 +140,26 @@ class AdminPanel {
             this.filteredCourses = [];
         }
     }
+async loadStudents() {
+    try {
+        this.showLoading('students');
+        
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .order('created_at', { ascending: false });
 
+        if (error) throw error;
+        
+        this.students = data || [];
+        this.renderStudents();
+        
+    } catch (error) {
+        console.error('Error loading students:', error);
+        this.showMessage('Error loading students: ' + error.message, 'error');
+        this.students = [];
+    }
+}
     async loadStats() {
         try {
             // Get total students from profiles table
@@ -526,21 +546,89 @@ class AdminPanel {
 
     // STUDENTS MANAGEMENT - SIMPLIFIED
     renderStudents() {
-        const container = document.getElementById('studentsList');
-        if (!container) return;
+    const container = document.getElementById('studentsList');
+    if (!container) return;
 
+    if (this.students.length === 0) {
         container.innerHTML = `
             <div class="placeholder-message">
-                <p>Student management features are currently being developed.</p>
-                <p>Total student count is displayed in the Dashboard.</p>
+                <p>No students found.</p>
             </div>
         `;
+        return;
+    }
+searchStudents(query) {
+    if (!query.trim()) {
+        this.renderStudents();
+        return;
     }
 
-    searchStudents(query) {
-        // Student search functionality removed
-        console.log('Student search is not yet implemented');
+    const searchTerm = query.toLowerCase();
+    const filteredStudents = this.students.filter(student => 
+        student.email?.toLowerCase().includes(searchTerm) ||
+        student.subscription_tier?.toLowerCase().includes(searchTerm)
+    );
+
+    this.renderFilteredStudents(filteredStudents);
+}
+
+renderFilteredStudents(filteredStudents) {
+    const container = document.getElementById('studentsList');
+    if (!container) return;
+
+    if (filteredStudents.length === 0) {
+        container.innerHTML = `
+            <div class="placeholder-message">
+                <p>No students match your search.</p>
+            </div>
+        `;
+        return;
     }
+
+    // Same rendering logic as renderStudents but with filtered data
+    container.innerHTML = filteredStudents.map(student => {
+        const createdDate = new Date(student.created_at).toLocaleDateString();
+        const tier = student.subscription_tier || 'basic';
+        
+        return `
+            <div class="student-item">
+                <div class="student-info">
+                    <h3>${student.email || 'No email'}</h3>
+                    <div class="student-meta">
+                        <span class="tier-badge ${tier}">${tier.toUpperCase()} TIER</span>
+                        <span>Joined: ${createdDate}</span>
+                        <span>User ID: ${student.id.substring(0, 8)}...</span>
+                    </div>
+                </div>
+                <div class="student-actions">
+                    <span class="student-status">Active</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+        
+    container.innerHTML = this.students.map(student => {
+        const createdDate = new Date(student.created_at).toLocaleDateString();
+        const tier = student.subscription_tier || 'basic';
+        
+        return `
+            <div class="student-item">
+                <div class="student-info">
+                    <h3>${student.email || 'No email'}</h3>
+                    <div class="student-meta">
+                        <span class="tier-badge ${tier}">${tier.toUpperCase()} TIER</span>
+                        <span>Joined: ${createdDate}</span>
+                        <span>User ID: ${student.id.substring(0, 8)}...</span>
+                    </div>
+                </div>
+                <div class="student-actions">
+                    <span class="student-status">Active</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 
     // MODAL MANAGEMENT
     openCourseModal(courseId = null) {
