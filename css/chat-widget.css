@@ -6,7 +6,30 @@
     z-index: 10000;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+/* Add this to your existing chat-widget.css */
+.chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 10000; /* Ensure it's above everything */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
+.chat-container {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 350px;
+    height: 500px;
+    background: #1a1a1a;
+    border-radius: 10px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
+    display: none; /* Start hidden */
+    flex-direction: column;
+    overflow: hidden;
+    border: 2px solid #ff6b35;
+    z-index: 10001; /* Above the button */
+}
 .chat-button {
     width: 60px;
     height: 60px;
@@ -311,3 +334,4 @@
         font-size: 20px;
     }
 }
+
