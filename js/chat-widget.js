@@ -1,98 +1,64 @@
-// Chat Widget Functionality
+// chat-widget.js - With Backend Integration
 class ChatWidget {
     constructor() {
-        // Check if already initialized
-        if (window.chatWidgetInitialized) {
-            console.log('Chat widget already initialized');
-            return;
-        }
+        if (window.chatWidgetInitialized) return;
         
         this.isChatOpen = false;
         this.currentTicketId = null;
         this.userName = '';
         this.isNewChat = true;
+        this.backendUrl = 'YOUR_GOOGLE_APPS_SCRIPT_URL'; // Replace with your GAS URL
+        
         this.initializeElements();
         this.attachEventListeners();
+        this.startPolling();
         
-        // Mark as initialized
         window.chatWidgetInitialized = true;
-        console.log('Chat widget initialized successfully');
     }
 
     initializeElements() {
-        // Core elements
         this.chatToggle = document.getElementById('chatToggle');
         this.chatContainer = document.getElementById('chatContainer');
         this.closeChat = document.getElementById('closeChat');
         this.welcomeScreen = document.getElementById('welcomeScreen');
         this.chatMessages = document.getElementById('chatMessages');
         this.chatInputArea = document.getElementById('chatInputArea');
-        
-        // Buttons and inputs
         this.startChatBtn = document.getElementById('startChatBtn');
         this.messageInput = document.getElementById('messageInput');
         this.sendMessageBtn = document.getElementById('sendMessageBtn');
         this.userNameInput = document.getElementById('userName');
         this.ticketIdInput = document.getElementById('ticketId');
         
-        // Reset any existing state
         this.resetChatState();
     }
 
     resetChatState() {
-        // Clear any existing messages
-        if (this.chatMessages) {
-            this.chatMessages.innerHTML = '';
-        }
+        if (this.chatMessages) this.chatMessages.innerHTML = '';
+        if (this.userNameInput) this.userNameInput.value = '';
+        if (this.ticketIdInput) this.ticketIdInput.value = '';
+        if (this.welcomeScreen) this.welcomeScreen.style.display = 'flex';
+        if (this.chatMessages) this.chatMessages.style.display = 'none';
+        if (this.chatInputArea) this.chatInputArea.style.display = 'none';
         
-        // Reset form inputs
-        if (this.userNameInput) {
-            this.userNameInput.value = '';
-        }
-        if (this.ticketIdInput) {
-            this.ticketIdInput.value = '';
-        }
-        
-        // Show welcome screen
-        if (this.welcomeScreen) {
-            this.welcomeScreen.style.display = 'flex';
-        }
-        if (this.chatMessages) {
-            this.chatMessages.style.display = 'none';
-        }
-        if (this.chatInputArea) {
-            this.chatInputArea.style.display = 'none';
-        }
-        
-        // Reset internal state
         this.currentTicketId = null;
         this.userName = '';
         this.isNewChat = true;
     }
 
     attachEventListeners() {
-        // Check if elements exist before adding listeners
-        if (!this.chatToggle || !this.closeChat || !this.startChatBtn) {
-            console.error('Chat widget elements not found');
-            return;
-        }
+        if (!this.chatToggle || !this.closeChat || !this.startChatBtn) return;
 
-        // Toggle chat window
         this.chatToggle.addEventListener('click', () => this.toggleChat());
         this.closeChat.addEventListener('click', () => this.closeChatWindow());
-
-        // Start chat
         this.startChatBtn.addEventListener('click', () => this.startChat());
-
-        // Send message
         this.sendMessageBtn.addEventListener('click', () => this.sendMessage());
+        
         if (this.messageInput) {
             this.messageInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') this.sendMessage();
             });
         }
 
-        // Close chat when clicking outside
         document.addEventListener('click', (e) => {
             if (this.isChatOpen && 
                 !this.chatContainer.contains(e.target) && 
@@ -108,9 +74,7 @@ class ChatWidget {
         
         if (this.isChatOpen) {
             setTimeout(() => {
-                if (this.messageInput) {
-                    this.messageInput.focus();
-                }
+                if (this.messageInput) this.messageInput.focus();
             }, 100);
         }
     }
@@ -120,7 +84,7 @@ class ChatWidget {
         this.chatContainer.style.display = 'none';
     }
 
-    startChat() {
+    async startChat() {
         this.userName = this.userNameInput.value.trim();
         const ticketId = this.ticketIdInput.value.trim();
         
@@ -129,68 +93,89 @@ class ChatWidget {
             return;
         }
         
-        // Handle ticket ID
-        if (ticketId) {
-            this.currentTicketId = ticketId;
-            this.isNewChat = false;
-            this.continueExistingChat();
-        } else {
-            this.currentTicketId = this.generateTicketId();
-            this.isNewChat = true;
-            this.startNewChat();
+        try {
+            if (ticketId) {
+                this.currentTicketId = ticketId;
+                this.isNewChat = false;
+                await this.continueExistingChat();
+            } else {
+                this.currentTicketId = this.generateTicketId();
+                this.isNewChat = true;
+                await this.startNewChat();
+            }
+            
+            this.welcomeScreen.style.display = 'none';
+            this.chatMessages.style.display = 'flex';
+            this.chatInputArea.style.display = 'flex';
+            
+        } catch (error) {
+            console.error('Error starting chat:', error);
+            alert('Error starting chat. Please try again.');
         }
-        
-        // Update UI
-        this.welcomeScreen.style.display = 'none';
-        this.chatMessages.style.display = 'flex';
-        this.chatInputArea.style.display = 'flex';
     }
 
-    startNewChat() {
-        // Clear any existing messages first
+    async startNewChat() {
         this.chatMessages.innerHTML = '';
         
-        // Add welcome messages
-        this.addMessage(`Hello ${this.userName}! How can we help you today?`, 'bot');
-        this.addMessage(`Your ticket ID is: ${this.currentTicketId}. Please save this ID to continue this chat later.`, 'bot');
-        
-        // Send to backend to create Discord channel
-        this.sendToBackend('new_chat', {
+        const response = await this.sendToBackend('new_chat', {
             userName: this.userName,
             ticketId: this.currentTicketId
         });
+        
+        if (response.success) {
+            this.addMessage(`Hello ${this.userName}! How can we help you today?`, 'bot');
+            this.addMessage(`Your ticket ID is: ${this.currentTicketId}. Please save this ID to continue this chat later.`, 'bot');
+        } else {
+            throw new Error(response.error);
+        }
     }
 
-    continueExistingChat() {
-        // Clear any existing messages first
+    async continueExistingChat() {
         this.chatMessages.innerHTML = '';
         
-        this.addMessage(`Welcome back ${this.userName}! Continuing your previous conversation.`, 'bot');
-        
-        // Send to backend to fetch previous messages
-        this.sendToBackend('continue_chat', {
+        const response = await this.sendToBackend('continue_chat', {
             userName: this.userName,
             ticketId: this.currentTicketId
         });
+        
+        if (response.success) {
+            this.addMessage(`Welcome back ${this.userName}! Continuing your previous conversation.`, 'bot');
+            
+            // Load previous messages
+            const messagesResponse = await this.sendToBackend('get_messages', {
+                ticketId: this.currentTicketId
+            });
+            
+            if (messagesResponse.success) {
+                messagesResponse.messages.forEach(msg => {
+                    this.addMessage(msg.message, msg.sender === 'user' ? 'user' : 'bot');
+                });
+            }
+        } else {
+            throw new Error(response.error);
+        }
     }
 
-    sendMessage() {
+    async sendMessage() {
         const message = this.messageInput.value.trim();
-        if (!message) return;
+        if (!message || !this.currentTicketId) return;
         
-        // Add user message to chat
         this.addMessage(message, 'user');
         this.messageInput.value = '';
         
-        // Send to backend
-        this.sendToBackend('user_message', {
-            userName: this.userName,
-            ticketId: this.currentTicketId,
-            message: message
-        });
-        
-        // Simulate typing indicator
-        this.showTypingIndicator();
+        try {
+            await this.sendToBackend('user_message', {
+                userName: this.userName,
+                ticketId: this.currentTicketId,
+                message: message
+            });
+            
+            this.showTypingIndicator();
+            
+        } catch (error) {
+            console.error('Error sending message:', error);
+            this.addMessage('Failed to send message. Please try again.', 'bot');
+        }
     }
 
     addMessage(text, sender) {
@@ -203,17 +188,12 @@ class ChatWidget {
         
         messageDiv.appendChild(contentDiv);
         this.chatMessages.appendChild(messageDiv);
-        
-        // Scroll to bottom
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
     }
 
     showTypingIndicator() {
-        // Remove existing typing indicator if any
         const existingIndicator = document.getElementById('typingIndicator');
-        if (existingIndicator) {
-            existingIndicator.remove();
-        }
+        if (existingIndicator) existingIndicator.remove();
         
         const typingDiv = document.createElement('div');
         typingDiv.className = 'message bot-message typing-indicator';
@@ -227,28 +207,18 @@ class ChatWidget {
         this.chatMessages.appendChild(typingDiv);
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
         
-        // Remove typing indicator after delay (simulate response time)
         setTimeout(() => {
             const indicator = document.getElementById('typingIndicator');
             if (indicator) {
                 indicator.remove();
+                // In real implementation, this would be replaced with actual bot response
                 this.addMessage("Thanks for your message! Our team will respond shortly.", 'bot');
             }
         }, 2000);
     }
 
-    generateTicketId() {
-        return 'TKT-' + Math.random().toString(36).substring(2, 10).toUpperCase();
-    }
-
-    sendToBackend(action, data) {
-        // This is where you'll integrate with your backend
-        // For now, we'll just log to console
-        console.log(`Backend Action: ${action}`, data);
-        
-        // Example fetch request (commented out for now)
-        /*
-        fetch('https://your-backend-url.com/chat', {
+    async sendToBackend(action, data) {
+        const response = await fetch(this.backendUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -257,26 +227,50 @@ class ChatWidget {
                 action: action,
                 ...data
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Backend response:', data);
-        })
-        .catch(error => {
-            console.error('Error sending to backend:', error);
         });
-        */
+        
+        return await response.json();
     }
 
-    // Method to receive messages from backend/Discord
-    receiveMessage(message, sender = 'bot') {
-        this.addMessage(message, sender);
+    startPolling() {
+        // Poll for new messages every 3 seconds
+        setInterval(async () => {
+            if (this.currentTicketId && this.isChatOpen) {
+                try {
+                    const response = await this.sendToBackend('get_messages', {
+                        ticketId: this.currentTicketId
+                    });
+                    
+                    if (response.success) {
+                        // Implement message sync logic here
+                        this.syncMessages(response.messages);
+                    }
+                } catch (error) {
+                    console.error('Error polling messages:', error);
+                }
+            }
+        }, 3000);
+    }
+
+    syncMessages(messages) {
+        // Compare existing messages with new messages and update if needed
+        // This prevents duplicate messages
+        const existingMessages = Array.from(this.chatMessages.querySelectorAll('.message-content'))
+            .map(el => el.textContent);
+            
+        messages.forEach(msg => {
+            if (!existingMessages.includes(msg.message)) {
+                this.addMessage(msg.message, msg.sender === 'user' ? 'user' : 'bot');
+            }
+        });
+    }
+
+    generateTicketId() {
+        return 'TKT-' + Math.random().toString(36).substring(2, 10).toUpperCase();
     }
 }
 
-// Initialize chat widget when DOM is loaded - SINGLE INITIALIZATION
 document.addEventListener('DOMContentLoaded', () => {
-    // Only initialize if not already initialized
     if (!window.chatWidget) {
         window.chatWidget = new ChatWidget();
     }
