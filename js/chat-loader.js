@@ -1,12 +1,12 @@
-// chat-loader.js - Add this once, works on all pages
-function loadChatWidget() {
+// chat-loader.js - Simple version
+document.addEventListener('DOMContentLoaded', function() {
     // Load CSS
     const chatCSS = document.createElement('link');
     chatCSS.rel = 'stylesheet';
     chatCSS.href = 'css/chat-widget.css';
     document.head.appendChild(chatCSS);
     
-    // Create HTML
+    // Add HTML
     const chatHTML = `
     <div class="chat-widget">
         <button class="chat-button" id="chatToggle">🤖</button>
@@ -43,15 +43,19 @@ function loadChatWidget() {
     
     document.body.insertAdjacentHTML('beforeend', chatHTML);
     
-    // Load chat widget functionality
-    const chatScript = document.createElement('script');
-    chatScript.src = 'js/chat-widget.js';
-    document.body.appendChild(chatScript);
-}
-
-// Load when page is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadChatWidget);
-} else {
-    loadChatWidget();
-}
+    // Load the main chat widget script
+    setTimeout(function() {
+        const script = document.createElement('script');
+        script.src = 'js/chat-widget.js';
+        script.onload = function() {
+            // Initialize after script loads
+            setTimeout(function() {
+                if (typeof ChatWidget !== 'undefined' && !window.chatWidget) {
+                    window.chatWidget = new ChatWidget();
+                    console.log('Chat widget loaded on other page');
+                }
+            }, 100);
+        };
+        document.body.appendChild(script);
+    }, 100);
+});
