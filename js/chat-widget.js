@@ -1,17 +1,18 @@
-// Simplified chat-widget.js - Focus on core functionality
+// Real API chat-widget.js - Connects to actual backend
 class ChatWidget {
     constructor() {
-        console.log('🚀 Initializing Chat Widget...');
+        console.log('🚀 Initializing Chat Widget with Real API...');
         this.isChatOpen = false;
         this.currentTicketId = null;
         this.userName = '';
         this.isNewChat = true;
-        this.backendUrl = 'https://1454e379-5d20-4c4f-91ff-4859f3439300-00-2mhzvdi91js6d.sisko.replit.dev/';
+        this.backendUrl = 'https://1454e379-5d20-4c4f-91ff-4859f3439300-00-2mhzvdi91js6d.sisko.replit.dev';
         
         this.initializeElements();
         this.attachEventListeners();
+        this.startPolling();
         
-        console.log('✅ Chat Widget Ready');
+        console.log('✅ Chat Widget Ready with Real API');
     }
 
     initializeElements() {
@@ -165,16 +166,49 @@ class ChatWidget {
         
         this.elements.chatMessages.innerHTML = '';
         
-        // Simulate API call for demo
-        this.addMessage(`Your ticket ID is: ${this.currentTicketId}. Please save this ID to continue this chat later.`, 'bot');
-        this.addMessage(`Hello ${this.userName}! How can I help you today?`, 'bot');
+        try {
+            const response = await this.sendToBackend('/api/new_chat', {
+                userName: this.userName,
+                ticketId: this.currentTicketId
+            });
+            
+            if (response.success) {
+                this.addMessage(`Your ticket ID is: ${this.currentTicketId}. Please save this ID to continue this chat later.`, 'bot');
+                this.addMessage(`Hello ${this.userName}! Welcome to Game Support. How can I help you today?`, 'bot');
+            } else {
+                throw new Error(response.error || 'Failed to start chat');
+            }
+        } catch (error) {
+            console.error('Error starting new chat:', error);
+            this.addMessage(`Sorry, there was an error starting the chat. Please try again.`, 'bot');
+        }
     }
 
     async continueExistingChat() {
         if (!this.elements.chatMessages) return;
         
         this.elements.chatMessages.innerHTML = '';
-        this.addMessage(`Welcome back ${this.userName}! Continuing your previous conversation.`, 'bot');
+        
+        try {
+            const response = await this.sendToBackend('/api/continue_chat', {
+                userName: this.userName,
+                ticketId: this.currentTicketId
+            });
+            
+            if (response.success) {
+                this.addMessage(`Welcome back ${this.userName}! Continuing your previous conversation.`, 'bot');
+                // Load existing messages
+                await this.loadMessages();
+            } else {
+                throw new Error(response.error || 'Failed to continue chat');
+            }
+        } catch (error) {
+            console.error('Error continuing chat:', error);
+            this.addMessage(`Sorry, couldn't load your previous conversation. Starting a new one.`, 'bot');
+            this.currentTicketId = this.generateTicketId();
+            this.isNewChat = true;
+            await this.startNewChat();
+        }
     }
 
     async sendMessage() {
@@ -189,15 +223,87 @@ class ChatWidget {
         // Show typing indicator
         this.showTypingIndicator();
         
-        // Simulate bot response after delay
-        setTimeout(() => {
+        try {
+            const response = await this.sendToBackend('/api/user_message', {
+                userName: this.userName,
+                ticketId: this.currentTicketId,
+                message: message
+            });
+            
             this.hideTypingIndicator();
-            this.addMessage("Thanks for your message! Our support team will get back to you soon.", 'bot');
-        }, 1000);
+            
+            if (response.success && response.message) {
+                this.addMessage(response.message, 'bot');
+            } else {
+                this.addMessage("I apologize, but I'm having trouble processing your message. Please try again.", 'bot');
+            }
+            
+        } catch (error) {
+            console.error('Error sending message:', error);
+            this.hideTypingIndicator();
+            this.addMessage("Sorry, I'm having trouble connecting to the support team. Please try again later.", 'bot');
+        }
+    }
+
+    async loadMessages() {
+        try {
+            const response = await this.sendToBackend('/api/get_messages', {
+                ticketId: this.currentTicketId
+            });
+            
+            if (response.success && response.messages) {
+                response.messages.forEach(msg => {
+                    this.addMessage(msg.message, msg.sender === 'user' ? 'user' : 'bot', false);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading messages:', error);
+        }
+    }
+
+    async sendToBackend(endpoint, data) {
+        console.log(`📤 Sending to ${endpoint}:`, data);
+        
+        const response = await fetch(`${this.backendUrl}${endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log(`📥 Response from ${endpoint}:`, result);
+        return result;
+    }
+
+    startPolling() {
+        // Poll for new messages every 3 seconds when chat is open
+        setInterval(async () => {
+            if (this.currentTicketId && this.isChatOpen) {
+                try {
+                    await this.loadMessages();
+                } catch (error) {
+                    console.error('Error polling messages:', error);
+                }
+            }
+        }, 3000);
     }
 
     addMessage(text, sender, scroll = true) {
         if (!this.elements.chatMessages) return;
+        
+        // Check if message already exists to avoid duplicates
+        const existingMessages = Array.from(this.elements.chatMessages.querySelectorAll('.message-content'))
+            .map(el => el.textContent);
+            
+        if (existingMessages.includes(text)) {
+            return; // Skip duplicate
+        }
         
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}-message`;
@@ -256,9 +362,13 @@ function initializeChatWidget() {
     
     // Wait a bit for DOM to be fully ready
     setTimeout(() => {
-        chatWidgetInstance = new ChatWidget();
-        window.chatWidget = chatWidgetInstance;
-        console.log('🌐 Chat widget added to window object');
+        try {
+            chatWidgetInstance = new ChatWidget();
+            window.chatWidget = chatWidgetInstance;
+            console.log('🌐 Chat widget added to window object');
+        } catch (error) {
+            console.error('❌ Failed to initialize chat widget:', error);
+        }
     }, 100);
 }
 
