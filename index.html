@@ -434,19 +434,9 @@
             console.log('Godot 3D MP website loaded with full functionality');
         });
     </script>
- <!-- Second Script Section: Chat Widget Initialization -->
-<script>
-    // Initialize chat widget after everything is loaded - SINGLE INITIALIZATION
-    document.addEventListener('DOMContentLoaded', function() {
-        // Wait a bit to ensure chat-widget.js is loaded
-        setTimeout(() => {
-            if (typeof ChatWidget !== 'undefined' && !window.chatWidget) {
-                window.chatWidget = new ChatWidget();
-                console.log('Chat widget initialized successfully');
-            }
-        }, 100);
-    });
-</script>
+ <!-- Before closing </body> tag in EVERY page -->
+<script src="js/chat-loader.js"></script>
 </body>
 </html>
+
 
