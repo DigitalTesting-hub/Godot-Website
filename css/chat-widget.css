@@ -1,4 +1,4 @@
-/* chat-widget.css - Orange Theme */
+/* chat-widget.css - Mobile Responsive Orange Theme */
 .chat-widget {
     position: fixed;
     bottom: 20px;
@@ -6,30 +6,7 @@
     z-index: 10000;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-/* Add this to your existing chat-widget.css */
-.chat-widget {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 10000; /* Ensure it's above everything */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
 
-.chat-container {
-    position: absolute;
-    bottom: 70px;
-    right: 0;
-    width: 350px;
-    height: 500px;
-    background: #1a1a1a;
-    border-radius: 10px;
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
-    display: none; /* Start hidden */
-    flex-direction: column;
-    overflow: hidden;
-    border: 2px solid #ff6b35;
-    z-index: 10001; /* Above the button */
-}
 .chat-button {
     width: 60px;
     height: 60px;
@@ -321,11 +298,139 @@
     background: #e55a2b;
 }
 
-@media (max-width: 480px) {
+/* ==================== */
+/* MOBILE RESPONSIVE CSS */
+/* ==================== */
+
+@media (max-width: 768px) {
+    .chat-widget {
+        bottom: 15px;
+        right: 15px;
+        left: 15px;
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .chat-button {
+        width: 55px;
+        height: 55px;
+        font-size: 22px;
+        position: relative;
+        z-index: 10002;
+    }
+    
     .chat-container {
-        width: 300px;
-        height: 450px;
-        right: -10px;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        border: none;
+        z-index: 10001;
+    }
+    
+    .chat-header {
+        padding: 20px 15px;
+        border-radius: 0;
+        position: relative;
+    }
+    
+    .chat-header h3 {
+        font-size: 18px;
+    }
+    
+    .close-chat {
+        font-size: 24px;
+        width: 30px;
+        height: 30px;
+    }
+    
+    .chat-body {
+        height: calc(100% - 140px);
+    }
+    
+    .chat-messages {
+        padding: 20px 15px;
+        height: 100%;
+    }
+    
+    .message {
+        max-width: 85%;
+    }
+    
+    .message-content {
+        padding: 12px 16px;
+        font-size: 16px;
+        line-height: 1.4;
+    }
+    
+    .chat-input-area {
+        padding: 20px 15px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #1a1a1a;
+        border-top: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .chat-input {
+        padding: 15px 20px;
+        font-size: 16px;
+        border-radius: 25px;
+    }
+    
+    .send-button {
+        width: 50px;
+        height: 50px;
+        font-size: 18px;
+    }
+    
+    .welcome-screen {
+        padding: 30px 20px;
+    }
+    
+    .welcome-screen h3 {
+        font-size: 22px;
+        margin-bottom: 20px;
+    }
+    
+    .welcome-screen p {
+        font-size: 16px;
+        margin-bottom: 30px;
+    }
+    
+    .input-group {
+        margin-bottom: 20px;
+    }
+    
+    .input-group label {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+    
+    .input-group input {
+        padding: 15px;
+        font-size: 16px;
+        border-radius: 10px;
+    }
+    
+    .start-chat-btn {
+        padding: 16px 20px;
+        font-size: 16px;
+        border-radius: 10px;
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-widget {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
     }
     
     .chat-button {
@@ -333,5 +438,67 @@
         height: 50px;
         font-size: 20px;
     }
+    
+    .chat-messages {
+        padding: 15px 10px;
+    }
+    
+    .message {
+        max-width: 90%;
+    }
+    
+    .message-content {
+        padding: 10px 14px;
+        font-size: 15px;
+    }
+    
+    .chat-input-area {
+        padding: 15px 10px;
+    }
+    
+    .chat-input {
+        padding: 12px 18px;
+        font-size: 15px;
+    }
+    
+    .send-button {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .welcome-screen {
+        padding: 25px 15px;
+    }
+    
+    .welcome-screen h3 {
+        font-size: 20px;
+    }
+    
+    .input-group input {
+        padding: 12px 15px;
+    }
 }
 
+/* Prevent body scroll when chat is open on mobile */
+body.chat-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+/* Backdrop for mobile */
+.chat-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+}
+
+.chat-backdrop.active {
+    display: block;
+}
