@@ -7,7 +7,7 @@ class ChatWidget {
         this.currentTicketId = null;
         this.userName = '';
         this.isNewChat = true;
-        this.backendUrl = 'YOUR_GOOGLE_APPS_SCRIPT_URL'; // Replace with your GAS URL
+        this.backendUrl = 'https://script.google.com/macros/s/AKfycbxVXQl4WceTDxc1B58i9kJpWaa8UvDVlff9Avm-h83RJsmmxQjMStY2S8pFarvUsNhtNA/exec'; // Replace after deploying GAS
         
         this.initializeElements();
         this.attachEventListeners();
@@ -110,7 +110,7 @@ class ChatWidget {
             
         } catch (error) {
             console.error('Error starting chat:', error);
-            alert('Error starting chat. Please try again.');
+            alert('Error starting chat: ' + error.message);
         }
     }
 
@@ -229,6 +229,10 @@ class ChatWidget {
             })
         });
         
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         return await response.json();
     }
 
@@ -242,7 +246,6 @@ class ChatWidget {
                     });
                     
                     if (response.success) {
-                        // Implement message sync logic here
                         this.syncMessages(response.messages);
                     }
                 } catch (error) {
@@ -253,8 +256,6 @@ class ChatWidget {
     }
 
     syncMessages(messages) {
-        // Compare existing messages with new messages and update if needed
-        // This prevents duplicate messages
         const existingMessages = Array.from(this.chatMessages.querySelectorAll('.message-content'))
             .map(el => el.textContent);
             
