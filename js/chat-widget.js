@@ -1,4 +1,4 @@
-// chat-widget.js - With Backend Integration
+// chat-widget.js - Updated with Backend Integration
 class ChatWidget {
     constructor() {
         if (window.chatWidgetInitialized) return;
@@ -7,11 +7,14 @@ class ChatWidget {
         this.currentTicketId = null;
         this.userName = '';
         this.isNewChat = true;
-        this.backendUrl = 'https://script.google.com/macros/s/AKfycbx0LfVwbwY2i3U5Oo_2bGAthAHesr55l7akdsqq3o4QQvEKTp0nsMjq7_9GYHGtpi__1Q/exec'; // Replace after deploying GAS
+        this.lastMessageId = null;
+        this.pollingInterval = null;
+        
+        // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT URL
+        this.backendUrl = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
         
         this.initializeElements();
         this.attachEventListeners();
-        this.startPolling();
         
         window.chatWidgetInitialized = true;
     }
@@ -43,6 +46,12 @@ class ChatWidget {
         this.currentTicketId = null;
         this.userName = '';
         this.isNewChat = true;
+        this.lastMessageId = null;
+        
+        if (this.pollingInterval) {
+            clearInterval(this.pollingInterval);
+            this.pollingInterval = null;
+        }
     }
 
     attachEventListeners() {
@@ -74,7 +83,9 @@ class ChatWidget {
         
         if (this.isChatOpen) {
             setTimeout(() => {
-                if (this.messageInput) this.messageInput.focus();
+                if (this.messageInput && this.currentTicketId) {
+                    this.messageInput.focus();
+                }
             }, 100);
         }
     }
@@ -94,11 +105,16 @@ class ChatWidget {
         }
         
         try {
+            this.startChatBtn.disabled = true;
+            this.startChatBtn.textContent = 'Connecting...';
+            
             if (ticketId) {
+                // Continue existing chat
                 this.currentTicketId = ticketId;
                 this.isNewChat = false;
                 await this.continueExistingChat();
             } else {
+                // Start new chat
                 this.currentTicketId = this.generateTicketId();
                 this.isNewChat = true;
                 await this.startNewChat();
@@ -108,9 +124,14 @@ class ChatWidget {
             this.chatMessages.style.display = 'flex';
             this.chatInputArea.style.display = 'flex';
             
+            // Start polling for new messages
+            this.startPolling();
+            
         } catch (error) {
             console.error('Error starting chat:', error);
             alert('Error starting chat: ' + error.message);
+            this.startChatBtn.disabled = false;
+            this.startChatBtn.textContent = 'Start Chat';
         }
     }
 
@@ -124,9 +145,10 @@ class ChatWidget {
         
         if (response.success) {
             this.addMessage(`Hello ${this.userName}! How can we help you today?`, 'bot');
-            this.addMessage(`Your ticket ID is: ${this.currentTicketId}. Please save this ID to continue this chat later.`, 'bot');
+            this.addMessage(`Your ticket ID is: ${this.currentTicketId}`, 'bot', true);
+            this.addMessage(`Please save this ID to continue this chat later.`, 'bot');
         } else {
-            throw new Error(response.error);
+            throw new Error(response.error || 'Failed to start chat');
         }
     }
 
@@ -139,20 +161,31 @@ class ChatWidget {
         });
         
         if (response.success) {
-            this.addMessage(`Welcome back ${this.userName}! Continuing your previous conversation.`, 'bot');
+            this.addMessage(`Welcome back ${this.userName}!`, 'bot');
+            this.addMessage(`Continuing your previous conversation (${this.currentTicketId})`, 'bot');
             
             // Load previous messages
-            const messagesResponse = await this.sendToBackend('get_messages', {
-                ticketId: this.currentTicketId
+            await this.loadMessages();
+        } else {
+            throw new Error(response.error || 'Failed to continue chat');
+        }
+    }
+
+    async loadMessages() {
+        try {
+            const response = await this.sendToBackend('get_messages', {
+                ticketId: this.currentTicketId,
+                lastMessageId: this.lastMessageId
             });
             
-            if (messagesResponse.success) {
-                messagesResponse.messages.forEach(msg => {
-                    this.addMessage(msg.message, msg.sender === 'user' ? 'user' : 'bot');
+            if (response.success && response.messages) {
+                response.messages.forEach(msg => {
+                    this.addMessage(msg.message, msg.sender === 'user' ? 'user' : 'bot', false, msg.id);
+                    this.lastMessageId = msg.id;
                 });
             }
-        } else {
-            throw new Error(response.error);
+        } catch (error) {
+            console.error('Error loading messages:', error);
         }
     }
 
@@ -170,7 +203,9 @@ class ChatWidget {
                 message: message
             });
             
+            // Show typing indicator briefly
             this.showTypingIndicator();
+            setTimeout(() => this.hideTypingIndicator(), 2000);
             
         } catch (error) {
             console.error('Error sending message:', error);
@@ -178,13 +213,19 @@ class ChatWidget {
         }
     }
 
-    addMessage(text, sender) {
+    addMessage(text, sender, isTicketId = false, messageId = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}-message`;
+        if (messageId) messageDiv.dataset.messageId = messageId;
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
-        contentDiv.textContent = text;
+        
+        if (isTicketId) {
+            contentDiv.innerHTML = `<div class="ticket-id">${text}</div>`;
+        } else {
+            contentDiv.textContent = text;
+        }
         
         messageDiv.appendChild(contentDiv);
         this.chatMessages.appendChild(messageDiv);
@@ -193,7 +234,7 @@ class ChatWidget {
 
     showTypingIndicator() {
         const existingIndicator = document.getElementById('typingIndicator');
-        if (existingIndicator) existingIndicator.remove();
+        if (existingIndicator) return;
         
         const typingDiv = document.createElement('div');
         typingDiv.className = 'message bot-message typing-indicator';
@@ -206,15 +247,11 @@ class ChatWidget {
         typingDiv.appendChild(contentDiv);
         this.chatMessages.appendChild(typingDiv);
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-        
-        setTimeout(() => {
-            const indicator = document.getElementById('typingIndicator');
-            if (indicator) {
-                indicator.remove();
-                // In real implementation, this would be replaced with actual bot response
-                this.addMessage("Thanks for your message! Our team will respond shortly.", 'bot');
-            }
-        }, 2000);
+    }
+
+    hideTypingIndicator() {
+        const indicator = document.getElementById('typingIndicator');
+        if (indicator) indicator.remove();
     }
 
     async sendToBackend(action, data) {
@@ -238,43 +275,23 @@ class ChatWidget {
 
     startPolling() {
         // Poll for new messages every 3 seconds
-        setInterval(async () => {
+        this.pollingInterval = setInterval(async () => {
             if (this.currentTicketId && this.isChatOpen) {
-                try {
-                    const response = await this.sendToBackend('get_messages', {
-                        ticketId: this.currentTicketId
-                    });
-                    
-                    if (response.success) {
-                        this.syncMessages(response.messages);
-                    }
-                } catch (error) {
-                    console.error('Error polling messages:', error);
-                }
+                await this.loadMessages();
             }
         }, 3000);
     }
 
-    syncMessages(messages) {
-        const existingMessages = Array.from(this.chatMessages.querySelectorAll('.message-content'))
-            .map(el => el.textContent);
-            
-        messages.forEach(msg => {
-            if (!existingMessages.includes(msg.message)) {
-                this.addMessage(msg.message, msg.sender === 'user' ? 'user' : 'bot');
-            }
-        });
-    }
-
     generateTicketId() {
-        return 'TKT-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        const timestamp = Date.now().toString(36);
+        const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+        return `TKT-${timestamp}-${random}`.toUpperCase();
     }
 }
 
+// Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
     if (!window.chatWidget) {
         window.chatWidget = new ChatWidget();
     }
 });
-
-
