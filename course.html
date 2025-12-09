@@ -64,7 +64,7 @@
         <div class="container">
             <div class="auth-message">
                 <h2>Authentication Required</h2>
-                <p>Please log in to access the course content.</p>
+                <p>Please log in or create an account to access the course content.</p>
                 <a href="login.html" class="cta-button">Login / Sign Up</a>
             </div>
         </div>
@@ -164,24 +164,65 @@
             </div>
         </div>
     </section>
-<!-- Chat Widget -->
-<!-- In the body -->
-<div class="chat-widget">
-    <!-- Chat widget will be injected here by chat-loader.js -->
-</div>
 
-<!-- Before </body> -->
-<script src="js/chat-loader.js"></script>
-<script src="js/chat-widget.js"></script>
-      <script>
-        // Mobile Menu Functionality (same as before)
-        // ...
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <!-- Chat widget will be injected here by chat-loader.js -->
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/chat-loader.js"></script>
+    <script src="js/chat-widget.js"></script>
+    <script>
+        // Mobile Menu Functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const body = document.body;
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            body.classList.add('menu-open');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            body.classList.remove('menu-open');
+        }
+
+        // Event Listeners for mobile menu
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+        // Close menu when clicking on links
+        const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+            }
+        });
 
         // Supabase Configuration
         const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Initialize Supabase with session persistence
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true
+            }
+        });
 
         class LMSManager {
             constructor() {
@@ -199,7 +240,13 @@
             }
 
             async checkAuthState() {
+                console.log('Checking auth state...');
                 const { data: { session }, error } = await supabase.auth.getSession();
+                
+                console.log('Session exists:', !!session);
+                if (session) {
+                    console.log('User email:', session.user.email);
+                }
                 
                 const authRequired = document.getElementById('authRequired');
                 const dashboard = document.getElementById('dashboard');
@@ -235,111 +282,111 @@
             }
 
             async loadUserData() {
-    if (!this.currentUser) return;
+                if (!this.currentUser) return;
 
-    try {
-        // First, get the profile
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', this.currentUser.id)
-            .single();
+                try {
+                    // First, get the profile
+                    const { data, error } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', this.currentUser.id)
+                        .single();
 
-        if (error) {
-            // Profile not found - create new one with email from Auth
-            console.log('Profile not found, creating new profile...');
-            await this.createUserProfile();
-            return;
-        }
+                    if (error) {
+                        // Profile not found - create new one with email from Auth
+                        console.log('Profile not found, creating new profile...');
+                        await this.createUserProfile();
+                        return;
+                    }
 
-        // Profile exists - check if email is null and update if needed
-        if (!data.email || data.email === null || data.email === '') {
-            console.log('Email is null in profile, updating from Auth...');
-            await this.updateProfileEmail();
-            return;
-        }
+                    // Profile exists - check if email is null and update if needed
+                    if (!data.email || data.email === null || data.email === '') {
+                        console.log('Email is null in profile, updating from Auth...');
+                        await this.updateProfileEmail();
+                        return;
+                    }
 
-        this.userProfile = data;
-        this.updateTierUI();
-        
-    } catch (error) {
-        console.error('Error loading user profile:', error);
-        this.setDefaultTier();
-    }
-}
+                    this.userProfile = data;
+                    this.updateTierUI();
+                    
+                } catch (error) {
+                    console.error('Error loading user profile:', error);
+                    this.setDefaultTier();
+                }
+            }
 
-async createUserProfile() {
-    try {
-        const { data, error } = await supabase
-            .from('profiles')
-            .insert([{
-                id: this.currentUser.id,
-                email: this.currentUser.email, // Get email from Auth user
-                subscription_tier: 'free',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            }])
-            .select()
-            .single();
+            async createUserProfile() {
+                try {
+                    const { data, error } = await supabase
+                        .from('profiles')
+                        .insert([{
+                            id: this.currentUser.id,
+                            email: this.currentUser.email,
+                            subscription_tier: 'free',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        }])
+                        .select()
+                        .single();
 
-        if (error) throw error;
-        
-        this.userProfile = data;
-        this.updateTierUI();
-        console.log('✅ New profile created with email:', this.userProfile.email);
-        
-    } catch (error) {
-        console.error('Error creating user profile:', error);
-        this.setDefaultTier();
-    }
-}
+                    if (error) throw error;
+                    
+                    this.userProfile = data;
+                    this.updateTierUI();
+                    console.log('✅ New profile created with email:', this.userProfile.email);
+                    
+                } catch (error) {
+                    console.error('Error creating user profile:', error);
+                    this.setDefaultTier();
+                }
+            }
 
-async updateProfileEmail() {
-    try {
-        // Update the profile with email from Auth user
-        const { data, error } = await supabase
-            .from('profiles')
-            .update({
-                email: this.currentUser.email, // Get email from Auth user
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', this.currentUser.id)
-            .select()
-            .single();
+            async updateProfileEmail() {
+                try {
+                    // Update the profile with email from Auth user
+                    const { data, error } = await supabase
+                        .from('profiles')
+                        .update({
+                            email: this.currentUser.email,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', this.currentUser.id)
+                        .select()
+                        .single();
 
-        if (error) throw error;
-        
-        this.userProfile = data;
-        this.updateTierUI();
-        console.log('✅ Profile email updated:', this.userProfile.email);
-        
-    } catch (error) {
-        console.error('Error updating profile email:', error);
-        // Even if update fails, try to load the profile without email
-        await this.loadProfileWithoutEmail();
-    }
-}
+                    if (error) throw error;
+                    
+                    this.userProfile = data;
+                    this.updateTierUI();
+                    console.log('✅ Profile email updated:', this.userProfile.email);
+                    
+                } catch (error) {
+                    console.error('Error updating profile email:', error);
+                    await this.loadProfileWithoutEmail();
+                }
+            }
 
-async loadProfileWithoutEmail() {
-    try {
-        // Load profile even if email update failed
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', this.currentUser.id)
-            .single();
+            async loadProfileWithoutEmail() {
+                try {
+                    // Load profile even if email update failed
+                    const { data, error } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', this.currentUser.id)
+                        .single();
 
-        if (error) throw error;
-        
-        this.userProfile = data;
-        this.updateTierUI();
-        console.log('✅ Profile loaded (email may be null):', this.userProfile);
-        
-    } catch (error) {
-        console.error('Error loading profile:', error);
-        this.setDefaultTier();
-    }
-}
+                    if (error) throw error;
+                    
+                    this.userProfile = data;
+                    this.updateTierUI();
+                    console.log('✅ Profile loaded (email may be null):', this.userProfile);
+                    
+                } catch (error) {
+                    console.error('Error loading profile:', error);
+                    this.setDefaultTier();
+                }
+            }
+
             updateTierUI() {
                 if (!this.userProfile) {
                     this.setDefaultTier();
@@ -365,7 +412,6 @@ async loadProfileWithoutEmail() {
                 document.getElementById('userTier').textContent = defaultTier;
                 document.getElementById('mobileUserTier').textContent = defaultTier;
                 
-                // Also set it in the userProfile object
                 this.userProfile = this.userProfile || {};
                 this.userProfile.subscription_tier = defaultTier;
             }
@@ -476,7 +522,7 @@ async loadProfileWithoutEmail() {
                 if (!this.currentCourse) return;
 
                 if (!this.hasCourseAccess(courseId)) {
-                    alert('❌ You need to upgrade your tier to access this course');
+                    this.showMessage('❌ You need to upgrade your tier to access this course');
                     return;
                 }
 
@@ -584,7 +630,7 @@ async loadProfileWithoutEmail() {
                 const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
                 
-                alert(`📱 Opening WhatsApp to request ${course.required_tier.toUpperCase()} tier upgrade for "${course.title}"`);
+                this.showMessage(`📱 Opening WhatsApp to request ${course.required_tier.toUpperCase()} tier upgrade for "${course.title}"`);
             }
 
             renderUpgradeOptions() {
@@ -624,17 +670,23 @@ async loadProfileWithoutEmail() {
                 const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
                 
-                alert(`📱 Opening WhatsApp to request ${tier.toUpperCase()} tier upgrade`);
+                this.showMessage(`📱 Opening WhatsApp to request ${tier.toUpperCase()} tier upgrade`);
             }
 
             async logout() {
                 try {
                     const { error } = await supabase.auth.signOut();
                     if (error) throw error;
-                    window.location.href = 'login.html';
+                    
+                    this.showMessage('👋 Logged out successfully. Redirecting...');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1000);
+                    
                 } catch (error) {
                     console.error('Logout error:', error);
-                    alert('Logout failed: ' + error.message);
+                    this.showMessage('❌ Logout failed: ' + error.message);
                 }
             }
 
@@ -649,6 +701,10 @@ async loadProfileWithoutEmail() {
                 circle.style.strokeDashoffset = offset;
                 percent.textContent = progress + '%';
             }
+
+            showMessage(message) {
+                alert(message);
+            }
         }
 
         function backToCourses() {
@@ -656,11 +712,14 @@ async loadProfileWithoutEmail() {
             document.getElementById('courseDetailsView').style.display = 'none';
         }
 
+        // Initialize LMS Manager
         document.addEventListener('DOMContentLoaded', function() {
             window.lmsManager = new LMSManager();
         });
 
+        // Auth state listener
         supabase.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state changed:', event);
             if (window.lmsManager) {
                 window.lmsManager.checkAuthState();
             }
