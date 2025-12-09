@@ -3,30 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Godot 4 3D Multiplayer - Build a Basic Battle Royale Game</title>
+    <title>Godot Game Assets Marketplace - Ready-Made Godot Scripts & Systems</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/chat-widget.css">
+    <style>
+        /* Additional CSS for Home/About Page */
+        .about-hero {
+            padding: 150px 0 80px;
+            text-align: center;
+            background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
+        }
+        
+        .about-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .about-intro {
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+        
+        .highlight-section {
+            padding: 80px 0;
+            background: var(--secondary);
+        }
+        
+        .highlight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .highlight-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .highlight-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+        
+        .highlight-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+        
+        .systems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .system-item {
+            background: rgba(0, 217, 255, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            text-align: center;
+        }
+        
+        .services-section {
+            padding: 80px 0;
+            background: var(--dark);
+        }
+        
+        .services-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .service-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 10px;
+            border-top: 4px solid var(--primary);
+        }
+        
+        .service-card h4 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 1.5rem 0;
+        }
+        
+        .features-list li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+        
+        .features-list li:before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .offer-section {
+            padding: 80px 0;
+            background: var(--secondary);
+            text-align: center;
+        }
+        
+        .offer-card {
+            background: rgba(255, 107, 53, 0.1);
+            padding: 3rem;
+            border-radius: 15px;
+            border: 2px solid var(--primary);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .target-audience {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .audience-item {
+            background: rgba(255, 107, 53, 0.1);
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .cta-section {
+            padding: 100px 0;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary) 0%, #e55a2b 100%);
+            color: white;
+        }
+        
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .cta-button-light {
+            background: white;
+            color: var(--primary);
+            padding: 1rem 2.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .cta-button-light:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .about-hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .about-intro {
+                font-size: 1.1rem;
+                padding: 0 1rem;
+            }
+            
+            .highlight-card, .service-card {
+                padding: 1.5rem;
+            }
+            
+            .services-cards, .highlight-grid {
+                grid-template-columns: 1fr;
+                padding: 0 1rem;
+            }
+            
+            .offer-card {
+                padding: 2rem 1.5rem;
+                margin: 0 1rem;
+            }
+            
+            .cta-section h2 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .about-hero {
+                padding: 130px 0 60px;
+            }
+            
+            .about-hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .systems-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
     <header>
         <div class="container">
             <nav>
-                <div class="logo">GODOT 3D MP</div>
+                <div class="logo">GODOT ASSETS</div>
                 
                 <!-- Desktop Navigation -->
                 <div class="nav-links">
-                    <a href="#features">Features</a>
-                    <a href="#curriculum">Curriculum</a>
-                    <a href="#mechanics">Mechanics</a>
-                    <a href="#media">Media</a>
-                    <a href="course.html">Course</a>
-                    <a href="#pricing">Get Notified</a>
-                    <a href="#faq">FAQ</a>
+                    <a href="index.html" class="active">Home</a>
+                    <a href="scripts.html">Scripts</a>
+                    <a href="addons.html">Addons</a>
+                    <a href="services.html">Services</a>
+                    <a href="pvp-game.html">PVP Game Course</a>
+                    <a href="index.html#contact">Contact</a>
                 </div>
                 
                 <!-- Desktop CTA Button -->
-                <a href="#pricing" class="cta-button">Get Notified</a>
+                <a href="#offer" class="cta-button">Get Assets</a>
                 
                 <!-- Mobile Menu Button -->
                 <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
@@ -36,20 +252,19 @@
         <!-- Mobile Menu -->
         <div class="mobile-menu" id="mobileMenu">
             <div class="mobile-menu-header">
-                <div class="mobile-menu-logo">GODOT 3D MP</div>
+                <div class="mobile-menu-logo">GODOT ASSETS</div>
                 <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
             </div>
             
             <div class="mobile-nav-links">
-                <a href="#features" onclick="closeMobileMenu()">Features</a>
-                <a href="#curriculum" onclick="closeMobileMenu()">Curriculum</a>
-                <a href="#mechanics" onclick="closeMobileMenu()">Mechanics</a>
-                <a href="#media" onclick="closeMobileMenu()">Media</a>
-                <a href="course.html" onclick="closeMobileMenu()">Course</a>
-                <a href="#pricing" onclick="closeMobileMenu()">Get Notified</a>
-                <a href="#faq" onclick="closeMobileMenu()">FAQ</a>
+                <a href="index.html" onclick="closeMobileMenu()">Home</a>
+                <a href="scripts.html" onclick="closeMobileMenu()">Scripts</a>
+                <a href="addons.html" onclick="closeMobileMenu()">Addons</a>
+                <a href="services.html" onclick="closeMobileMenu()">Services</a>
+                <a href="pvp-game.html" onclick="closeMobileMenu()">PVP Game Course</a>
+                <a href="index.html#contact" onclick="closeMobileMenu()">Contact</a>
                 
-                <a href="#pricing" class="cta-button" onclick="closeMobileMenu()">Get Notified</a>
+                <a href="#offer" class="cta-button" onclick="closeMobileMenu()">Get Assets</a>
             </div>
         </div>
         
@@ -58,281 +273,172 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="hero">
+    <section class="about-hero">
         <div class="container">
-            <div class="hero-badge">🚀 COMING SOON - PRELAUNCH OFFER</div>
-            <h1>Build a Basic Battle Royale Game with Godot 4</h1>
-            <p>Master 3D multiplayer game development by creating a complete battle royale experience with networking, combat systems, and professional game mechanics</p>
-            <a href="#pricing" class="cta-button">Get Early Access & Special Pricing →</a>
+            <h1>Godot Game Assets Marketplace</h1>
+            <div class="about-intro">
+                <p><strong>Ready-made, production-tested Godot systems</strong> – Stop coding from scratch, start building your game!</p>
+                <p>Hi, I'm <strong>Sanjay</strong>, an independent game developer from India. I build complete, tested systems that you can plug directly into your Godot 4 projects.</p>
+            </div>
+            <a href="#offer" class="cta-button">Explore Assets →</a>
         </div>
     </section>
 
-    <!-- Features -->
-    <section class="features" id="features">
+    <!-- Highlights Section -->
+    <section class="highlight-section">
         <div class="container">
-            <h2 class="section-title">What You'll Build</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🌐</div>
-                    <h3>Multiplayer Networking</h3>
-                    <p>Client-server architecture, RPC calls, player synchronization, and lag compensation for smooth multiplayer experience</p>
+            <h2 class="section-title">Production-Tested Systems</h2>
+            <p style="text-align: center; margin-bottom: 2rem; color: #ccc;">Built and tested in real multiplayer games</p>
+            
+            <div class="systems-grid">
+                <div class="system-item">Multiplayer Setup</div>
+                <div class="system-item">Vehicle Driving + Passengers</div>
+                <div class="system-item">Gun Combat System</div>
+                <div class="system-item">Melee Combat</div>
+                <div class="system-item">Throwables System</div>
+                <div class="system-item">AI Zombies</div>
+                <div class="system-item">AI Ranged Enemies</div>
+                <div class="system-item">Supabase Authentication</div>
+                <div class="system-item">Character Selection</div>
+                <div class="system-item">Shrinking Battle-Zone</div>
+                <div class="system-item">Pathfinding AI</div>
+                <div class="system-item">Enemy Logic Systems</div>
+            </div>
+            
+            <div class="highlight-grid">
+                <div class="highlight-card">
+                    <div class="highlight-icon">🚀</div>
+                    <h3>Why Choose Us?</h3>
+                    <p>Most free assets are incomplete or outdated. Our systems are:</p>
+                    <ul class="features-list">
+                        <li>Tested in real projects</li>
+                        <li>Multiplayer ready</li>
+                        <li>Mobile optimized</li>
+                        <li>Easy to customize</li>
+                        <li>Godot 4 compatible</li>
+                    </ul>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🎭</div>
-                    <h3>Character System</h3>
-                    <p>Multiple character models with animations, character selection, and customized player controllers</p>
+                
+                <div class="highlight-card">
+                    <div class="highlight-icon">📱</div>
+                    <h3>Mobile-First Design</h3>
+                    <p>Specifically optimized for mobile developers:</p>
+                    <ul class="features-list">
+                        <li>Touch-based controls</li>
+                        <li>Performance optimized</li>
+                        <li>Small screen friendly</li>
+                        <li>Battery efficient</li>
+                    </ul>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🏟️</div>
-                    <h3>Lobby & Map System</h3>
-                    <p>Custom lobby with god mode, waiting area, and optimized battle royale map with strategic locations</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚔️</div>
-                    <h3>Combat Mechanics</h3>
-                    <p>Gun systems with raycast damage, melee weapons with Area3D detection, and weapon switching</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🗺️</div>
-                    <h3>Game Systems</h3>
-                    <p>Shrinking danger zones, minimaps, kill feeds, spectator mode, and complete game cycle management</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🚀</div>
-                    <h3>Production Ready</h3>
-                    <p>Optimized, documented codebase that you can extend and use as foundation for your own games</p>
+                
+                <div class="highlight-card">
+                    <div class="highlight-icon">🇮🇳</div>
+                    <h3>For Indian Developers</h3>
+                    <p>We understand local needs:</p>
+                    <ul class="features-list">
+                        <li>Hindi tutorials available</li>
+                        <li>Affordable pricing (INR)</li>
+                        <li>Local support times</li>
+                        <li>Beginner friendly</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Curriculum Section -->
-    <section class="curriculum" id="curriculum">
+    <!-- Services Section -->
+    <section class="services-section">
         <div class="container">
-            <h2 class="section-title">Course Curriculum</h2>
-            <div class="curriculum-grid">
-                <div class="curriculum-card">
-                    <h3>1. Multiplayer Network Setup</h3>
-                    <p>Learn to set up robust multiplayer networking with Godot 4's high-level networking API, including client-server architecture and state synchronization.</p>
+            <h2 class="section-title">What We Offer</h2>
+            
+            <div class="services-cards">
+                <div class="service-card">
+                    <h4>Ready-Made Scripts</h4>
+                    <p>Plug-and-play Godot scripts for common game systems:</p>
+                    <ul class="features-list">
+                        <li>Complete AI systems</li>
+                        <li>Multiplayer networking</li>
+                        <li>Combat mechanics</li>
+                        <li>UI systems</li>
+                        <li>Save/load systems</li>
+                    </ul>
                 </div>
-                <div class="curriculum-card">
-                    <h3>2. Character Modeling & Animation</h3>
-                    <p>Create and implement 3D character models with proper rigging, animations for movement, combat, and character selection systems.</p>
+                
+                <div class="service-card">
+                    <h4>Full Addons</h4>
+                    <p>Complete systems ready to import:</p>
+                    <ul class="features-list">
+                        <li>Vehicle system with passengers</li>
+                        <li>Battle royale systems</li>
+                        <li>Inventory systems</li>
+                        <li>Character controllers</li>
+                        <li>Animation systems</li>
+                    </ul>
                 </div>
-                <div class="curriculum-card">
-                    <h3>3. Character Selection System</h3>
-                    <p>Build a multiplayer-ready character selection screen where players can choose from multiple characters with visual previews.</p>
-                </div>
-                <div class="curriculum-card">
-                    <h3>4. Lobby & Map Creation</h3>
-                    <p>Design and implement the game lobby with god mode functionality and create the main battle royale map with strategic locations.</p>
-                </div>
-                <div class="curriculum-card">
-                    <h3>5. Battle Royale Mechanics</h3>
-                    <p>Implement core battle royale features including safe zones, shrinking danger areas, and victory conditions.</p>
+                
+                <div class="service-card">
+                    <h4>Custom Services</h4>
+                    <p>Need something specific? We can help:</p>
+                    <ul class="features-list">
+                        <li>Godot Game Development</li>
+                        <li>Character Design & Animation</li>
+                        <li>Custom Script Development</li>
+                        <li>Performance Optimization</li>
+                        <li>Mobile Porting</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Mechanics Section -->
-    <section class="features" id="mechanics">
+    <!-- Special Offer Section -->
+    <section class="offer-section" id="offer">
         <div class="container">
-            <h2 class="section-title">Game Mechanics You'll Learn</h2>
-            <div class="mechanics-grid">
-                <div class="mechanic-item">Multiple Character System with Selection</div>
-                <div class="mechanic-item">Spawn Lobby with God Mode</div>
-                <div class="mechanic-item">Gun Systems with Raycast Damage</div>
-                <div class="mechanic-item">Melee Weapons with Area3D Detection</div>
-                <div class="mechanic-item">Basic Weapon Switching (Gun + Melee)</div>
-                <div class="mechanic-item">Safe & Shrinking Danger Zones</div>
-                <div class="mechanic-item">Minimaps & Individual Map Views</div>
-                <div class="mechanic-item">Killfeed & Player Status System</div>
-                <div class="mechanic-item">Spectator Mode & Waiting Lobby</div>
-                <div class="mechanic-item">Complete Game Cycle Management</div>
-                <div class="mechanic-item">Multiplayer Sync & Networking</div>
-                <div class="mechanic-item">Player Spawning & Respawn Systems</div>
+            <div class="offer-card">
+                <h2 class="section-title" style="color: var(--primary);">Stop Struggling with Basic Systems</h2>
+                <p style="font-size: 1.2rem; margin: 1.5rem 0;">Whether you're:</p>
+                
+                <div class="target-audience">
+                    <div class="audience-item">A Beginner</div>
+                    <div class="audience-item">Mobile Developer</div>
+                    <div class="audience-item">Hobbyist</div>
+                    <div class="audience-item">Solo Developer</div>
+                    <div class="audience-item">Student</div>
+                </div>
+                
+                <p style="font-size: 1.3rem; margin: 2rem 0; font-weight: bold;">
+                    Our assets save you time so you can focus on creativity
+                </p>
+                
+                <a href="scripts.html" class="cta-button" style="margin-top: 1rem;">Browse Available Scripts →</a>
             </div>
         </div>
     </section>
 
-    <!-- Media Gallery -->
-    <section class="media" id="media">
+    <!-- CTA Section -->
+    <section class="cta-section" id="contact">
         <div class="container">
-            <h2 class="section-title">Game Screenshots</h2>
-            <p style="text-align: center; margin-bottom: 2rem; color: #ccc;">Click on images to view fullscreen (Desktop only)</p>
-            <div class="gallery-grid">
-                <div class="gallery-item">
-                    <img src="images/1.webp" alt="Game Screenshot 1 - Multiplayer Lobby" class="gallery-image">
-                </div>
-                <div class="gallery-item">
-                    <img src="images/2.webp" alt="Game Screenshot 2 - Character Selection" class="gallery-image">
-                </div>
-                <div class="gallery-item">
-                    <img src="images/3.webp" alt="Game Screenshot 3 - Battle Royale Map" class="gallery-image">
-                </div>
-                <div class="gallery-item">
-                    <img src="images/4.webp" alt="Game Screenshot 4 - Combat System" class="gallery-image">
-                </div>
-                <div class="gallery-item">
-                    <img src="images/5.webp" alt="Game Screenshot 5 - Weapon System" class="gallery-image">
-                </div>
-                <div class="gallery-item">
-                    <img src="images/6.webp" alt="Game Screenshot 6 - Minimap" class="gallery-image">
-                </div>
-                <div class="gallery-item">
-                    <img src="images/7.webp" alt="Game Screenshot 7 - Spectator Mode" class="gallery-image">
-                </div>
-                <div class="gallery-item">
-                    <img src="images/8.webp" alt="Game Screenshot 8 - Game Interface" class="gallery-image">
-                </div>
-                <div class="gallery-item">
-                    <img src="images/9.webp" alt="Game Screenshot 9 - Character Models" class="gallery-image">
-                </div>
-                <div class="gallery-item">
-                    <img src="images/10.webp" alt="Game Screenshot 10 - Network Setup" class="gallery-image">
-                </div>
-                <div class="gallery-item">
-                    <img src="images/11.webp" alt="Game Screenshot 11 - Game Settings" class="gallery-image">
-                </div>
-                <div class="gallery-item">
-                    <img src="images/12.webp" alt="Game Screenshot 12 - Victory Screen" class="gallery-image">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Lead Collection Form -->
-    <section class="pricing" id="pricing">
-        <div class="container">
-            <h2 class="section-title">Get Early Access & Special Pricing</h2>
-            <div class="pricing-card">
-                <h3>🎁 Prelaunch Exclusive Offer</h3>
-                <p>Be the first to know when we launch and get special early-bird pricing</p>
-                
-                <form id="leadForm" class="lead-form">
-                    <div class="form-group">
-                        <input type="text" id="name" name="name" placeholder="Your Name" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="email" id="email" name="email" placeholder="Your Email" required>
-                    </div>
-                    <div class="form-group">
-                        <select id="budget" name="budget" required>
-                            <option value="">What's your budget? (INR)</option>
-                            <option value="100">₹100</option>
-                            <option value="200">₹200</option>
-                            <option value="300">₹300</option>
-                            <option value="400">₹400</option>
-                            <option value="500">₹500</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <textarea id="expectations" name="expectations" placeholder="What do you expect to learn from this course?" rows="3"></textarea>
-                    </div>
-                    
-                    <button type="submit" class="cta-button full-width" id="submitBtn">
-                        <span class="btn-text">Get Early Access & Pricing</span>
-                        <span class="btn-loading" style="display: none;">Sending...</span>
-                    </button>
-                </form>
-                
-                <div id="formMessage" class="form-message"></div>
-                
-                <div style="margin-top: 1rem; font-size: 0.9rem; color: #ccc;">
-                    🔒 We respect your privacy. No spam, ever.
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ -->
-    <section class="faq" id="faq">
-        <div class="container">
-            <h2 class="section-title">Frequently Asked Questions</h2>
-            <div class="faq-list">
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFAQ(1)">
-                        <span>Do I need prior Godot experience?</span>
-                        <span>+</span>
-                    </div>
-                    <div class="faq-answer" id="faq1">
-                        <p>Basic Godot knowledge is recommended, but we start from foundational concepts and build up gradually. Complete beginners can follow along with some extra effort.</p>
-                    </div>
-                </div>
-                
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFAQ(2)">
-                        <span>When will the course be available?</span>
-                        <span>+</span>
-                    </div>
-                    <div class="faq-answer" id="faq2">
-                        <p>We're launching soon! Join the waitlist to get notified first and receive special early-bird pricing.</p>
-                    </div>
-                </div>
-                
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFAQ(3)">
-                        <span>Can I use the code in commercial projects?</span>
-                        <span>+</span>
-                    </div>
-                    <div class="faq-answer" id="faq3">
-                        <p>Yes! All code created in the course is yours to use in personal or commercial projects. We teach production-ready patterns you can apply anywhere.</p>
-                    </div>
-                </div>
-                
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFAQ(4)">
-                        <span>What if I get stuck?</span>
-                        <span>+</span>
-                    </div>
-                    <div class="faq-answer" id="faq4">
-                        <p>You'll get access to our private Discord community where you can ask questions, get help from me and other students, and share your progress.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFAQ(5)">
-                        <span>Is this course suitable for beginners?</span>
-                        <span>+</span>
-                    </div>
-                    <div class="faq-answer" id="faq5">
-                        <p>While some programming experience is helpful, we explain everything step by step. The course is designed to take you from basic concepts to advanced multiplayer implementation.</p>
-                    </div>
-                </div>
-            </div>
+            <h2>Ready to Build Your Game Faster?</h2>
+            <p>We've done the hard work of building and testing complex systems. You get production-ready code that just works.</p>
+            <p style="font-size: 1.5rem; font-weight: bold; margin: 2rem 0;">
+                Let's build amazing Godot games together!
+            </p>
+            <a href="#offer" class="cta-button-light">Get Started Now →</a>
         </div>
     </section>
 
     <!-- Footer -->
     <footer>
         <div class="container">
-            <div class="logo" style="margin-bottom: 1rem;">GODOT 3D MP</div>
-            <p>Master 3D Multiplayer Game Development with Godot 4</p>
+            <div class="logo" style="margin-bottom: 1rem;">GODOT ASSETS</div>
+            <p>Ready-made Godot Scripts & Systems for Faster Game Development</p>
             <div style="margin-top: 2rem; font-size: 0.9rem; color: #ccc;">
-                © 2024 Godot 3D Multiplayer Mastery. All rights reserved.
+                © 2024 Godot Game Assets Marketplace. All rights reserved.
             </div>
         </div>
     </footer>
 
-    <!-- Fullscreen Image Modal -->
-    <div class="image-modal" id="imageModal">
-        <button class="modal-close" id="modalClose">✕</button>
-        <img src="" alt="" class="modal-image" id="modalImage">
-        <div class="modal-caption" id="modalCaption"></div>
-    </div>
-<!-- In the body -->
-<div class="chat-widget">
-    <!-- Chat widget will be injected here by chat-loader.js -->
-</div>
-
-<!-- Before </body> -->
-<script src="js/chat-loader.js"></script>
-    <!-- External JavaScript -->
-    <script src="js/script.js"></script>
-    <script src="js/chat-widget.js"></script>
-
-    <!-- First Script Section: Original Website Functionality -->
+    <!-- JavaScript -->
     <script>
         // Mobile Menu Functionality
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -371,17 +477,39 @@
             }
         });
 
-        // FAQ Toggle Function
-        function toggleFAQ(faqNum) {
-            const answer = document.getElementById(`faq${faqNum}`);
-            answer.classList.toggle('active');
-            const question = answer.previousElementSibling;
-            question.querySelector('span:last-child').textContent = answer.classList.contains('active') ? '−' : '+';
-        }
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    closeMobileMenu();
+                }
+            });
+        });
 
-        // Add some interactive animations
+        // Add active class to current page in nav
         document.addEventListener('DOMContentLoaded', function() {
-            // Add fade-in animation to elements
+            const currentPage = window.location.pathname.split('/').pop();
+            const navLinks = document.querySelectorAll('.nav-links a, .mobile-nav-links a');
+            
+            navLinks.forEach(link => {
+                const linkPage = link.getAttribute('href');
+                if (linkPage === currentPage || 
+                    (currentPage === '' && linkPage === 'index.html') ||
+                    (currentPage === 'index.html' && linkPage === 'index.html')) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Add fade-in animation
             const observerOptions = {
                 threshold: 0.1,
                 rootMargin: '0px 0px -50px 0px'
@@ -396,21 +524,14 @@
                 });
             }, observerOptions);
             
-            // Observe feature cards and other elements
-            document.querySelectorAll('.feature-card, .pricing-card, .curriculum-card, .mechanic-item, .gallery-item').forEach(el => {
+            // Observe elements
+            document.querySelectorAll('.highlight-card, .service-card, .offer-card').forEach(el => {
                 el.style.opacity = '0';
                 el.style.transform = 'translateY(20px)';
                 el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
                 observer.observe(el);
             });
-            
-            console.log('Godot 3D MP website loaded with full functionality');
         });
     </script>
 </body>
 </html>
-
-
-
-
-
