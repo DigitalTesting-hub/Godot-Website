@@ -1033,117 +1033,150 @@
                         <h2 class="section-title">📋 Code Templates</h2>
                         <p class="section-description">Pre-built code templates for common Godot patterns. Click any template to load it for editing.</p>
                         
-                        <div class="templates-grid">
-                            <!-- Template 1: Advanced Player Controller -->
-                            <div class="template-card" data-template="player">
-                                <h4><span class="template-icon">👤</span> Advanced Player Controller</h4>
-                                <p>A complete 3D player controller with advanced movement, combat, and vehicle systems.</p>
-                                <div class="template-features">
-                                    <span class="feature-tag">Multiplayer</span>
-                                    <span class="feature-tag">Vehicle System</span>
-                                    <span class="feature-tag">Combat</span>
-                                    <span class="feature-tag">Animation</span>
-                                    <span class="feature-tag">Grenade System</span>
-                                </div>
-                            </div>
+                       <!-- Replace your current .templates-grid div with this: -->
+<div class="templates-grid">
+    <!-- Template 1: Player Controller -->
+    <div class="template-card" data-template="player">
+        <h4><span class="template-icon">👤</span> Advanced Player Controller</h4>
+        <p>Complete 3D player with movement, combat, vehicles, and multiplayer sync.</p>
+        <div class="template-features">
+            <span class="feature-tag">Multiplayer</span>
+            <span class="feature-tag">Vehicle System</span>
+            <span class="feature-tag">Combat</span>
+            <span class="feature-tag">Grenade</span>
+            <span class="feature-tag">Animation</span>
+        </div>
+        <div class="template-file">
+            <small>File: player.gd</small>
+        </div>
+    </div>
 
-                            <!-- Template 2: Enhanced Zombie AI -->
-                            <div class="template-card" data-template="zombie">
-                                <h4><span class="template-icon">🧟</span> Enhanced Zombie AI</h4>
-                                <p>Smart obstacle avoidance with multiplayer sync and combat systems.</p>
-                                <div class="template-features">
-                                    <span class="feature-tag">Pathfinding</span>
-                                    <span class="feature-tag">Multiplayer</span>
-                                    <span class="feature-tag">Combat</span>
-                                    <span class="feature-tag">Health System</span>
-                                    <span class="feature-tag">Detection</span>
-                                </div>
-                            </div>
+    <!-- Template 2: Zombie AI -->
+    <div class="template-card" data-template="zombie">
+        <h4><span class="template-icon">🧟</span> Enhanced Zombie AI</h4>
+        <p>Smart obstacle avoidance with group detection and combat AI.</p>
+        <div class="template-features">
+            <span class="feature-tag">Pathfinding</span>
+            <span class="feature-tag">Group Detection</span>
+            <span class="feature-tag">Combat</span>
+            <span class="feature-tag">Multiplayer</span>
+            <span class="feature-tag">Health</span>
+        </div>
+        <div class="template-file">
+            <small>File: Zombie.gd</small>
+        </div>
+    </div>
 
-                            <!-- Template 3: Grenade System -->
-                            <div class="template-card" data-template="grenade">
-                                <h4><span class="template-icon">💣</span> Grenade System</h4>
-                                <p>Complete grenade physics with explosion effects, damage, and friendly fire.</p>
-                                <div class="template-features">
-                                    <span class="feature-tag">Physics</span>
-                                    <span class="feature-tag">Particles</span>
-                                    <span class="feature-tag">Damage System</span>
-                                    <span class="feature-tag">Area Detection</span>
-                                </div>
-                            </div>
+    <!-- Template 3: Grenade System -->
+    <div class="template-card" data-template="grenade">
+        <h4><span class="template-icon">💣</span> Grenade System</h4>
+        <p>Physics-based grenade with explosion effects and area damage.</p>
+        <div class="template-features">
+            <span class="feature-tag">Physics</span>
+            <span class="feature-tag">Particles</span>
+            <span class="feature-tag">Damage</span>
+            <span class="feature-tag">Friendly Fire</span>
+            <span class="feature-tag">Network</span>
+        </div>
+        <div class="template-file">
+            <small>File: grenade.gd</small>
+        </div>
+    </div>
 
-                            <!-- Template 4: Vehicle Controller -->
-                            <div class="template-card" data-template="vehicle">
-                                <h4><span class="template-icon">🚗</span> Vehicle Controller</h4>
-                                <p>Complete car physics with driver/passenger seats and multiplayer sync.</p>
-                                <div class="template-features">
-                                    <span class="feature-tag">Physics</span>
-                                    <span class="feature-tag">Seat System</span>
-                                    <span class="feature-tag">Animation</span>
-                                    <span class="feature-tag">Audio</span>
-                                </div>
-                            </div>
+    <!-- Template 4: NPC System -->
+    <div class="template-card" data-template="npc">
+        <h4><span class="template-icon">👨‍🦰</span> Civilian NPC System</h4>
+        <p>Wandering NPCs with fleeing behavior and damage response.</p>
+        <div class="template-features">
+            <span class="feature-tag">Wandering</span>
+            <span class="feature-tag">Fleeing</span>
+            <span class="feature-tag">Multiplayer</span>
+            <span class="feature-tag">Animation</span>
+            <span class="feature-tag">Damage</span>
+        </div>
+        <div class="template-file">
+            <small>File: npccasual.gd</small>
+        </div>
+    </div>
 
-                            <!-- Template 5: Weapon Manager -->
-                            <div class="template-card" data-template="weapon">
-                                <h4><span class="template-icon">🔫</span> Weapon Manager</h4>
-                                <p>Modular weapon system with guns, throwables, melee, and inventory.</p>
-                                <div class="template-features">
-                                    <span class="feature-tag">Inventory</span>
-                                    <span class="feature-tag">Reloading</span>
-                                    <span class="feature-tag">Multi-weapon</span>
-                                    <span class="feature-tag">Throwables</span>
-                                </div>
-                            </div>
+    <!-- Template 5: Vehicle Controller -->
+    <div class="template-card" data-template="vehicle">
+        <h4><span class="template-icon">🚗</span> Vehicle Controller</h4>
+        <p>Complete car physics with driver/passenger seats.</p>
+        <div class="template-features">
+            <span class="feature-tag">Physics</span>
+            <span class="feature-tag">Seat System</span>
+            <span class="feature-tag">Animation</span>
+            <span class="feature-tag">Audio</span>
+            <span class="feature-tag">Network</span>
+        </div>
+        <div class="template-file">
+            <small>File: car.gd</small>
+        </div>
+    </div>
 
-                            <!-- Template 6: NPC System -->
-                            <div class="template-card" data-template="npc">
-                                <h4><span class="template-icon">👨‍🦰</span> NPC System</h4>
-                                <p>Civilian NPCs with wandering, fleeing, and damage response.</p>
-                                <div class="template-features">
-                                    <span class="feature-tag">Wandering</span>
-                                    <span class="feature-tag">Fleeing</span>
-                                    <span class="feature-tag">Multiplayer</span>
-                                    <span class="feature-tag">Animation</span>
-                                </div>
-                            </div>
+    <!-- Template 6: Weapon Manager -->
+    <div class="template-card" data-template="weapon">
+        <h4><span class="template-icon">🔫</span> Weapon Manager System</h4>
+        <p>Modular weapon system with guns, throwables, and melee.</p>
+        <div class="template-features">
+            <span class="feature-tag">Inventory</span>
+            <span class="feature-tag">Reloading</span>
+            <span class="feature-tag">Multi-weapon</span>
+            <span class="feature-tag">Throwables</span>
+            <span class="feature-tag">Network</span>
+        </div>
+        <div class="template-file">
+            <small>File: weaponmanager.gd</small>
+        </div>
+    </div>
 
-                            <!-- Template 7: Ranged Enemy -->
-                            <div class="template-card" data-template="ranged">
-                                <h4><span class="template-icon">🎯</span> Ranged Enemy</h4>
-                                <p>Shooting enemy with line-of-sight detection and projectile attacks.</p>
-                                <div class="template-features">
-                                    <span class="feature-tag">Shooting</span>
-                                    <span class="feature-tag">Detection</span>
-                                    <span class="feature-tag">Multiplayer</span>
-                                    <span class="feature-tag">Audio</span>
-                                </div>
-                            </div>
+    <!-- Template 7: Ranged Enemy -->
+    <div class="template-card" data-template="ranged">
+        <h4><span class="template-icon">🎯</span> Ranged Enemy AI</h4>
+        <p>Shooting enemy with line-of-sight detection.</p>
+        <div class="template-features">
+            <span class="feature-tag">Shooting</span>
+            <span class="feature-tag">Detection</span>
+            <span class="feature-tag">Multiplayer</span>
+            <span class="feature-tag">Audio</span>
+            <span class="feature-tag">Animation</span>
+        </div>
+        <div class="template-file">
+            <small>File: Ranged.gd</small>
+        </div>
+    </div>
 
-                            <!-- Template 8: Animation Controller -->
-                            <div class="template-card" data-template="animation">
-                                <h4><span class="template-icon">💃</span> Animation Controller</h4>
-                                <p>Advanced animation system with stance management and combat poses.</p>
-                                <div class="template-features">
-                                    <span class="feature-tag">Stance System</span>
-                                    <span class="feature-tag">Combat</span>
-                                    <span class="feature-tag">Smooth Blending</span>
-                                    <span class="feature-tag">Vehicle</span>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Template 8: Animation Controller -->
+    <div class="template-card" data-template="animation">
+        <h4><span class="template-icon">💃</span> Animation Controller</h4>
+        <p>Advanced animation system with stance management.</p>
+        <div class="template-features">
+            <span class="feature-tag">Stance System</span>
+            <span class="feature-tag">Combat</span>
+            <span class="feature-tag">Smooth Blending</span>
+            <span class="feature-tag">Vehicle</span>
+            <span class="feature-tag">Server</span>
+        </div>
+        <div class="template-file">
+            <small>File: animation.gd</small>
+        </div>
+    </div>
+</div>
 
-                        <div class="output-area" id="template-output-area" style="display: none; margin-top: 2rem;">
-                            <div class="output-header">
-                                <h4>📋 Selected Template</h4>
-                                <div class="output-actions">
-                                    <button class="btn-secondary" id="copy-template-btn">📋 Copy Template</button>
-                                    <button class="btn btn-warning" id="edit-template-btn">✏️ Edit with AI</button>
-                                    <button class="btn btn-clear" id="close-template-btn">❌ Close</button>
-                                </div>
-                            </div>
-                            <pre class="code-output" id="template-code-output"></pre>
-                        </div>
+<!-- Output area for templates -->
+<div class="output-area" id="template-output-area" style="display: none; margin-top: 2rem;">
+    <div class="output-header">
+        <h4>📋 Template Preview</h4>
+        <div class="output-actions">
+            <button class="btn-secondary" id="copy-template-btn">📋 Copy Template</button>
+            <button class="btn-secondary" id="download-template-btn" data-filename="template.gd">💾 Download (.gd)</button>
+            <button class="btn btn-warning" id="edit-template-btn">🤖 Edit with AI</button>
+            <button class="btn btn-clear" id="close-template-btn">❌ Close</button>
+        </div>
+    </div>
+    <pre class="code-output" id="template-code-output"></pre>
+</div>
                     </div>
 
                     <!-- Panel 4: Visual Block Editor -->
@@ -2016,6 +2049,7 @@ func _apply_damage():
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
+            initializeTemplateSystem();
             // ========== TAB SYSTEM ==========
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -2061,48 +2095,163 @@ func _apply_damage():
             initializeDropdowns('scene-provider', 'scene-model');
 
             // ========== PANEL 3: Code Templates ==========
-            document.querySelectorAll('.template-card').forEach(card => {
-                card.addEventListener('click', function() {
-                    const templateId = this.dataset.template;
-                    const template = TEMPLATES[templateId];
-                    
-                    if (template) {
-                        document.getElementById('template-code-output').textContent = template.code;
-                        document.getElementById('template-output-area').style.display = 'block';
-                        
-                        // Scroll to output
-                        document.getElementById('template-output-area').scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'start' 
-                        });
-                    }
-                });
-            });
+          const TEMPLATES = {
+    player: {
+        name: "Advanced Player Controller",
+        description: "Complete 3D player with movement, combat, vehicles, and multiplayer sync.",
+        filename: "player.gd",
+        // PASTE YOUR FULL player.gd CODE HERE
+        code: ``
+    },
+    
+    zombie: {
+        name: "Enhanced Zombie AI",
+        description: "Smart zombie with obstacle avoidance, group detection, and combat AI.",
+        filename: "Zombie.gd",
+        // PASTE YOUR FULL Zombie.gd CODE HERE
+        code: ``
+    },
+    
+    grenade: {
+        name: "Grenade System",
+        description: "Physics-based grenade with explosion effects, damage, and friendly fire.",
+        filename: "grenade.gd",
+        // PASTE YOUR FULL grenade.gd CODE HERE
+        code: ``
+    },
+    
+    npc: {
+        name: "Civilian NPC System",
+        description: "Wandering NPCs with fleeing behavior and damage response.",
+        filename: "npccasual.gd",
+        // PASTE YOUR FULL npccasual.gd CODE HERE
+        code: ``
+    },
+    
+    vehicle: {
+        name: "Vehicle Controller",
+        description: "Complete car physics with driver/passenger seats and multiplayer.",
+        filename: "car.gd",
+        // PASTE YOUR FULL car.gd CODE HERE
+        code: ``
+    },
+    
+    weapon: {
+        name: "Weapon Manager System",
+        description: "Modular weapon system with guns, throwables, melee, and inventory.",
+        filename: "weaponmanager.gd",
+        // PASTE YOUR FULL weaponmanager.gd CODE HERE
+        code: ``
+    },
+    
+    ranged: {
+        name: "Ranged Enemy AI",
+        description: "Shooting enemy with line-of-sight detection and projectile attacks.",
+        filename: "Ranged.gd",
+        // PASTE YOUR FULL Ranged.gd CODE HERE
+        code: ``
+    },
+    
+    animation: {
+        name: "Animation Controller",
+        description: "Advanced animation system with stance management and smooth blending.",
+        filename: "animation.gd",
+        // PASTE YOUR FULL animation.gd CODE HERE
+        code: ``
+    }
+};
 
-            // Template actions
-            document.getElementById('copy-template-btn').addEventListener('click', function() {
-                const code = document.getElementById('template-code-output').textContent;
-                navigator.clipboard.writeText(code).then(() => {
-                    this.textContent = '✓ Copied!';
-                    setTimeout(() => {
-                        this.textContent = '📋 Copy Template';
-                    }, 2000);
-                });
-            });
-
-            document.getElementById('edit-template-btn').addEventListener('click', function() {
-                const code = document.getElementById('template-code-output').textContent;
-                // Switch to script generator tab with the template loaded
-                document.querySelector('[data-tab="script-generator"]').click();
-                document.getElementById('script-prompt').value = `Please enhance and optimize this GDScript template:\n\n${code}`;
+// Template system initialization
+function initializeTemplateSystem() {
+    // Template card click handlers
+    document.querySelectorAll('.template-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const templateId = this.dataset.template;
+            const template = TEMPLATES[templateId];
+            
+            if (template && template.code) {
+                // Display template code
+                document.getElementById('template-code-output').textContent = template.code;
+                document.getElementById('template-output-area').style.display = 'block';
                 
-                // Show success message
-                showMessage('script-success', 'Template loaded for editing! Click "Generate GDScript" to enhance it.');
-            });
-
-            document.getElementById('close-template-btn').addEventListener('click', function() {
-                document.getElementById('template-output-area').style.display = 'none';
-            });
+                // Update download button filename
+                document.getElementById('download-template-btn').dataset.filename = template.filename;
+                
+                // Scroll to output
+                document.getElementById('template-output-area').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            } else {
+                alert('Template not loaded yet. Please paste the code into TEMPLATES object.');
+            }
+        });
+    });
+    
+    // Copy template button
+    document.getElementById('copy-template-btn').addEventListener('click', function() {
+        const code = document.getElementById('template-code-output').textContent;
+        if (!code.trim()) return;
+        
+        navigator.clipboard.writeText(code).then(() => {
+            this.textContent = '✓ Copied!';
+            setTimeout(() => {
+                this.textContent = '📋 Copy Template';
+            }, 2000);
+        });
+    });
+    
+    // Edit with AI button
+    document.getElementById('edit-template-btn').addEventListener('click', function() {
+        const code = document.getElementById('template-code-output').textContent;
+        if (!code.trim()) return;
+        
+        // Switch to script generator tab
+        document.querySelector('[data-tab="script-generator"]').click();
+        
+        // Load template into prompt with instructions
+        document.getElementById('script-prompt').value = 
+            `ENHANCE AND OPTIMIZE THIS GDSCRIPT TEMPLATE:\n\n` +
+            `Current code:\n` +
+            `\`\`\`gdscript\n${code}\n\`\`\`\n\n` +
+            `Please:\n` +
+            `1. Optimize for performance\n` +
+            `2. Add proper error handling\n` +
+            `3. Ensure multiplayer sync works correctly\n` +
+            `4. Add comments for clarity\n` +
+            `5. Follow Godot 4.4 best practices`;
+        
+        // Show success message
+        showMessage('script-success', '✅ Template loaded for AI enhancement! Click "Generate GDScript" to customize.');
+    });
+    
+    // Download template button
+    document.getElementById('download-template-btn').addEventListener('click', function() {
+        const code = document.getElementById('template-code-output').textContent;
+        if (!code.trim()) return;
+        
+        const filename = this.dataset.filename || 'template.gd';
+        const blob = new Blob([code], { type: 'text/x-gdscript' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        this.textContent = '✓ Downloaded!';
+        setTimeout(() => {
+            this.textContent = '💾 Download (.gd)';
+        }, 2000);
+    });
+    
+    // Close template button
+    document.getElementById('close-template-btn').addEventListener('click', function() {
+        document.getElementById('template-output-area').style.display = 'none';
+    });
+}
 
             // ========== PANEL 4: Visual Block Editor ==========
             let draggedBlock = null;
