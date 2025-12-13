@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GDScript Built-in Reference - Godot Assets</title>
+    <style>
+        :root {
+            --primary: #ff6b35;
+            --secondary: #2a2a2a;
+            --accent: #00d9ff;
+            --light: #f8f9fa;
+            --dark: #1a1a1a;
+            --success: #28a745;
+            --error: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--light);
+            background: linear-gradient(135deg, var(--dark) 0%, #2d1b69 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .cta-button {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            background: #e55a2b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 150px 0 80px;
+            text-align: center;
+            background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #ccc;
+        }
+
+        /* Main Content */
+        .reference-section {
+            padding: 60px 0;
+            background: var(--dark);
+        }
+
+        .section-intro {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            color: #ccc;
+        }
+
+        .reference-category {
+            margin-bottom: 3rem;
+        }
+
+        .category-header {
+            background: rgba(255, 107, 53, 0.1);
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .category-header:hover {
+            background: rgba(255, 107, 53, 0.2);
+            transform: translateX(5px);
+        }
+
+        .category-header h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        .toggle-icon {
+            font-size: 1.5rem;
+            color: var(--accent);
+            transition: transform 0.3s;
+        }
+
+        .category-header.active .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .category-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .category-content.active {
+            max-height: 5000px;
+        }
+
+        .subcategory {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .subcategory h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .item-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .reference-item {
+            background: rgba(0, 217, 255, 0.05);
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 3px solid var(--accent);
+            transition: all 0.3s;
+        }
+
+        .reference-item:hover {
+            background: rgba(0, 217, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .item-name {
+            font-family: 'Courier New', monospace;
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-description {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .item-type {
+            display: inline-block;
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Code Example */
+        .code-example {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .code-example code {
+            font-family: 'Courier New', monospace;
+            color: #00d9ff;
+            font-size: 0.9rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 80px 0;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary) 0%, #e55a2b 100%);
+            color: white;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .whatsapp-button {
+            background: #25D366;
+            color: white;
+            padding: 1.2rem 3rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .whatsapp-button:hover {
+            background: #20bd5a;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            z-index: 1001;
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 80%;
+            height: 100vh;
+            background: var(--dark);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            padding: 2rem;
+            border-right: 2px solid var(--primary);
+            overflow-y: auto;
+        }
+
+        .mobile-menu.active {
+            left: 0;
+        }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-menu-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .mobile-close-btn {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mobile-nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            padding: 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .mobile-nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .mobile-nav-links .cta-button {
+            margin-top: 1rem;
+            text-align: center;
+            background: var(--primary);
+            color: white;
+        }
+
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+            display: none;
+        }
+
+        .mobile-menu-overlay.active {
+            display: block;
+        }
+
+        body.menu-open {
+            overflow: hidden;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 2px solid var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .category-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .item-list {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-section h2 {
+                font-size: 1.8rem;
+            }
+
+            .whatsapp-button {
+                padding: 1rem 2rem;
+                font-size: 1rem;
+            }
+        }
+
+        /* Search Bar */
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-box::placeholder {
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">GODOT ASSETS</div>
+                
+                <!-- Desktop Navigation -->
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="scripts.html">Scripts</a>
+                    <a href="minicourses.html">Mini Courses</a>
+                    <a href="services.html">Services</a>
+                    <a href="pvp-game.html">PVP Game Course</a>
+                    <a href="course.html">Course</a>
+                    <a href="reference.html" class="active">Reference</a>
+                    <a href="index.html#contact">Contact</a>
+                </div>
+                
+                <!-- Desktop CTA Button -->
+                <a href="scripts.html" class="cta-button">Get Assets</a>
+                
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            </nav>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">GODOT ASSETS</div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="index.html" onclick="closeMobileMenu()">Home</a>
+                <a href="scripts.html" onclick="closeMobileMenu()">Scripts</a>
+                <a href="minicourses.html" onclick="closeMobileMenu()">Mini Courses</a>
+                <a href="services.html" onclick="closeMobileMenu()">Services</a>
+                <a href="pvp-game.html" onclick="closeMobileMenu()">PVP Game Course</a>
+                <a href="course.html" onclick="closeMobileMenu()">Course</a>
+                <a href="reference.html" onclick="closeMobileMenu()">Reference</a>
+                <a href="index.html#contact" onclick="closeMobileMenu()">Contact</a>
+                
+                <a href="scripts.html" class="cta-button" onclick="closeMobileMenu()">Get Assets</a>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>GDScript Built-in Reference</h1>
+            <p>Complete guide to Godot's default variables, functions, and methods</p>
+            <p style="font-size: 1rem; color: #999;">No separate declaration required - ready to use!</p>
+        </div>
+    </section>
+
+    <!-- Main Reference Section -->
+    <section class="reference-section">
+        <div class="container">
+            <div class="section-intro">
+                <p>This comprehensive reference covers all built-in properties, methods, and functions available in Godot Engine. These are available without any import or declaration!</p>
+            </div>
+
+            <!-- Search Box -->
+            <div class="search-container">
+                <input type="text" class="search-box" id="searchBox" placeholder="Search for functions, variables, or methods...">
+            </div>
+
+            <!-- CharacterBody2D/3D -->
+            <div class="reference-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <h2>CharacterBody2D / CharacterBody3D</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <h3>Properties</h3>
+                        <div class="item-list">
+                            <div class="reference-item">
+                                <div class="item-name">velocity</div>
+                                <div class="item-description">Movement velocity of the character body</div>
+                                <span class="item-type">Vector2/Vector3</span>
+                                <div class="code-example"><code>velocity = Vector2(300, 0)</code></div>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">motion_mode</div>
+                                <div class="item-description">Physics motion mode (grounded or floating)</div>
+                                <span class="item-type">Enum</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">up_direction</div>
+                                <div class="item-description">Defines which direction is "up" for floor detection</div>
+                                <span class="item-type">Vector2/Vector3</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">floor_stop_on_slope</div>
+                                <div class="item-description">Stop character from sliding down slopes</div>
+                                <span class="item-type">bool</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="subcategory">
+                        <h3>Methods</h3>
+                        <div class="item-list">
+                            <div class="reference-item">
+                                <div class="item-name">move_and_slide()</div>
+                                <div class="item-description">Move character with collision detection and sliding</div>
+                                <span class="item-type">void</span>
+                                <div class="code-example"><code>move_and_slide()</code></div>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">is_on_floor()</div>
+                                <div class="item-description">Check if character is touching the floor</div>
+                                <span class="item-type">bool</span>
+                                <div class="code-example"><code>if is_on_floor(): jump()</code></div>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">is_on_ceiling()</div>
+                                <div class="item-description">Check if character is touching the ceiling</div>
+                                <span class="item-type">bool</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">is_on_wall()</div>
+                                <div class="item-description">Check if character is touching a wall</div>
+                                <span class="item-type">bool</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">get_floor_normal()</div>
+                                <div class="item-description">Get the normal vector of the floor surface</div>
+                                <span class="item-type">Vector2/Vector3</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">get_wall_normal()</div>
+                                <div class="item-description">Get the normal vector of the wall surface</div>
+                                <span class="item-type">Vector2/Vector3</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Node (Base Class) -->
+            <div class="reference-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <h2>Node (Base Class)</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <h3>Properties</h3>
+                        <div class="item-list">
+                            <div class="reference-item">
+                                <div class="item-name">name</div>
+                                <div class="item-description">The node's name in the scene tree</div>
+                                <span class="item-type">String</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">owner</div>
+                                <div class="item-description">The scene root that owns this node</div>
+                                <span class="item-type">Node</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="subcategory">
+                        <h3>Methods</h3>
+                        <div class="item-list">
+                            <div class="reference-item">
+                                <div class="item-name">get_tree()</div>
+                                <div class="item-description">Access the scene tree</div>
+                                <span class="item-type">SceneTree</span>
+                                <div class="code-example"><code>get_tree().quit()</code></div>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">get_parent()</div>
+                                <div class="item-description">Get the parent node</div>
+                                <span class="item-type">Node</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">get_children()</div>
+                                <div class="item-description">Get all child nodes as an array</div>
+                                <span class="item-type">Array</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">add_child(node)</div>
+                                <div class="item-description">Add a child node</div>
+                                <span class="item-type">void</span>
+                                <div class="code-example"><code>add_child(enemy)</code></div>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">queue_free()</div>
+                                <div class="item-description">Delete node at end of current frame</div>
+                                <span class="item-type">void</span>
+                                <div class="code-example"><code>queue_free()</code></div>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">add_to_group(group)</div>
+                                <div class="item-description">Add node to a group</div>
+                                <span class="item-type">void</span>
+                                <div class="code-example"><code>add_to_group("enemies")</code></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Node2D -->
+            <div class="reference-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <h2>Node2D</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <h3>Properties</h3>
+                        <div class="item-list">
+                            <div class="reference-item">
+                                <div class="item-name">position</div>
+                                <div class="item-description">2D position in space</div>
+                                <span class="item-type">Vector2</span>
+                                <div class="code-example"><code>position = Vector2(100, 200)</code></div>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">rotation</div>
+                                <div class="item-description">Rotation in radians</div>
+                                <span class="item-type">float</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">rotation_degrees</div>
+                                <div class="item-description">Rotation in degrees</div>
+                                <span class="item-type">float</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">scale</div>
+                                <div class="item-description">Scale (1.0 = normal size)</div>
+                                <span class="item-type">Vector2</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">global_position</div>
+                                <div class="item-description">World space position</div>
+                                <span class="item-type">Vector2</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="subcategory">
+                        <h3>Methods</h3>
+                        <div class="item-list">
+                            <div class="reference-item">
+                                <div class="item-name">look_at(point)</div>
+                                <div class="item-description">Rotate to look at a point</div>
+                                <span class="item-type">void</span>
+                                <div class="code-example"><code>look_at(player.position)</code></div>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">rotate(angle)</div>
+                                <div class="item-description">Rotate by angle in radians</div>
+                                <span class="item-type">void</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">translate(offset)</div>
+                                <div class="item-description">Move by offset</div>
+                                <span class="item-type">void</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Singleton -->
+            <div class="reference-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <h2>Input (Singleton)</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <h3>Methods</h3>
+                        <div class="item-list">
+                            <div class="reference-item">
+                                <div class="item-name">is_action_pressed(action)</div>
+                                <div class="item-description">Check if action is currently held</div>
+                                <span class="item-type">bool</span>
+                                <div class="code-example"><code>if Input.is_action_pressed("jump"):</code></div>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">is_action_just_pressed(action)</div>
+                                <div class="item-description">Check if action was just pressed this frame</div>
+                                <span class="item-type">bool</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">get_axis(negative, positive)</div>
+                                <div class="item-description">Get axis value (-1.0 to 1.0)</div>
+                                <span class="item-type">float</span>
+                                <div class="code-example"><code>var dir = Input.get_axis("left", "right")</code></div>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">get_vector(neg_x, pos_x, neg_y, pos_y)</div>
+                                <div class="item-description">Get movement vector from input</div>
+                                <span class="item-type">Vector2</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">get_mouse_position()</div>
+                                <div class="item-description">Get mouse position on screen</div>
+                                <span class="item-type">Vector2</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Math Functions -->
+            <div class="reference-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <h2>Global Math Functions</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <h3>Basic Math</h3>
+                        <div class="item-list">
+                            <div class="reference-item">
+                                <div class="item-name">abs(value)</div>
+                                <div class="item-description">Absolute value</div>
+                                <span class="item-type">float</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">sqrt(value)</div>
+                                <div class="item-description">Square root</div>
+                                <span class="item-type">float</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">pow(base, exp)</div>
+                                <div class="item-description">Power operation</div>
+                                <span class="item-type">float</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">min(a, b)</div>
+                                <div class="item-description">Minimum value</div>
+                                <span class="item-type">Variant</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">max(a, b)</div>
+                                <div class="item-description">Maximum value</div>
+                                <span class="item-type">Variant</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">clamp(value, min, max)</div>
+                                <div class="item-description">Constrain value between min and max</div>
+                                <span class="item-type">Variant</span>
+                                <div class="code-example"><code>health = clamp(health, 0, 100)</code></div>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">lerp(from, to, weight)</div>
+                                <div class="item-description">Linear interpolation</div>
+                                <span class="item-type">Variant</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">move_toward(from, to, delta)</div>
+                                <div class="item-description">Move value toward target by delta</div>
+                                <span class="item-type">float</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="subcategory">
+                        <h3>Trigonometry</h3>
+                        <div class="item-list">
+                            <div class="reference-item">
+                                <div class="item-name">sin(angle)</div>
+                                <div class="item-description">Sine function</div>
+                                <span class="item-type">float</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">cos(angle)</div>
+                                <div class="item-description">Cosine function</div>
+                                <span class="item-type">float</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">atan2(y, x)</div>
+                                <div class="item-description">Arctangent returning angle</div>
+                                <span class="item-type">float</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">deg_to_rad(degrees)</div>
+                                <div class="item-description">Convert degrees to radians</div>
+                                <span class="item-type">float</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">rad_to_deg(radians)</div>
+                                <div class="item-description">Convert radians to degrees</div>
+                                <span class="item-type">float</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="subcategory">
+                        <h3>Random Functions</h3>
+                        <div class="item-list">
+                            <div class="reference-item">
+                                <div class="item-name">randf()</div>
+                                <div class="item-description">Random float between 0.0 and 1.0</div>
+                                <span class="item-type">float</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">randi()</div>
+                                <div class="item-description">Random integer</div>
+                                <span class="item-type">int</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">randf_range(from, to)</div>
+                                <div class="item-description">Random float in range</div>
+                                <span class="item-type">float</span>
+                                <div class="code-example"><code>var x = randf_range(0, 100)</code></div>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">randi_range(from, to)</div>
+                                <div class="item-description">Random integer in range</div>
+                                <span class="item-type">int</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Area2D/3D -->
+            <div class="reference-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <h2>Area2D / Area3D</h2>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="category-content">
+                    <div class="subcategory">
+                        <h3>Methods</h3>
+                        <div class="item-list">
+                            <div class="reference-item">
+                                <div class="item-name">get_overlapping_bodies()</div>
+                                <div class="item-description">Get all bodies currently overlapping</div>
+                                <span class="item-type">Array</span>
+                            </div>
+                            <div class="reference-item">
+                                <div class="item-name">get_overlapping_areas()</div>
+                                <div class="item-description">Get all areas currently overlapping</div>
