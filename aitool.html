@@ -6,7 +6,6 @@
     <title>Godot AI Tools - AI-Powered GDScript Generator</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
-        /* All the CSS styles from previous response */
         :root {
             --primary: #ff6b35;
             --secondary: #2a2a2a;
@@ -17,8 +16,6 @@
             --darker: #121212;
             --success: #28a745;
             --error: #dc3545;
-            --warning: #ffc107;
-            --info: #17a2b8;
         }
 
         * {
@@ -41,7 +38,6 @@
             padding: 0 20px;
         }
 
-        /* Main Content */
         .main-content {
             padding-top: 140px;
             min-height: 100vh;
@@ -54,7 +50,6 @@
             margin-top: 2rem;
         }
 
-        /* Sidebar */
         .sidebar {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
@@ -89,7 +84,7 @@
             text-align: left;
             border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             gap: 0.8rem;
@@ -117,7 +112,6 @@
             text-align: center;
         }
 
-        /* Content Area */
         .content-area {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
@@ -157,7 +151,6 @@
             font-size: 1.1rem;
         }
 
-        /* API Configuration */
         .api-config {
             background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(0, 217, 255, 0.05));
             padding: 1.5rem;
@@ -171,9 +164,6 @@
             color: var(--accent);
             margin-bottom: 1.5rem;
             font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
 
         .config-grid {
@@ -227,7 +217,6 @@
             line-height: 1.6;
         }
 
-        /* Buttons */
         .btn {
             background: linear-gradient(135deg, var(--primary), #e55a2b);
             color: white;
@@ -236,12 +225,8 @@
             border: none;
             cursor: pointer;
             font-weight: bold;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s;
             font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: relative;
-            overflow: hidden;
         }
 
         .btn:hover {
@@ -264,7 +249,6 @@
             box-shadow: 0 10px 25px rgba(0, 217, 255, 0.4);
         }
 
-        /* Output Area */
         .output-area {
             margin-top: 2.5rem;
             background: rgba(0, 0, 0, 0.4);
@@ -286,16 +270,13 @@
         .output-header h4 {
             color: var(--accent);
             font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
 
         .code-output {
             background: #1a1a2e;
             padding: 1.5rem;
             border-radius: 8px;
-            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-family: 'Cascadia Code', 'Consolas', monospace;
             color: #e0e0ff;
             overflow-x: auto;
             white-space: pre-wrap;
@@ -305,7 +286,6 @@
             line-height: 1.6;
         }
 
-        /* Loading Indicator */
         .loading {
             display: none;
             text-align: center;
@@ -333,7 +313,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Messages */
         .message {
             padding: 1rem 1.5rem;
             border-radius: 8px;
@@ -358,7 +337,6 @@
             color: #6bff88;
         }
 
-        /* Responsive */
         @media (max-width: 1024px) {
             .ai-tools-layout {
                 grid-template-columns: 1fr;
@@ -370,7 +348,6 @@
             .sidebar-tabs {
                 flex-direction: row;
                 overflow-x: auto;
-                padding-bottom: 0.5rem;
             }
             .tab-btn {
                 min-width: 180px;
@@ -388,20 +365,14 @@
             .section-title {
                 font-size: 2rem;
             }
-            .config-grid {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header>
         <div class="container">
             <nav>
                 <div class="logo">GODOT AI TOOLS</div>
-                
-                <!-- Desktop Navigation -->
                 <div class="nav-links">
                     <a href="index.html">Home</a>
                     <a href="scripts.html">Scripts</a>
@@ -411,22 +382,16 @@
                     <a href="course.html">Course</a>
                     <a href="index.html#contact">Contact</a>
                 </div>
-                
-                <!-- Desktop CTA Button -->
                 <a href="#generate" class="cta-button">Try AI Generator</a>
-                
-                <!-- Mobile Menu Button -->
                 <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
             </nav>
         </div>
         
-        <!-- Mobile Menu -->
         <div class="mobile-menu" id="mobileMenu">
             <div class="mobile-menu-header">
                 <div class="mobile-menu-logo">GODOT AI TOOLS</div>
                 <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
             </div>
-            
             <div class="mobile-nav-links">
                 <a href="index.html" onclick="closeMobileMenu()">Home</a>
                 <a href="scripts.html" onclick="closeMobileMenu()">Scripts</a>
@@ -435,23 +400,18 @@
                 <a href="pvp-game.html" onclick="closeMobileMenu()">PVP Game Course</a>
                 <a href="course.html" onclick="closeMobileMenu()">Course</a>
                 <a href="index.html#contact" onclick="closeMobileMenu()">Contact</a>
-                
                 <a href="#generate" class="cta-button" onclick="closeMobileMenu()">Try AI Generator</a>
             </div>
         </div>
-        
-        <!-- Mobile Menu Overlay -->
         <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
     </header>
 
-    <!-- Main Content -->
     <div class="main-content">
         <div class="container">
             <h1 style="text-align: center; margin-bottom: 0.5rem; font-size: 3rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Godot AI Tools</h1>
-            <p style="text-align: center; color: var(--accent-light); margin-bottom: 2.5rem; font-size: 1.2rem;">Generate GDScript code instantly with AI - Powered by Groq & Gemini</p>
+            <p style="text-align: center; color: var(--accent-light); margin-bottom: 2.5rem; font-size: 1.2rem;">Generate GDScript code instantly with AI</p>
 
             <div class="ai-tools-layout">
-                <!-- Sidebar -->
                 <aside class="sidebar">
                     <h3>🚀 AI Tools</h3>
                     <div class="sidebar-tabs">
@@ -482,57 +442,43 @@
                     </div>
                 </aside>
 
-                <!-- Content Area -->
                 <main class="content-area">
-                    <!-- AI Script Generator Tab -->
                     <div class="tab-content active" id="script-generator">
                         <h2 class="section-title">🤖 AI Script Generator</h2>
-                        <p class="section-description">Describe your game mechanic in natural language and instantly get production-ready GDScript code. Using Sanjay's API keys for instant access!</p>
+                        <p class="section-description">Describe your game mechanic and get production-ready GDScript code instantly.</p>
 
-                        <!-- API Configuration -->
                         <div class="api-config" id="generate">
-                            <h4>⚙️ AI Configuration (Using Sanjay's Keys)</h4>
+                            <h4>⚙️ AI Configuration</h4>
                             <div class="config-grid">
                                 <div class="form-group">
                                     <label for="api-provider">AI Provider</label>
                                     <select id="api-provider">
-                                        <option value="groq">Groq (Ultra Fast - Sanjay's Key)</option>
-                                        <option value="gemini">Google Gemini (Sanjay's Key)</option>
+                                        <option value="groq">Groq (Fast)</option>
+                                        <option value="gemini">Google Gemini</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label for="api-model">AI Model</label>
-                                    <select id="api-model">
-                                        <!-- Options populated by JavaScript -->
-                                    </select>
+                                    <select id="api-model"></select>
                                 </div>
-                            </div>
-                            <div style="background: rgba(255, 107, 53, 0.1); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
-                                <p style="color: var(--accent); margin: 0; font-size: 0.9rem;">
-                                    <strong>🔐 Using Sanjay's API Keys:</strong> Keys are visible for community use. Rate limits: Groq (30/min), Gemini (60/min).
-                                </p>
                             </div>
                         </div>
 
-                        <!-- Generation Form -->
                         <div class="form-group">
                             <label for="prompt">Describe what you want to create</label>
-                            <textarea id="prompt" placeholder="Example: Create a 2D platformer player controller with double jump, wall slide, and dash mechanics. Include proper collision detection and animation states." rows="4"></textarea>
+                            <textarea id="prompt" placeholder="Example: Create a 2D platformer player controller with double jump, wall slide, and dash mechanics." rows="4"></textarea>
                         </div>
 
                         <button class="btn" id="generate-btn">🚀 Generate GDScript</button>
 
-                        <!-- Loading Indicator -->
                         <div class="loading" id="loading">
                             <div class="spinner"></div>
-                            <p>AI is crafting your perfect GDScript code...</p>
+                            <p>AI is generating your script...</p>
                         </div>
 
-                        <!-- Messages -->
                         <div class="error-message message" id="error-message"></div>
                         <div class="success-message message" id="success-message"></div>
 
-                        <!-- Output Area -->
                         <div class="output-area" id="output-area" style="display: none;">
                             <div class="output-header">
                                 <h4>✨ Generated GDScript</h4>
@@ -545,306 +491,327 @@
                         </div>
                     </div>
 
-                    <!-- Other Tabs -->
+                    <!-- Other tabs remain the same -->
                     <div class="tab-content" id="code-templates">
                         <h2 class="section-title">📋 Code Templates</h2>
-                        <p class="section-description">Pre-built, production-tested code templates for common Godot patterns.</p>
+                        <p class="section-description">Pre-built code templates for common Godot patterns.</p>
                     </div>
-
                     <div class="tab-content" id="scene-generator">
                         <h2 class="section-title">🎬 Scene Generator</h2>
-                        <p class="section-description">Coming Soon! Describe your scene structure and AI will generate complete node hierarchies.</p>
+                        <p class="section-description">Coming Soon!</p>
                     </div>
-
                     <div class="tab-content" id="code-refactor">
                         <h2 class="section-title">🔧 Code Refactor</h2>
-                        <p class="section-description">Coming Soon! Paste your code and AI will optimize and improve it.</p>
+                        <p class="section-description">Coming Soon!</p>
                     </div>
-
                     <div class="tab-content" id="debug-assistant">
                         <h2 class="section-title">🐛 Debug Assistant</h2>
-                        <p class="section-description">Coming Soon! Paste errors and get AI-powered solutions.</p>
+                        <p class="section-description">Coming Soon!</p>
                     </div>
-
                     <div class="tab-content" id="code-explainer">
                         <h2 class="section-title">💡 Code Explainer</h2>
-                        <p class="section-description">Coming Soon! Understand any GDScript code with AI explanations.</p>
+                        <p class="section-description">Coming Soon!</p>
                     </div>
                 </main>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript -->
     <script>
-        // API Keys - Netlify will inject these from environment variables
-        // For local testing, it will use localStorage or prompt user
-        const API_KEYS = {
-            groq: '',
-            gemini: ''
+        // Netlify Environment Variables (Set these in Netlify dashboard)
+        const GROQ_API_KEY = 'GROQ_API_KEY_PLACEHOLDER'; // Netlify will replace this
+        const GEMINI_API_KEY = 'GEMINI_API_KEY_PLACEHOLDER'; // Netlify will replace this
+        
+        // Model configurations
+        const models = {
+            groq: [
+                { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
+                { value: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B (Fast)' },
+                { value: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B' }
+            ],
+            gemini: [
+                { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
+                { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' }
+            ]
         };
 
-        // Try to get keys from Netlify environment (injected at build time)
-        // These are set by Netlify during deployment
-        const netlifyEnv = window.process?.env || {};
-        API_KEYS.groq = netlifyEnv.GROQ_API_KEY || localStorage.getItem('groq_key') || '';
-        API_KEYS.gemini = netlifyEnv.GEMINI_API_KEY || localStorage.getItem('gemini_key') || '';
+        // Initialize tabs
+        function initTabs() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
 
-        // If no keys found, prompt user to enter their own
-        if (!API_KEYS.groq && !API_KEYS.gemini) {
-            const useDefault = confirm('Use Sanjay\'s demo API keys? (Limited usage)\n\nClick OK to use demo keys or Cancel to enter your own.');
-            if (useDefault) {
-                // Use your keys as fallback
-                API_KEYS.groq = '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';
-                API_KEYS.gemini = 'AIzaSyCScOCC90fh1L2LybA3NYd63rAgb38M5j0';
-            } else {
-                // Let user enter keys
-                API_KEYS.groq = prompt('Enter your Groq API key:', '');
-                API_KEYS.gemini = prompt('Enter your Gemini API key:', '');
-                if (API_KEYS.groq) localStorage.setItem('groq_key', API_KEYS.groq);
-                if (API_KEYS.gemini) localStorage.setItem('gemini_key', API_KEYS.gemini);
-            }
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.dataset.tab;
+                    
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    btn.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
         }
 
-      // Tab switching
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
+        // Initialize API provider dropdown
+        function initApiProvider() {
+            const apiProvider = document.getElementById('api-provider');
+            const apiModel = document.getElementById('api-model');
 
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const tabId = btn.dataset.tab;
+            function updateModels() {
+                const provider = apiProvider.value;
+                apiModel.innerHTML = '';
                 
-                tabBtns.forEach(b => b.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-                
-                btn.classList.add('active');
-                document.getElementById(tabId).classList.add('active');
-            });
-        });
+                models[provider].forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.value;
+                    option.textContent = model.label;
+                    apiModel.appendChild(option);
+                });
+            }
 
-        // API Provider switching
-        const apiProvider = document.getElementById('api-provider');
-        const apiModel = document.getElementById('api-model');
+            apiProvider.addEventListener('change', updateModels);
+            updateModels(); // Initial population
+        }
 
-        function updateModels() {
-            const provider = apiProvider.value;
-            apiModel.innerHTML = '';
+        // Get API key securely
+        function getApiKey(provider) {
+            // Check if we have environment variables from Netlify
+            if (typeof process !== 'undefined' && process.env) {
+                if (provider === 'groq' && process.env.GROQ_API_KEY) {
+                    return process.env.GROQ_API_KEY;
+                }
+                if (provider === 'gemini' && process.env.GEMINI_API_KEY) {
+                    return process.env.GEMINI_API_KEY;
+                }
+            }
             
-            models[provider].forEach(model => {
-                const option = document.createElement('option');
-                option.value = model.value;
-                option.textContent = model.label;
-                apiModel.appendChild(option);
-            });
+            // Check localStorage
+            const storedKey = localStorage.getItem(`${provider}_key`);
+            if (storedKey) {
+                return storedKey;
+            }
+            
+            // Ask user for key
+            const key = prompt(`Please enter your ${provider.toUpperCase()} API key:`);
+            if (key) {
+                localStorage.setItem(`${provider}_key`, key);
+                return key;
+            }
+            
+            return null;
         }
 
-        apiProvider.addEventListener('change', updateModels);
-        updateModels();
-
-        // Generate Script
-        const generateBtn = document.getElementById('generate-btn');
-        const promptInput = document.getElementById('prompt');
-        const loading = document.getElementById('loading');
-        const errorMessage = document.getElementById('error-message');
-        const successMessage = document.getElementById('success-message');
-        const outputArea = document.getElementById('output-area');
-        const codeOutput = document.getElementById('code-output');
-        const copyBtn = document.getElementById('copy-btn');
-        const downloadBtn = document.getElementById('download-btn');
-
-        generateBtn.addEventListener('click', async () => {
-            const prompt = promptInput.value.trim();
-            const provider = apiProvider.value;
-            const model = apiModel.value;
-
-            if (!prompt) {
-                showMessage('error', 'Please describe what you want to create.');
-                return;
+        // Generate script function
+        async function generateScript(prompt, provider, model) {
+            const apiKey = getApiKey(provider);
+            
+            if (!apiKey) {
+                throw new Error(`No API key found for ${provider}. Please enter your API key.`);
             }
 
-            // Use Sanjay's API keys
-            const apiKey = SANJAY_API_KEYS[provider];
-
-            // Show loading
-            generateBtn.disabled = true;
-            loading.classList.add('active');
-            hideMessages();
-            outputArea.style.display = 'none';
-
-            try {
-                const code = await generateScript(prompt, apiKey, provider, model);
-                displayCode(code);
-                showMessage('success', '✅ GDScript generated successfully!');
-            } catch (error) {
-                showMessage('error', `❌ Error: ${error.message}`);
-            } finally {
-                generateBtn.disabled = false;
-                loading.classList.remove('active');
-            }
-        });
-
-        async function generateScript(prompt, apiKey, provider, model) {
             const systemPrompt = `You are an expert Godot 4.4 game developer. Generate clean, production-ready GDScript 4.4 code.
 Requirements:
-1. Use GDScript 4.4 syntax from Godot official Documentation
-2. Include proper type hints, comments
+1. Use GDScript 4.4 syntax
+2. Include proper type hints and comments
 3. Follow Godot best practices
-4. Add necessary imports
-5. Structure code logically
-6. Make it ready to use
-7. Give as per 3d game unless specially specified
+4. Structure code logically
+5. Default to 3D unless specified
 
 User request: ${prompt}
 
 Generate only the GDScript code, no explanations.`;
 
-            let endpoint, headers, body;
-
             if (provider === 'groq') {
-                endpoint = 'https://api.groq.com/openai/v1/chat/completions';
-                headers = {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                };
-                body = {
-                    model: model,
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        { role: 'user', content: prompt }
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 4000
-                };
-            } else { // gemini
-                endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-                headers = {
-                    'Content-Type': 'application/json'
-                };
-                body = {
-                    contents: [{
-                        parts: [{ text: systemPrompt }]
-                    }],
-                    generationConfig: {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: prompt }
+                        ],
                         temperature: 0.7,
-                        maxOutputTokens: 4000
-                    }
-                };
-            }
+                        max_tokens: 4000
+                    })
+                });
 
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify(body)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                let errorMsg = errorData.error?.message || `API Error (${response.status})`;
-                
-                if (response.status === 429) {
-                    errorMsg = 'Rate limit exceeded. Please wait a minute and try again.';
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
                 }
-                
-                throw new Error(errorMsg);
-            }
 
-            const data = await response.json();
-
-            if (provider === 'groq') {
+                const data = await response.json();
                 return data.choices[0].message.content.trim();
-            } else {
+            } else { // gemini
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: systemPrompt }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 4000
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
                 return data.candidates[0].content.parts[0].text.trim();
             }
         }
 
-        function displayCode(code) {
-            // Clean code
-            code = code.replace(/```(?:gdscript)?\n?/g, '').replace(/```/g, '').trim();
-            codeOutput.textContent = code;
-            outputArea.style.display = 'block';
-            outputArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        // Initialize UI
+        function initUI() {
+            const generateBtn = document.getElementById('generate-btn');
+            const promptInput = document.getElementById('prompt');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
+            const outputArea = document.getElementById('output-area');
+            const codeOutput = document.getElementById('code-output');
+            const copyBtn = document.getElementById('copy-btn');
+            const downloadBtn = document.getElementById('download-btn');
 
-        function showMessage(type, message) {
-            const element = type === 'error' ? errorMessage : successMessage;
-            element.textContent = message;
-            element.classList.add('show');
-            
-            if (type === 'success') {
-                setTimeout(() => element.classList.remove('show'), 3000);
+            // Confirmation before using service
+            if (!localStorage.getItem('api_agreed')) {
+                const agreed = confirm('This AI tool uses your API keys. Do you agree to use this service?\n\nNote: API keys are stored locally in your browser.');
+                if (agreed) {
+                    localStorage.setItem('api_agreed', 'true');
+                }
             }
-        }
 
-        function hideMessages() {
-            errorMessage.classList.remove('show');
-            successMessage.classList.remove('show');
-        }
+            generateBtn.addEventListener('click', async () => {
+                const prompt = promptInput.value.trim();
+                const provider = document.getElementById('api-provider').value;
+                const model = document.getElementById('api-model').value;
 
-        // Copy to clipboard
-        copyBtn.addEventListener('click', () => {
-            const code = codeOutput.textContent;
-            navigator.clipboard.writeText(code).then(() => {
-                copyBtn.textContent = '✓ Copied!';
+                if (!prompt) {
+                    showMessage('error', 'Please describe what you want to create.');
+                    return;
+                }
+
+                // Show loading
+                generateBtn.disabled = true;
+                loading.classList.add('active');
+                hideMessages();
+                outputArea.style.display = 'none';
+
+                try {
+                    const code = await generateScript(prompt, provider, model);
+                    displayCode(code);
+                    showMessage('success', '✅ GDScript generated successfully!');
+                } catch (error) {
+                    showMessage('error', `❌ Error: ${error.message}`);
+                } finally {
+                    generateBtn.disabled = false;
+                    loading.classList.remove('active');
+                }
+            });
+
+            function displayCode(code) {
+                code = code.replace(/```(?:gdscript)?\n?/g, '').replace(/```/g, '').trim();
+                codeOutput.textContent = code;
+                outputArea.style.display = 'block';
+                outputArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            function showMessage(type, message) {
+                const element = type === 'error' ? errorMessage : successMessage;
+                element.textContent = message;
+                element.classList.add('show');
+                
+                if (type === 'success') {
+                    setTimeout(() => element.classList.remove('show'), 3000);
+                }
+            }
+
+            function hideMessages() {
+                errorMessage.classList.remove('show');
+                successMessage.classList.remove('show');
+            }
+
+            copyBtn.addEventListener('click', () => {
+                const code = codeOutput.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    copyBtn.textContent = '✓ Copied!';
+                    setTimeout(() => {
+                        copyBtn.textContent = '📋 Copy Code';
+                    }, 2000);
+                });
+            });
+
+            downloadBtn.addEventListener('click', () => {
+                const code = codeOutput.textContent;
+                const blob = new Blob([code], { type: 'text/x-gdscript' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'godot_ai_script.gd';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                downloadBtn.textContent = '✓ Downloaded!';
                 setTimeout(() => {
-                    copyBtn.textContent = '📋 Copy Code';
+                    downloadBtn.textContent = '💾 Download';
                 }, 2000);
             });
-        });
 
-        // Download code
-        downloadBtn.addEventListener('click', () => {
-            const code = codeOutput.textContent;
-            const blob = new Blob([code], { type: 'text/x-gdscript' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'godot_ai_script.gd';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            downloadBtn.textContent = '✓ Downloaded!';
-            setTimeout(() => {
-                downloadBtn.textContent = '💾 Download';
-            }, 2000);
-        });
+            // Example prompts
+            const examplePrompts = [
+                "Create a 2D player controller with double jump and dash",
+                "Make an inventory system for an RPG game",
+                "Generate enemy AI with patrol and chase states"
+            ];
 
-        // Mobile Menu Functionality
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
-
-        function openMobileMenu() {
-            mobileMenu.classList.add('active');
-            mobileMenuOverlay.classList.add('active');
-            document.body.classList.add('menu-open');
-        }
-
-        function closeMobileMenu() {
-            mobileMenu.classList.remove('active');
-            mobileMenuOverlay.classList.remove('active');
-            document.body.classList.remove('menu-open');
-        }
-
-        mobileMenuBtn.addEventListener('click', openMobileMenu);
-        mobileCloseBtn.addEventListener('click', closeMobileMenu);
-        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
-
-        // Example prompts for quick testing
-        const examplePrompts = [
-            "Create a 2D player controller with double jump and dash",
-            "Make an inventory system for an RPG game",
-            "Generate enemy AI with patrol and chase states",
-            "Create a health and damage system for a shooter game",
-            "Make a save/load system using JSON"
-        ];
-
-        // Set random example on page load
-        window.addEventListener('DOMContentLoaded', () => {
+            // Set random example on load
             const randomPrompt = examplePrompts[Math.floor(Math.random() * examplePrompts.length)];
             promptInput.placeholder = `Example: ${randomPrompt}`;
+        }
+
+        // Mobile menu functions
+        function initMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+
+            function openMobileMenu() {
+                mobileMenu.classList.add('active');
+                mobileMenuOverlay.classList.add('active');
+                document.body.classList.add('menu-open');
+            }
+
+            function closeMobileMenu() {
+                mobileMenu.classList.remove('active');
+                mobileMenuOverlay.classList.remove('active');
+                document.body.classList.remove('menu-open');
+            }
+
+            mobileMenuBtn.addEventListener('click', openMobileMenu);
+            mobileCloseBtn.addEventListener('click', closeMobileMenu);
+            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initTabs();
+            initApiProvider();
+            initUI();
+            initMobileMenu();
         });
     </script>
 </body>
