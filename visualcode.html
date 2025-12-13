@@ -849,22 +849,62 @@
             },
             
             keyboard: {
-                name: "Keyboard Input",
-                icon: "⌨️",
-                config: {
-                    key: { label: "Key", type: "select", options: ["W", "A", "S", "D", "Space", "Shift", "Ctrl", "E", "F", "Q", "Escape"] },
-                    event: { label: "Event Type", type: "select", options: ["pressed", "released", "just_pressed", "just_released"] }
-                }
-            },
-            
-            mouse: {
-                name: "Mouse Input",
-                icon: "🖱️",
-                config: {
-                    button: { label: "Button", type: "select", options: ["Left", "Right", "Middle", "Wheel Up", "Wheel Down"] },
-                    event: { label: "Event Type", type: "select", options: ["pressed", "released", "just_pressed", "just_released"] }
-                }
-            },
+    name: "Keyboard Input",
+    icon: "⌨️",
+    config: {
+        key: { 
+            label: "Key", 
+            type: "select", 
+            options: [
+                // Alphabet
+                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+                "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+                
+                // Numbers
+                "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+                
+                // Function Keys
+                "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
+                
+                // Modifier Keys
+                "Shift", "Ctrl", "Alt", "Meta", "Super", "Hyper", "AltGr",
+                
+                // Navigation Keys
+                "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+                "Home", "End", "PageUp", "PageDown",
+                
+                // Special Keys
+                "Space", "Enter", "Tab", "Backspace", "Delete", "Insert",
+                "Escape", "CapsLock", "NumLock", "ScrollLock", "PrintScreen",
+                "Pause", "Menu", "ContextMenu",
+                
+                // Numpad
+                "NumPad0", "NumPad1", "NumPad2", "NumPad3", "NumPad4",
+                "NumPad5", "NumPad6", "NumPad7", "NumPad8", "NumPad9",
+                "NumPadMultiply", "NumPadAdd", "NumPadSubtract", 
+                "NumPadDecimal", "NumPadDivide", "NumPadEnter",
+                
+                // Symbols
+                "Backtick", "Minus", "Equal", "BracketLeft", "BracketRight",
+                "Backslash", "Semicolon", "Apostrophe", "Comma", "Period", 
+                "Slash", "IntlBackslash",
+                
+                // Media Keys
+                "AudioVolumeUp", "AudioVolumeDown", "AudioVolumeMute",
+                "MediaPlayPause", "MediaStop", "MediaNextTrack", "MediaPreviousTrack",
+                
+                // Special Characters
+                "At", "Colon", "Caret", "Underscore", "Dollar", "Exclam", "Question",
+                "Ampersand", "Asterisk", "ParenLeft", "ParenRight", "QuoteDbl",
+                "Less", "Greater", "Bar", "Tilde", "Section", "Plus", "Percent",
+                
+                // System Keys
+                "Sleep", "WakeUp", "Power", "Help", "Undo", "Redo", "Cut", "Copy", "Paste"
+            ] 
+        },
+        event: { label: "Event Type", type: "select", options: ["pressed", "released", "just_pressed", "just_released"] }
+    }
+},
             
             // MOVEMENT BLOCKS
             movement: {
